@@ -77,19 +77,19 @@ nav a:hover {
     background-color: #b96200;
 }
 
-/* --- SECCIÓN HERO --- */
-.hero {
+/* --- SECCIÓN CENTRAL --- */
+.central {
     text-align: center;
     padding: 4rem 2rem;
     background: linear-gradient(to bottom, #1f252c, var(--bg-color));
 }
 
-.hero h1 {
+.central h1 {
     font-size: 3rem;
     margin-bottom: 1rem;
 }
 
-.hero p {
+.central p {
     color: var(--text-muted);
     font-size: 1.2rem;
     max-width: 600px;
@@ -111,6 +111,12 @@ h2 {
     text-transform: uppercase;
     font-size: 1rem;
     letter-spacing: 1px;
+}
+
+.tituloWeb{
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* --- JUEGOS --- */

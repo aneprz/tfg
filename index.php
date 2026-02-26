@@ -9,9 +9,13 @@
 </head>
 <body>
     <header>
-        <a href="#" class="logo">Salsa<span>Box</span></a>
+        <div class="tituloWeb">
+            <img src="media/logoPlatinoSinFondo.png" alt="" width="40px">
+            <a href="" class="logo">Salsa<span>Box</span></a>
+        </div>
         <nav>
             <ul>
+                <li><a href="index.php">Inicio</a></li>
                 <li><a href="#">Juegos</a></li>
                 <li><a href="#">Listas</a></li>
                 <li><a href="#">Comunidades</a></li>
@@ -20,7 +24,7 @@
         <a href="#" class="botonCrearCuenta">Crear cuenta</a>
     </header>
 
-    <div class="hero">
+    <div class="central">
         <h1>Registra, puntúa y debate.</h1>
         <p>La red social para amantes de los videojuegos. Guarda lo que has jugado, puntúa tus favoritos y únete a las comunidades de tus juegos preferidos.</p>
     </div>
