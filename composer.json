@@ -1,0 +1,11 @@
+{
+    "name": "altf4/tfg",
+    "autoload": {
+        "psr-4": {
+            "Altf4\\Tfg\\": "src/"
+        }
+    },
+    "require-dev": {
+        "robmorgan/phinx": "^0.16.10"
+    }
+}
