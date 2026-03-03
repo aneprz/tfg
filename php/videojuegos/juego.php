@@ -88,7 +88,7 @@ if (isset($conexion) && $conexion && $idJuego > 0) {
                 <li><a href="../../index.php">Inicio</a></li>
                 <li><a href="juegos.php" class="activo">Juegos</a></li>
                 <li><a href="#">Listas</a></li>
-                <li><a href="./comunidades/comunidades.php">Comunidades</a></li>
+                <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>
