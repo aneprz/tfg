@@ -39,24 +39,14 @@ if (isset($conexion) && $conexion && $idJuego > 0) {
             v.developer,
             v.rating_medio,
             v.portada,
-            GROUP_CONCAT(g.nombre_genero ORDER BY g.nombre_genero SEPARATOR ', ') AS generos
+            v.genero AS generos
         FROM videojuego v
-        LEFT JOIN juego_genero jg ON jg.id_videojuego = v.id_videojuego
-        LEFT JOIN genero g ON g.id_genero = jg.id_genero
         WHERE v.id_videojuego = ?
-        GROUP BY
-            v.id_videojuego,
-            v.titulo,
-            v.descripcion,
-            v.fecha_lanzamiento,
-            v.developer,
-            v.rating_medio,
-            v.portada
         LIMIT 1
     ";
 
-    $stmt = mysqli_prepare($conexion, $sql);
-    if ($stmt) {
+    try {
+        $stmt = mysqli_prepare($conexion, $sql);
         mysqli_stmt_bind_param($stmt, "i", $idJuego);
         mysqli_stmt_execute($stmt);
         $resultado = mysqli_stmt_get_result($stmt);
@@ -65,6 +55,9 @@ if (isset($conexion) && $conexion && $idJuego > 0) {
             mysqli_free_result($resultado);
         }
         mysqli_stmt_close($stmt);
+    } catch (mysqli_sql_exception $e) {
+        $juego = null;
+        error_log('Error al cargar juego.php: ' . $e->getMessage());
     }
 }
 ?>
