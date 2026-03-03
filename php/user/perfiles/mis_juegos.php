@@ -29,6 +29,8 @@ $total_juegos = $resultado->num_rows;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Juegos - SalsaBox</title>
     <link rel="stylesheet" href="../../../estilos/estilos_statsPerfil.css">
+    <link rel="icon" href="../../../media/logoPlatino.png">
+
 </head>
 <body>
     <div class="container-lista" style="width: 100%; max-width: 900px; margin: 0 auto; padding: 20px;">

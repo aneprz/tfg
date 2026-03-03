@@ -32,6 +32,8 @@ $total_amigos = $resultado->num_rows;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Amigos - SalsaBox</title>
     <link rel="stylesheet" href="../../../estilos/estilos_statsPerfil.css">
+    <link rel="icon" href="../../../media/logoPlatino.png">
+
     <style>
         /* Parche rápido por si el CSS falla */
         .container-lista { display: block !important; opacity: 1 !important; visibility: visible !important; }
