@@ -21,7 +21,7 @@
                 <li><a href="#">Comunidades</a></li>
             </ul>
         </nav>
-        <a href="#" class="botonCrearCuenta">Crear cuenta</a>
+        <a href="php/sesiones/register/register.php" class="botonCrearCuenta">Crear cuenta</a>
     </header>
 
     <div class="central">
