@@ -27,7 +27,7 @@ session_start();
         <?php if(!isset($_SESSION['tag'])) : ?>
         <a href="php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
         <?php else: ?>
-            <a class="tag" href="#" ><?php echo $_SESSION['tag'] ?></a>
+            <a class="tag" href="/php/user/perfiles/perfilSesion.php" ><?php echo $_SESSION['tag'] ?></a>
         <?php endif; ?>
         </header>
 

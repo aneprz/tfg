@@ -1,0 +1,135 @@
+:root {
+    --bg-color: #14181c;
+    --card-bg: hsl(212, 17%, 15%);
+    --accent-color: #e07700;
+    --text-main: #ffffff;
+    --text-muted: #9ab;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.perfil-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+}
+
+.perfil-card {
+    background-color: var(--card-bg);
+    border-radius: 15px;
+    border: 1px solid #2c3440;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+/* Cabecera del perfil */
+.perfil-header {
+    background: linear-gradient(to bottom, #1f252c, var(--card-bg));
+    padding: 3rem 1rem 1.5rem;
+}
+
+.avatar-grande {
+    width: 80px;
+    height: 80px;
+    background-color: var(--accent-color);
+    color: #000;
+    font-size: 2.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    box-shadow: 0 0 20px rgba(224, 119, 0, 0.4);
+}
+
+.perfil-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    letter-spacing: 1px;
+}
+
+.status {
+    color: var(--accent-color);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-top: 5px;
+}
+
+/* Estadísticas */
+.perfil-stats {
+    display: flex;
+    justify-content: space-around;
+    padding: 1.5rem;
+    border-top: 1px solid #2c3440;
+    border-bottom: 1px solid #2c3440;
+    background-color: rgba(0,0,0,0.1);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-num {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+/* Cuerpo y Botones */
+.perfil-body {
+    padding: 2rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.perfil-footer {
+    padding: 0 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-volver, .btn-logout {
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.btn-volver {
+    background-color: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+}
+
+.btn-volver:hover {
+    background-color: var(--accent-color);
+    color: #000;
+}
+
+.btn-logout {
+    color: #ff4444;
+    font-size: 0.9rem;
+}
+
+.btn-logout:hover {
+    text-decoration: underline;
+}
