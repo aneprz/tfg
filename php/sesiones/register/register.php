@@ -14,14 +14,14 @@ session_start();
     <form action="procesarRegister.php" method="POST">
         <div>
             <h2>Crear Cuenta</h2>
-            <label for="gameTag">Nombre en juegos: </label><br>
+            <label for="gameTag">Nombre de usuario: </label><br>
             <input type="text" id="gameTag" name="gameTag" required placeholder="GameTag">
         </div>
 
         <br>    
 
         <div>
-            <label for="nombreApellido">Nombre y Apellido reales:</label><br>
+            <label for="nombreApellido">Nombre y Apellido:</label><br>
             <input type="text" id="nombreApellido" name="nombreApellido" required placeholder="Nombre Apellido">
         </div>
 
