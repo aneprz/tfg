@@ -18,8 +18,8 @@ session_start();
         </div>
         <nav>
             <ul>
-                <li><a href="index.php">Inicio</a></li>
-                <li><a href="#">Juegos</a></li>
+                <li><a href="index.php" class="activo">Inicio</a></li>
+                <li><a href="php/videojuegos/juegos.php">Juegos</a></li>
                 <li><a href="#">Listas</a></li>
                 <li><a href="#">Comunidades</a></li>
             </ul>
@@ -86,7 +86,7 @@ session_start();
             </div>
             <div class="juego">
                 <div class="portadaJuego">
-                    <img src="media/portadaWatchDogs.jpg" alt="">
+                    <img src="media/portadaWatchdogs.jpg" alt="">
                 </div>
                 <div class="infoJuego">
                     <div class="tituloJuego">Watch Dogs</div>

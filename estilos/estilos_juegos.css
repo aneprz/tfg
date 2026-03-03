@@ -1,4 +1,3 @@
-/* Variables de colores*/
 :root {
     --bg-color: #14181c;
     --card-bg: hsl(212, 17%, 15%);
@@ -8,7 +7,6 @@
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Reset básico */
 * {
     margin: 0;
     padding: 0;
@@ -22,7 +20,6 @@ body {
     line-height: 1.6;
 }
 
-/* ---HEADER--- */
 header {
     background-color: rgba(20, 24, 28, 0.95);
     padding: 1rem 5%;
@@ -33,6 +30,12 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
+}
+
+.tituloWeb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .logo {
@@ -59,10 +62,7 @@ nav a {
     transition: color 0.3s;
 }
 
-nav a:hover {
-    color: var(--text-main);
-}
-
+nav a:hover,
 nav a.activo {
     color: var(--text-main);
 }
@@ -80,6 +80,7 @@ nav a.activo {
 .botonCrearCuenta:hover {
     background-color: #bfa200;
 }
+
 .tag {
     color: var(--text-main);
     text-decoration: none;
@@ -93,7 +94,7 @@ nav a.activo {
     align-items: center;
     gap: 8px;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .tag:hover {
@@ -113,26 +114,46 @@ nav a.activo {
     box-shadow: 0 0 5px #2ecc71;
 }
 
-/* --- SECCIÓN CENTRAL --- */
 .central {
     text-align: center;
-    padding: 4rem 2rem;
+    padding: 4rem 2rem 3rem;
     background: linear-gradient(to bottom, #1f252c, var(--bg-color));
 }
 
 .central h1 {
     font-size: 3rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
 }
 
 .central p {
     color: var(--text-muted);
-    font-size: 1.2rem;
-    max-width: 600px;
+    font-size: 1.1rem;
+    max-width: 700px;
     margin: 0 auto 2rem;
 }
 
-/* --- CONTENEDOR PRINCIPAL --- */
+.buscadorContainer {
+    width: min(720px, 100%);
+    margin: 0 auto;
+}
+
+.buscadorContainer input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    background-color: var(--card-bg);
+    border: 1px solid #2c3440;
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.buscadorContainer input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(224, 190, 0, 0.35);
+}
+
 main {
     padding: 2rem 5%;
     max-width: 1400px;
@@ -149,18 +170,17 @@ h2 {
     letter-spacing: 1px;
 }
 
-.tituloWeb{
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* --- JUEGOS --- */
-.juegos{
+.juegos {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
+}
+
+.juegoLink {
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 
 .juego {
@@ -175,7 +195,7 @@ h2 {
 .juego:hover {
     transform: translateY(-5px);
     border-color: var(--accent-color);
-    box-shadow: 0 5px 15px rgba(224, 146, 0, 0.2);
+    box-shadow: 0 5px 15px rgba(224, 190, 0, 0.2);
 }
 
 .portadaJuego {
@@ -185,12 +205,11 @@ h2 {
     overflow: hidden;
 }
 
-.portadaJuego img{
+.portadaJuego img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Magia pura: recorta la imagen proporcionalmente para que encaje */
+    object-fit: cover;
     display: block;
-    transition: transform 0.3s ease; /* Pequeño extra para animar la imagen */
 }
 
 .infoJuego {
@@ -210,53 +229,30 @@ h2 {
     font-size: 0.9rem;
 }
 
-/* --- COMUNIDADES --- */
-.comunidades {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 4rem;
-}
-
-.comunidad {
-    background-color: var(--card-bg);
-    padding: 1.5rem;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-left: 4px solid var(--accent-color);
-}
-
-.infoComunidad h3 {
-    margin-bottom: 0.3rem;
-}
-
-.infoComunidad p {
-    font-size: 0.85rem;
+.sinResultados {
     color: var(--text-muted);
+    padding: 0.5rem;
 }
 
-.botonUnirse {
-    background-color: transparent;
-    color: var(--accent-color);
-    border: 1px solid var(--accent-color);
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-join:hover {
-    background-color: var(--accent-color);
-    color: #000;
-}
-
-/* --- FOOTER --- */
 footer {
     text-align: center;
     padding: 2rem;
     color: var(--text-muted);
     border-top: 1px solid #2c3440;
     margin-top: 2rem;
+}
+
+@media (max-width: 900px) {
+    header {
+        flex-wrap: wrap;
+        gap: 0.8rem;
+    }
+
+    nav ul {
+        gap: 1rem;
+    }
+
+    .central h1 {
+        font-size: 2.1rem;
+    }
 }
