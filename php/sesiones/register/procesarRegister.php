@@ -14,6 +14,8 @@ $tag = trim($_POST['gameTag'] ?? '');
 $nombreApellido = trim($_POST['nombreApellido'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $pass = $_POST['password'] ?? '';
+$biografia= '';
+$avatar = 'https://i.pinimg.com/474x/37/a6/2f/37a62f1efd07210aee6cf44312f08a95.jpg?nii=t';
 
 if (empty($tag) || empty($email) || empty($pass)) {
     volverConError("Datos del formulario incompletos.");
@@ -31,8 +33,8 @@ if ($result->num_rows > 0) {
 $stmt->close();
 
 $passHash = password_hash($pass, PASSWORD_DEFAULT);
-$stmt = $conexion->prepare("INSERT INTO Usuario (gameTag, nombre_apellido, email, password) VALUES (?, ?, ?, ?)");
-$stmt->bind_param("ssss", $tag, $nombreApellido, $email, $passHash);
+$stmt = $conexion->prepare("INSERT INTO Usuario (gameTag, nombre_apellido, email, password, biografia, avatar) VALUES (?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("ssssss", $tag, $nombreApellido, $email, $passHash, $biografia, $avatar);
 
 if ($stmt->execute()) {
     $stmt->close();
