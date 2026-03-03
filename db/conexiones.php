@@ -1,2 +1,2 @@
 <?php
-$conexion = mysqli_connect("localhost","root","","nombreDeLaFuckingBaseDeDatos");
+$conexion = mysqli_connect("localhost","root","","salsabox_db");
