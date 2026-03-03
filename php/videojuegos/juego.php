@@ -1,60 +1,72 @@
 <?php
 session_start();
+require '../../db/conexiones.php';
 
-$slug = isset($_GET['slug']) ? strtolower(trim($_GET['slug'])) : '';
+function estrellasDesdeRating($rating) {
+    if ($rating === null || $rating === '') {
+        return '☆☆☆☆☆';
+    }
 
-$juegos = [
-    'elden-ring' => [
-        'titulo' => 'Elden Ring',
-        'imagen' => 'media/portadaEldenRing.jpg',
-        'genero' => 'Action RPG',
-        'anio' => '2022',
-        'puntuacion' => '4.8',
-        'resumen' => 'Mundo abierto oscuro, combates exigentes y exploracion libre en las Tierras Intermedias.'
-    ],
-    'hollow-knight' => [
-        'titulo' => 'Hollow Knight',
-        'imagen' => 'media/portadaHollowKnight.jpg',
-        'genero' => 'Metroidvania',
-        'anio' => '2017',
-        'puntuacion' => '4.9',
-        'resumen' => 'Aventura 2D con exploracion, precision en combate y una atmosfera inolvidable.'
-    ],
-    'cyberpunk-2077' => [
-        'titulo' => 'Cyberpunk 2077',
-        'imagen' => 'media/portadaCyberpunk.jpg',
-        'genero' => 'RPG',
-        'anio' => '2020',
-        'puntuacion' => '4.0',
-        'resumen' => 'Accion narrativa en Night City con progresion de personaje y decisiones de historia.'
-    ],
-    'stardew-valley' => [
-        'titulo' => 'Stardew Valley',
-        'imagen' => 'media/portadaStardewValley.jpg',
-        'genero' => 'Simulacion',
-        'anio' => '2016',
-        'puntuacion' => '4.9',
-        'resumen' => 'Gestiona tu granja, conoce al pueblo y construye tu vida a tu ritmo.'
-    ],
-    'zelda-totk' => [
-        'titulo' => 'Zelda: Tears of the Kingdom',
-        'imagen' => 'media/portadaZeldaTOTK.jpg',
-        'genero' => 'Aventura',
-        'anio' => '2023',
-        'puntuacion' => '4.7',
-        'resumen' => 'Exploracion vertical y creatividad total en Hyrule con nuevas habilidades.'
-    ],
-    'watch-dogs' => [
-        'titulo' => 'Watch Dogs',
-        'imagen' => 'media/portadaWatchdogs.jpg',
-        'genero' => 'Accion mundo abierto',
-        'anio' => '2014',
-        'puntuacion' => '4.5',
-        'resumen' => 'Hackeo urbano, persecuciones y misiones de infiltracion en Chicago.'
-    ]
-];
+    $valor = (float) $rating;
+    $llenas = (int) round($valor);
+    $llenas = max(0, min(5, $llenas));
 
-$juego = $juegos[$slug] ?? null;
+    return str_repeat('★', $llenas) . str_repeat('☆', 5 - $llenas);
+}
+
+function resolverPortada($portada) {
+    if (!$portada) {
+        return '../../media/logoPlatino.png';
+    }
+
+    if (strpos($portada, 'http://') === 0 || strpos($portada, 'https://') === 0 || strpos($portada, '/') === 0) {
+        return $portada;
+    }
+
+    return '../../' . ltrim($portada, '/');
+}
+
+$idJuego = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$juego = null;
+
+if (isset($conexion) && $conexion && $idJuego > 0) {
+    $sql = "
+        SELECT
+            v.id_videojuego,
+            v.titulo,
+            v.descripcion,
+            v.fecha_lanzamiento,
+            v.developer,
+            v.rating_medio,
+            v.portada,
+            GROUP_CONCAT(g.nombre_genero ORDER BY g.nombre_genero SEPARATOR ', ') AS generos
+        FROM videojuego v
+        LEFT JOIN juego_genero jg ON jg.id_videojuego = v.id_videojuego
+        LEFT JOIN genero g ON g.id_genero = jg.id_genero
+        WHERE v.id_videojuego = ?
+        GROUP BY
+            v.id_videojuego,
+            v.titulo,
+            v.descripcion,
+            v.fecha_lanzamiento,
+            v.developer,
+            v.rating_medio,
+            v.portada
+        LIMIT 1
+    ";
+
+    $stmt = mysqli_prepare($conexion, $sql);
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, "i", $idJuego);
+        mysqli_stmt_execute($stmt);
+        $resultado = mysqli_stmt_get_result($stmt);
+        if ($resultado) {
+            $juego = mysqli_fetch_assoc($resultado) ?: null;
+            mysqli_free_result($resultado);
+        }
+        mysqli_stmt_close($stmt);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -82,7 +94,7 @@ $juego = $juegos[$slug] ?? null;
         <?php if(!isset($_SESSION['tag'])) : ?>
             <a href="../../php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesion</a>
         <?php else: ?>
-            <a class="tag" href="../../php/user/perfiles/perfilSesion.php"><?php echo $_SESSION['tag']; ?></a>
+            <a class="tag" href="../../php/user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
         <?php endif; ?>
     </header>
 
@@ -90,16 +102,36 @@ $juego = $juegos[$slug] ?? null;
         <?php if($juego): ?>
             <section class="fichaJuego">
                 <div class="imagenJuego">
-                    <img src="<?php echo $juego['imagen']; ?>" alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
+                    <img src="<?php echo htmlspecialchars(resolverPortada($juego['portada'])); ?>" alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
                 </div>
                 <div class="contenidoJuego">
                     <h1><?php echo htmlspecialchars($juego['titulo']); ?></h1>
-                    <p class="meta"><?php echo htmlspecialchars($juego['genero']); ?> • <?php echo htmlspecialchars($juego['anio']); ?> • ★ <?php echo htmlspecialchars($juego['puntuacion']); ?></p>
-                    <p><?php echo htmlspecialchars($juego['resumen']); ?></p>
+                    <p class="meta">
+                        <?php
+                            $partesMeta = [];
+                            if (!empty($juego['generos'])) {
+                                $partesMeta[] = $juego['generos'];
+                            }
+                            if (!empty($juego['fecha_lanzamiento'])) {
+                                $partesMeta[] = date('Y', strtotime($juego['fecha_lanzamiento']));
+                            }
+                            if (!empty($juego['developer'])) {
+                                $partesMeta[] = $juego['developer'];
+                            }
+
+                            $rating = $juego['rating_medio'];
+                            $textoRating = $rating !== null ? estrellasDesdeRating($rating) . ' ' . number_format((float) $rating, 1) : 'Sin nota';
+                            $partesMeta[] = $textoRating;
+
+                            echo htmlspecialchars(implode(' • ', $partesMeta));
+                        ?>
+                    </p>
+                    <p><?php echo htmlspecialchars($juego['descripcion'] ?: 'Este juego aun no tiene descripcion.'); ?></p>
 
                     <div class="bloqueProximamente">
-                        <h2>Informacion detallada (proximamente)</h2>
-                        <p>Esta ficha esta preparada para que luego conectes sin problema tus datos reales desde base de datos.</p>
+                        <h2>Detalles del juego</h2>
+                        <p>Fecha de lanzamiento: <?php echo !empty($juego['fecha_lanzamiento']) ? htmlspecialchars($juego['fecha_lanzamiento']) : 'Sin fecha'; ?></p>
+                        <p>Developer: <?php echo !empty($juego['developer']) ? htmlspecialchars($juego['developer']) : 'Sin developer'; ?></p>
                     </div>
 
                     <a href="juegos.php" class="botonVolver">Volver al catalogo</a>
@@ -108,7 +140,7 @@ $juego = $juegos[$slug] ?? null;
         <?php else: ?>
             <section class="fichaJuego vacio">
                 <h1>Juego no encontrado</h1>
-                <p>La ficha solicitada no existe en el catalogo visual actual.</p>
+                <p>La ficha solicitada no existe en la base de datos actual.</p>
                 <a href="juegos.php" class="botonVolver">Ir a juegos</a>
             </section>
         <?php endif; ?>

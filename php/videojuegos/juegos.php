@@ -1,5 +1,48 @@
 <?php
 session_start();
+require '../../db/conexiones.php';
+
+function estrellasDesdeRating($rating) {
+    if ($rating === null || $rating === '') {
+        return '☆☆☆☆☆';
+    }
+
+    $valor = (float) $rating;
+    $llenas = (int) round($valor);
+    $llenas = max(0, min(5, $llenas));
+
+    return str_repeat('★', $llenas) . str_repeat('☆', 5 - $llenas);
+}
+
+function resolverPortada($portada) {
+    if (!$portada) {
+        return '../../media/logoPlatino.png';
+    }
+
+    if (strpos($portada, 'http://') === 0 || strpos($portada, 'https://') === 0 || strpos($portada, '/') === 0) {
+        return $portada;
+    }
+
+    return '../../' . ltrim($portada, '/');
+}
+
+$juegos = [];
+
+if (isset($conexion) && $conexion) {
+    $sql = "
+        SELECT id_videojuego, titulo, rating_medio, portada
+        FROM videojuego
+        ORDER BY titulo ASC
+    ";
+
+    $resultado = mysqli_query($conexion, $sql);
+    if ($resultado) {
+        while ($fila = mysqli_fetch_assoc($resultado)) {
+            $juegos[] = $fila;
+        }
+        mysqli_free_result($resultado);
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -25,9 +68,9 @@ session_start();
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>
-            <a href="php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesion</a>
+            <a href="../../php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesion</a>
         <?php else: ?>
-            <a class="tag" href="../../php/user/perfiles/perfilSesion.php"><?php echo $_SESSION['tag']; ?></a>
+            <a class="tag" href="../../php/user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
         <?php endif; ?>
     </header>
 
@@ -43,77 +86,28 @@ session_start();
     <main>
         <h2>Todos los videojuegos</h2>
         <div class="juegos" id="gridJuegos">
-            <a class="juegoLink" href="juego.php?slug=elden-ring" data-titulo="elden ring">
-                <article class="juego">
-                    <div class="portadaJuego">
-                        <img src="../../media/portadaEldenRing.jpg" alt="Portada de Elden Ring">
-                    </div>
-                    <div class="infoJuego">
-                        <div class="tituloJuego">Elden Ring</div>
-                        <div class="puntuacionJuego">★★★★★ 4.8</div>
-                    </div>
-                </article>
-            </a>
-
-            <a class="juegoLink" href="juego.php?slug=hollow-knight" data-titulo="hollow knight">
-                <article class="juego">
-                    <div class="portadaJuego">
-                        <img src="../../media/portadaHollowKnight.jpg" alt="Portada de Hollow Knight">
-                    </div>
-                    <div class="infoJuego">
-                        <div class="tituloJuego">Hollow Knight</div>
-                        <div class="puntuacionJuego">★★★★★ 4.9</div>
-                    </div>
-                </article>
-            </a>
-
-            <a class="juegoLink" href="juego.php?slug=cyberpunk-2077" data-titulo="cyberpunk 2077">
-                <article class="juego">
-                    <div class="portadaJuego">
-                        <img src="../../media/portadaCyberpunk.jpg" alt="Portada de Cyberpunk 2077">
-                    </div>
-                    <div class="infoJuego">
-                        <div class="tituloJuego">Cyberpunk 2077</div>
-                        <div class="puntuacionJuego">★★★★☆ 4.0</div>
-                    </div>
-                </article>
-            </a>
-
-            <a class="juegoLink" href="juego.php?slug=stardew-valley" data-titulo="stardew valley">
-                <article class="juego">
-                    <div class="portadaJuego">
-                        <img src="../../media/portadaStardewValley.jpg" alt="Portada de Stardew Valley">
-                    </div>
-                    <div class="infoJuego">
-                        <div class="tituloJuego">Stardew Valley</div>
-                        <div class="puntuacionJuego">★★★★★ 4.9</div>
-                    </div>
-                </article>
-            </a>
-
-            <a class="juegoLink" href="juego.php?slug=zelda-totk" data-titulo="zelda tears of the kingdom">
-                <article class="juego">
-                    <div class="portadaJuego">
-                        <img src="../../media/portadaZeldaTOTK.jpg" alt="Portada de Zelda: Tears of the Kingdom">
-                    </div>
-                    <div class="infoJuego">
-                        <div class="tituloJuego">Zelda: Tears of the Kingdom</div>
-                        <div class="puntuacionJuego">★★★★★ 4.7</div>
-                    </div>
-                </article>
-            </a>
-
-            <a class="juegoLink" href="juego.php?slug=watch-dogs" data-titulo="watch dogs">
-                <article class="juego">
-                    <div class="portadaJuego">
-                        <img src="../../media/portadaWatchdogs.jpg" alt="Portada de Watch Dogs">
-                    </div>
-                    <div class="infoJuego">
-                        <div class="tituloJuego">Watch Dogs</div>
-                        <div class="puntuacionJuego">★★★★☆ 4.5</div>
-                    </div>
-                </article>
-            </a>
+            <?php if (count($juegos) > 0): ?>
+                <?php foreach ($juegos as $juego): ?>
+                    <a class="juegoLink" href="juego.php?id=<?php echo (int) $juego['id_videojuego']; ?>" data-titulo="<?php echo htmlspecialchars(strtolower($juego['titulo'])); ?>">
+                        <article class="juego">
+                            <div class="portadaJuego">
+                                <img src="<?php echo htmlspecialchars(resolverPortada($juego['portada'])); ?>" alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
+                            </div>
+                            <div class="infoJuego">
+                                <div class="tituloJuego"><?php echo htmlspecialchars($juego['titulo']); ?></div>
+                                <div class="puntuacionJuego">
+                                    <?php
+                                        $rating = $juego['rating_medio'];
+                                        echo estrellasDesdeRating($rating) . ' ' . ($rating !== null ? number_format((float) $rating, 1) : 'Sin nota');
+                                    ?>
+                                </div>
+                            </div>
+                        </article>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p>No hay videojuegos cargados en la base de datos todavia.</p>
+            <?php endif; ?>
         </div>
 
         <p id="sinResultados" class="sinResultados" hidden>No se encontraron juegos para esa busqueda.</p>
