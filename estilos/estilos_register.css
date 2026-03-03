@@ -100,9 +100,24 @@ button[type="submit"]:active {
     transform: translateY(0);
 }
 
-/* Ajustes para pantallas pequeñas */
 @media (max-width: 480px) {
     form {
         padding: 1.5rem;
     }
+}
+.form-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.form-footer a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
 }

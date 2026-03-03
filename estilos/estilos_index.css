@@ -76,6 +76,38 @@ nav a:hover {
 .botonCrearCuenta:hover {
     background-color: #b96200;
 }
+.tag {
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--card-bg);
+    border: 1px solid #2c3440;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.tag:hover {
+    border-color: var(--accent-color);
+    background-color: #1f252c;
+    color: var(--accent-color);
+    transform: translateY(-2px);
+}
+
+.tag::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background-color: #2ecc71;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 5px #2ecc71;
+}
 
 /* --- SECCIÓN CENTRAL --- */
 .central {

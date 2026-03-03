@@ -1,9 +1,5 @@
 <?php
 session_start();
-if ($_SESSION) {
-    header("Location: php/sesiones/login/login.php");
-    exit();
-}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -28,8 +24,12 @@ if ($_SESSION) {
                 <li><a href="#">Comunidades</a></li>
             </ul>
         </nav>
-        <a href="php/sesiones/register/register.php" class="botonCrearCuenta">Crear cuenta</a>
-    </header>
+        <?php if(!isset($_SESSION['tag'])) : ?>
+        <a href="php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
+        <?php else: ?>
+            <a class="tag" href="#" ><?php echo $_SESSION['tag'] ?></a>
+        <?php endif; ?>
+        </header>
 
     <div class="central">
         <h1>Registra, puntúa y debate.</h1>

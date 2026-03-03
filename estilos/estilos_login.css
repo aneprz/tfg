@@ -81,7 +81,6 @@ input:focus {
     box-shadow: 0 0 10px rgba(224, 119, 0, 0.2);
 }
 
-/* Botón de acción */
 .btn-submit {
     width: 100%;
     background-color: var(--accent-color);
@@ -102,7 +101,6 @@ input:focus {
     box-shadow: 0 5px 15px rgba(224, 119, 0, 0.3);
 }
 
-/* Enlace inferior */
 .form-footer {
     text-align: center;
     margin-top: 1.5rem;

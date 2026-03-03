@@ -14,8 +14,8 @@
             <h2>Iniciar Sesión</h2>
 
             <div class="input-group">
-                <label for="GameTag">Nombre en juegos: </label>
-                <input type="text" id="GameTag" name="GameTag" required placeholder="Tu GameTag">
+                <label for="gameTag">Nombre en juegos: </label>
+                <input type="text" id="gameTag" name="gameTag" required placeholder="Tu GameTag">
             </div>
 
             <div class="input-group">

@@ -1,9 +1,10 @@
 <?php
 
-$_SESSION['tag'] = $_POST['gameTag'];
-$_SESSION['nombreApellido'] = $_POST['nombreApellido'];
-$_SESSION['email'] = $_POST['email'];
+$tag = $_POST['gameTag'];
+$nombreApellido = $_POST['nombreApellido'];
+$email = $_POST['email'];
+
 
 header("Location: ../login/login.php"); 
-    exit();
+exit();
 

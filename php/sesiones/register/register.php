@@ -49,7 +49,9 @@ session_start();
         <br>
 
         <button type="submit">Registrarse</button>
-
+        <p class="form-footer">
+        ¿Ya tienes cuenta? <a href="../login/login.php">Inicia sesión aquí</a>
+        </p>
     </form>
 </body>
 </html>
