@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../../estilos/estilos_login.css">
-    <link rel="icon" href="../../../media/logoplatinoSinFondo.png">
+    <link rel="icon" href="../../../media/logoplatino.png">
     <title>Iniciar Sesión</title>
 </head>
 <body>

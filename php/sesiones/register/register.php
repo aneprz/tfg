@@ -6,7 +6,7 @@ session_start();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="../../../media/logoplatinoSinFondo.png">
+    <link rel="icon" href="../../../media/logoplatino.png">
     <link rel="stylesheet" href="../../../estilos/estilos_register.css">
     <title>Registro de usuario</title>
 </head>
