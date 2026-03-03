@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,18 +11,18 @@
     <title>Registro de usuario</title>
 </head>
 <body>
-    <form action="procesarRegistro.php" method="POST">
+    <form action="procesarRegister.php" method="POST">
         <div>
             <h2>Crear Cuenta</h2>
             <label for="GameTag">Nombre en juegos: </label><br>
-            <input type="text" id="GameTag" name="GameTag" required placeholder="GameTag">
+            <input type="text" id="gameTag" name="gameTag" required placeholder="GameTag">
         </div>
 
         <br>    
 
         <div>
             <label for="NombreApellido">Nombre y Apellido reales:</label><br>
-            <input type="text" id="NombreApellido" name="NombreApellido" required placeholder="Nombre Apellido">
+            <input type="text" id="nombreApellido" name="nombreApellido" required placeholder="Nombre Apellido">
         </div>
 
         <br>
@@ -40,7 +43,7 @@
 
         <div>
             <label for="confirm_password">Repetir contraseña:</label><br>
-            <input type="password" id="confirm_password" name="confirm_password" required placeholder="••••••••">
+            <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="••••••••">
         </div>
 
         <br>
