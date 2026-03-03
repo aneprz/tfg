@@ -15,7 +15,7 @@ $inicial = strtoupper(substr($_SESSION['tag'], 0, 1));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil de <?php echo htmlspecialchars($_SESSION['tag']); ?> - SalsaBox</title>
     
-    <link rel="icon" href="../../../media/logoplatinoSinFondo.png">
+    <link rel="icon" href="../../../media/logoplatino.png">
     <link rel="stylesheet" href="../../../estilos/estilos_perfilSesion.css">
 </head>
 <body>
