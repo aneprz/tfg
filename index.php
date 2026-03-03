@@ -82,7 +82,7 @@ if (isset($conexion) && $conexion) {
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>
-        <a href="php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesion</a>
+            <a href="php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesion</a>
         <?php else: ?>
             <a class="tag" href="/php/user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
         <?php endif; ?>
@@ -98,7 +98,7 @@ if (isset($conexion) && $conexion) {
         <div class="juegos">
             <?php if (count($juegosPopulares) > 0): ?>
                 <?php foreach ($juegosPopulares as $juego): ?>
-                    <div class="juego">
+                    <a href="php/videojuegos/juego.php?id=<?php echo (int) $juego['id_videojuego']; ?>" class="juego">
                         <div class="portadaJuego">
                             <img src="<?php echo htmlspecialchars($juego['portada'] ?: 'media/logoPlatino.png'); ?>" alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
                         </div>
@@ -111,7 +111,7 @@ if (isset($conexion) && $conexion) {
                                 ?>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 <?php endforeach; ?>
             <?php else: ?>
                 <p>No hay videojuegos cargados en la base de datos todavia.</p>
