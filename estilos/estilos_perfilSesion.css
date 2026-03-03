@@ -133,3 +133,14 @@ body {
 .btn-logout:hover {
     text-decoration: underline;
 }
+.stat-link {
+    text-decoration: none; 
+    color: inherit;  
+    display: block;
+    transition: transform 0.2s;
+}
+
+.stat-link:hover {
+    transform: scale(1.05); 
+    filter: brightness(1.2); 
+}

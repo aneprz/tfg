@@ -1,6 +1,6 @@
 <?php
 session_start();
-require __DIR__ . '/db/conexiones.php';
+require_once __DIR__ . '/db/conexiones.php';
 
 function estrellasDesdeRating($rating) {
     if ($rating === null || $rating === '') {
@@ -78,7 +78,7 @@ if (isset($conexion) && $conexion) {
                 <li><a href="index.php" class="activo">Inicio</a></li>
                 <li><a href="php/videojuegos/juegos.php">Juegos</a></li>
                 <li><a href="#">Listas</a></li>
-                <li><a href="#">Comunidades</a></li>
+                <li><a href="php/comunidades/comunidades.php">Comunidades</a></li>
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>
