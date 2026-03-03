@@ -2,10 +2,13 @@
 session_start();
 require '../../../db/conexiones.php';
 
+// Primero comprobamos la sesión para evitar errores
 if (!isset($_SESSION['tag'])) {
     header("Location: ../../../index.php");
     exit();
 }
+
+include 'statsUsuario.php'; 
 
 $id = $_SESSION['id_usuario'];
 $stmt = $conexion->prepare("SELECT biografia, avatar FROM Usuario WHERE id_usuario = ?");
@@ -46,18 +49,26 @@ $inicial = strtoupper(substr($_SESSION['tag'], 0, 1));
             </div>
 
             <div class="perfil-stats">
-                <div class="stat-item">
-                    <span class="stat-num">0</span>
-                    <span class="stat-label">Juegos</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-num">0</span>
-                    <span class="stat-label">Puntos</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-num">0</span>
-                    <span class="stat-label">Amigos</span>
-                </div>
+                <a href="mis_juegos.php" class="stat-link">
+                    <div class="stat-item">
+                        <span class="stat-num"><?php echo $totalJuegos; ?></span>
+                        <span class="stat-label">Juegos</span>
+                    </div>
+                </a>
+
+                <a href="mis_logros.php" class="stat-link">
+                    <div class="stat-item">
+                        <span class="stat-num"><?php echo $totalPuntos; ?></span>
+                        <span class="stat-label">Puntos</span>
+                    </div>
+                </a>
+
+                <a href="mis_amigos.php" class="stat-link">
+                    <div class="stat-item">
+                        <span class="stat-num"><?php echo $totalAmigos; ?></span>
+                        <span class="stat-label">Amigos</span>
+                    </div>
+                </a>
             </div>
 
             <div class="perfil-body">
