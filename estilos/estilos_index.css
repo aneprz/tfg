@@ -2,7 +2,7 @@
 :root {
     --bg-color: #14181c;
     --card-bg: hsl(212, 17%, 15%);
-    --accent-color: #e07700;
+    --accent-color: #e0be00;
     --text-main: #ffffff;
     --text-muted: #9ab;
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -74,7 +74,7 @@ nav a:hover {
 }
 
 .botonCrearCuenta:hover {
-    background-color: #b96200;
+    background-color: #bfa200;
 }
 .tag {
     color: var(--text-main);

@@ -8,12 +8,12 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salsabox - Tu diario de videojuegos</title>
     <link rel="stylesheet" href="estilos/estilos_index.css">
-    <link rel="icon" href="media/logoPlatinoSinFondo.png">
+    <link rel="icon" href="media/logoPlatino.png">
 </head>
 <body>
     <header>
         <div class="tituloWeb">
-            <img src="media/logoPlatinoSinFondo.png" alt="" width="40px">
+            <img src="media/logoPlatino.png" alt="" width="40px">
             <a href="" class="logo">Salsa<span>Box</span></a>
         </div>
         <nav>

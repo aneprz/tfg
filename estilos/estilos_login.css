@@ -1,7 +1,7 @@
 :root {
     --bg-color: #14181c;
     --card-bg: hsl(212, 17%, 15%);
-    --accent-color: #e07700;
+    --accent-color: #e0be00;
     --text-main: #ffffff;
     --text-muted: #9ab;
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -78,7 +78,7 @@ input:focus {
     outline: none;
     border-color: var(--accent-color);
     background-color: #252d35;
-    box-shadow: 0 0 10px rgba(224, 119, 0, 0.2);
+    box-shadow: 0 0 10px #bea100;
 }
 
 .btn-submit {
@@ -96,9 +96,9 @@ input:focus {
 }
 
 .btn-submit:hover {
-    background-color: #ff8a00;
+    background-color: #c2a500;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(224, 119, 0, 0.3);
+    box-shadow: 0 5px 15px #bda000;
 }
 
 .form-footer {

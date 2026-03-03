@@ -1,7 +1,7 @@
 :root {
     --bg-color: #14181c;
     --card-bg: hsl(212, 17%, 15%);
-    --accent-color: #e07700;
+    --accent-color: #e0be00;
     --text-main: #ffffff;
     --text-muted: #9ab;
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -71,7 +71,7 @@ input {
 input:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 8px rgba(224, 119, 0, 0.3);
+    box-shadow: 0 0 8px #b89c00;
     background-color: #252d35;
 }
 
@@ -92,7 +92,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #ff8a00;
+    background-color: #b79b00;
     transform: translateY(-2px);
 }
 
