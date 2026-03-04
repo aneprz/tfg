@@ -9,22 +9,18 @@ if (!isset($_SESSION['id_usuario'])) {
 
 $id_usuario = $_SESSION['id_usuario'];
 
-// --- LÓGICA PARA ELIMINAR AMIGO ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_id'])) {
     $id_amigo_borrar = $_POST['eliminar_id'];
 
-    // Borramos la relación en ambos sentidos para estar seguros
     $sql_delete = "DELETE FROM Amigos WHERE (id_usuario = ? AND id_amigo = ?) OR (id_usuario = ? AND id_amigo = ?)";
     $stmt_delete = $conexion->prepare($sql_delete);
     $stmt_delete->bind_param("iiii", $id_usuario, $id_amigo_borrar, $id_amigo_borrar, $id_usuario);
     $stmt_delete->execute();
     
-    // Recargar para actualizar la lista
     header("Location: mis_amigos.php");
     exit();
 }
 
-// Consulta para listar amigos
 $sql = "SELECT u.id_usuario, u.gameTag, u.avatar, u.biografia 
         FROM Usuario u 
         WHERE u.id_usuario IN (

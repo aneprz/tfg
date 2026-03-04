@@ -9,7 +9,6 @@ if (!isset($_SESSION['id_usuario'])) {
 
 $id_usuario = $_SESSION['id_usuario'];
 
-// Consulta con JOIN para traer los datos del juego y de tu biblioteca personal
 $query = $conexion->prepare("
     SELECT v.titulo, v.portada, b.estado, b.horas_totales 
     FROM Biblioteca b
