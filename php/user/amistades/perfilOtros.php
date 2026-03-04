@@ -19,6 +19,8 @@ $query = $conexion->prepare("SELECT gameTag, biografia, avatar FROM Usuario WHER
 $query->bind_param("i", $id_objetivo);
 $query->execute();
 $usuario = $query->get_result()->fetch_assoc();
+$biografia = $usuario['biografia'] ?? '';
+$query->close();
 
 if (!$usuario) { die("Usuario no encontrado."); }
 
@@ -26,11 +28,13 @@ $q_amigos = $conexion->prepare("SELECT COUNT(*) as total FROM Amigos WHERE (id_u
 $q_amigos->bind_param("ii", $id_objetivo, $id_objetivo);
 $q_amigos->execute();
 $total_amigos = $q_amigos->get_result()->fetch_assoc()['total'];
+$q_amigos->close();
 
 $q_juegos = $conexion->prepare("SELECT COUNT(*) as total FROM Biblioteca WHERE id_usuario = ?");
 $q_juegos->bind_param("i", $id_objetivo);
 $q_juegos->execute();
 $total_juegos = $q_juegos->get_result()->fetch_assoc()['total'];
+$q_juegos->close();
 
 $q_puntos = $conexion->prepare("
     SELECT SUM(l.puntos_logro) as total 
@@ -40,11 +44,13 @@ $q_puntos = $conexion->prepare("
 $q_puntos->bind_param("i", $id_objetivo);
 $q_puntos->execute();
 $total_puntos = $q_puntos->get_result()->fetch_assoc()['total'] ?? 0;
+$q_puntos->close();
 
 $q_relacion = $conexion->prepare("SELECT id_usuario, estado FROM Amigos WHERE (id_usuario = ? AND id_amigo = ?) OR (id_usuario = ? AND id_amigo = ?)");
 $q_relacion->bind_param("iiii", $id_sesion, $id_objetivo, $id_objetivo, $id_sesion);
 $q_relacion->execute();
 $relacion = $q_relacion->get_result()->fetch_assoc();
+$q_relacion->close();
 ?>
 
 <!DOCTYPE html>
@@ -109,7 +115,16 @@ $relacion = $q_relacion->get_result()->fetch_assoc();
             </section>
 
             <div class="perfil-body">
-                <p><?php echo htmlspecialchars($usuario['biografia'] ?: "Este gamer prefiere mantener el misterio."); ?></p>
+                <h3>Sobre este gamer</h3>
+                <p class="bio-text">
+                    <?php 
+                        if (!empty(trim($biografia))) {
+                            echo nl2br(htmlspecialchars($biografia));
+                        } else {
+                            echo "Este gamer prefiere mantener el misterio.";
+                        }
+                    ?>
+                </p>
             </div>
 
             <div class="perfil-footer">

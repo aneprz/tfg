@@ -42,7 +42,7 @@ $user = $resultado->fetch_assoc();
 
         <div>
             <label>Biografía:</label><br>
-            <textarea name="biografia" rows="4" cols="30"><?php echo htmlspecialchars($user['biografia']); ?></textarea>
+            <textarea name="biografia" rows="4" cols="30" maxlength="296"><?php echo htmlspecialchars($user['biografia']); ?></textarea>
         </div>
 
         <br>
