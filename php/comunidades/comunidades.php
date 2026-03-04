@@ -47,7 +47,7 @@ if (isset($conexion) && $conexion) {
             <ul>
                 <li><a href="../../index.php">Inicio</a></li>
                 <li><a href="../videojuegos/juegos.php">Juegos</a></li>
-                <li><a href="#">Listas</a></li>
+                <li><a href="../../php/jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="comunidades.php" class="activo">Comunidades</a></li>
             </ul>
         </nav>

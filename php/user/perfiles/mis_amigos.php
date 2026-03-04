@@ -9,31 +9,49 @@ if (!isset($_SESSION['id_usuario'])) {
 
 $id_usuario = $_SESSION['id_usuario'];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_id'])) {
-    $id_amigo_borrar = $_POST['eliminar_id'];
-
-    $sql_delete = "DELETE FROM Amigos WHERE (id_usuario = ? AND id_amigo = ?) OR (id_usuario = ? AND id_amigo = ?)";
-    $stmt_delete = $conexion->prepare($sql_delete);
-    $stmt_delete->bind_param("iiii", $id_usuario, $id_amigo_borrar, $id_amigo_borrar, $id_usuario);
-    $stmt_delete->execute();
-    
+// --- LÓGICA DE ACCIONES ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['eliminar_id'])) {
+        $id_borrar = $_POST['eliminar_id'];
+        $sql = "DELETE FROM Amigos WHERE (id_usuario = ? AND id_amigo = ?) OR (id_usuario = ? AND id_amigo = ?)";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("iiii", $id_usuario, $id_borrar, $id_borrar, $id_usuario);
+        $stmt->execute();
+    } 
+    elseif (isset($_POST['aceptar_id'])) {
+        $id_aceptar = $_POST['aceptar_id'];
+        // Importante: id_usuario es el que envió la solicitud, id_amigo eres TÚ (el que acepta)
+        $sql = "UPDATE Amigos SET estado = 'aceptada' WHERE id_usuario = ? AND id_amigo = ?";
+        $stmt = $conexion->prepare($sql);
+        $stmt->bind_param("ii", $id_aceptar, $id_usuario);
+        $stmt->execute();
+    }
     header("Location: mis_amigos.php");
     exit();
 }
 
-$sql = "SELECT u.id_usuario, u.gameTag, u.avatar, u.biografia 
-        FROM Usuario u 
-        WHERE u.id_usuario IN (
-            SELECT id_amigo FROM Amigos WHERE id_usuario = ?
-            UNION
-            SELECT id_usuario FROM Amigos WHERE id_amigo = ?
-        ) AND u.id_usuario != ?";
+// --- CONSULTA 1: Solicitudes que TE han enviado a TI ---
+$sql_pendientes = "SELECT u.id_usuario, u.gameTag, u.avatar 
+                   FROM Usuario u 
+                   JOIN Amigos a ON u.id_usuario = a.id_usuario 
+                   WHERE a.id_amigo = ? AND a.estado = 'pendiente'";
+$query_p = $conexion->prepare($sql_pendientes);
+$query_p->bind_param("i", $id_usuario);
+$query_p->execute();
+$res_pendientes = $query_p->get_result();
 
-$query = $conexion->prepare($sql);
-$query->bind_param("iii", $id_usuario, $id_usuario, $id_usuario);
-$query->execute();
-$resultado = $query->get_result();
-$total_amigos = $resultado->num_rows;
+// --- CONSULTA 2: Lista de Amigos Aceptados (Bidireccional) ---
+$sql_amigos = "SELECT u.id_usuario, u.gameTag, u.avatar, u.biografia 
+               FROM Usuario u 
+               JOIN Amigos a ON (u.id_usuario = a.id_usuario OR u.id_usuario = a.id_amigo)
+               WHERE ((a.id_usuario = ? OR a.id_amigo = ?) AND a.estado = 'aceptada')
+               AND u.id_usuario <> ? 
+               GROUP BY u.id_usuario";
+$query_a = $conexion->prepare($sql_amigos);
+$query_a->bind_param("iii", $id_usuario, $id_usuario, $id_usuario);
+$query_a->execute();
+$res_amigos = $query_a->get_result();
+$total_amigos = $res_amigos->num_rows;
 ?>
 
 <!DOCTYPE html>
@@ -41,59 +59,93 @@ $total_amigos = $resultado->num_rows;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Amigos - SalsaBox</title>
+    <title>SalsaBox - Mis Amigos</title>
     <link rel="stylesheet" href="../../../estilos/estilos_statsPerfil.css">
     <link rel="icon" href="../../../media/logoPlatino.png">
+    <style>
+        body { background-color: #14181c; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        .container-lista { width: 90%; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .section-title { color: #e0be00; border-bottom: 1px solid #2c3440; padding-bottom: 10px; margin-top: 30px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .item-card { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: #1b2129; padding: 15px; border-radius: 12px; margin-bottom: 15px;
+            border: 1px solid #2c3440; transition: 0.3s;
+        }
+        .item-card:hover { border-color: #e0be00; transform: translateY(-2px); }
+        .card-pendiente { border-left: 4px solid #e0be00; background: #1f252e; }
+        
+        .info-perfil { display: flex; align-items: center; text-decoration: none; color: inherit; flex-grow: 1; }
+        .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid #e0be00; margin-right: 15px; background: #2c3440; }
+        
+        .tag-name { margin: 0; font-size: 1.1rem; color: #fff; }
+        .bio-text { margin: 5px 0 0; color: #9ab3bc; font-size: 0.85rem; }
 
-    
+        .botones { display: flex; gap: 10px; margin-left: 10px; }
+        .btn { padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; text-decoration: none; font-size: 0.85rem; }
+        
+        .btn-aceptar { background: #e0be00; color: #000; }
+        .btn-aceptar:hover { background: #fff; }
+        
+        .btn-eliminar { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid #ff4444; }
+        .btn-eliminar:hover { background: #ff4444; color: white; }
+
+        .empty-msg { color: #9ab3bc; font-style: italic; padding: 20px 0; text-align: center; }
+        .back-link { color: #e0be00; text-decoration: none; font-weight: bold; display: inline-block; margin-bottom: 20px; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-    <div class="container-lista" style="width: 100%; max-width: 900px; margin: 0 auto; padding: 20px;">
-        <a href="perfilSesion.php" class="btn-volver" style="color: #9ab3bc; text-decoration: none;">← Volver al Perfil</a>
-        
-        <h1 style="color: #e0be00; border-bottom: 2px solid #e0be00; padding-bottom: 10px;">
-            Mis Amigos (<?php echo $total_amigos; ?>)
-        </h1>
 
-        <?php 
-        if ($total_amigos > 0) {
-            while ($row = $resultado->fetch_assoc()) {
-                $avatar_raw = $row['avatar'];
-                $ruta_avatar = (!empty($avatar_raw)) ? "../../../" . $avatar_raw : "../../../media/defaultAvatar.png";
-                $bio = (!empty($row['biografia'])) ? $row['biografia'] : "Este gamer prefiere mantener el misterio.";
-                ?>
-                
-                <div class="item-card">
-                    <div class="amigo-info-principal">
-                        <img src="<?php echo htmlspecialchars($ruta_avatar); ?>" 
-                             alt="Avatar" 
-                             style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 20px; border: 2px solid #e0be00;">
-                        
-                        <div class="item-content">
-                            <h3 class="item-title" style="margin: 0; color: #e0be00;">
-                                <?php echo htmlspecialchars($row['gameTag']); ?>
-                            </h3>
-                            <p class="item-desc" style="margin: 5px 0 0; color: #9ab3bc; font-size: 0.9rem;">
-                                <?php 
-                                    $bio_corta = (strlen($bio) > 100) ? substr($bio, 0, 100) . "..." : $bio;
-                                    echo htmlspecialchars($bio_corta); 
-                                ?>
-                            </p>
-                        </div>
+<div class="container-lista">
+    <a href="perfilSesion.php" class="back-link">← Volver a mi Perfil</a>
+
+    <?php if ($res_pendientes->num_rows > 0): ?>
+        <h2 class="section-title">Solicitudes Pendientes</h2>
+        <?php while ($sol = $res_pendientes->fetch_assoc()): ?>
+            <div class="item-card card-pendiente">
+                <div class="info-perfil">
+                    <img src="<?php echo !empty($sol['avatar']) ? "../../../".$sol['avatar'] : "../../../media/defaultAvatar.png"; ?>" class="avatar">
+                    <div>
+                        <h3 class="tag-name"><?php echo htmlspecialchars($sol['gameTag']); ?></h3>
+                        <p style="margin:0; font-size: 0.75rem; color: #e0be00;">Te ha enviado una solicitud</p>
                     </div>
-
-                    <form method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar a <?php echo $row['gameTag']; ?> de tu lista?');">
-                        <input type="hidden" name="eliminar_id" value="<?php echo $row['id_usuario']; ?>">
-                        <button type="submit" class="btn-eliminar">Eliminar</button>
-                    </form>
                 </div>
+                <form method="POST" class="botones">
+                    <input type="hidden" name="aceptar_id" value="<?php echo $sol['id_usuario']; ?>">
+                    <button type="submit" class="btn btn-aceptar">Aceptar</button>
+                    <button type="submit" name="eliminar_id" value="<?php echo $sol['id_usuario']; ?>" class="btn btn-eliminar">Rechazar</button>
+                </form>
+            </div>
+        <?php endwhile; ?>
+    <?php endif; ?>
 
-                <?php
-            }
-        } else {
-            echo "<p style='color: white;'>No tienes amigos aún. Tu ID es: $id_usuario</p>";
-        }
-        ?>
-    </div>
+    <h2 class="section-title">Mis Amigos (<?php echo $total_amigos; ?>)</h2>
+    
+    <?php if ($total_amigos > 0): ?>
+        <?php while ($row = $res_amigos->fetch_assoc()): ?>
+            <div class="item-card">
+                <a href="perfilOtros.php?id=<?php echo $row['id_usuario']; ?>" class="info-perfil">
+                    <img src="<?php echo !empty($row['avatar']) ? "../../../".$row['avatar'] : "../../../media/defaultAvatar.png"; ?>" class="avatar">
+                    <div>
+                        <h3 class="tag-name"><?php echo htmlspecialchars($row['gameTag']); ?></h3>
+                        <p class="bio-text">
+                            <?php echo htmlspecialchars(mb_strlen($row['biografia']) > 60 ? mb_substr($row['biografia'], 0, 60)."..." : ($row['biografia'] ?: "Jugador de SalsaBox")); ?>
+                        </p>
+                    </div>
+                </a>
+                
+                <form method="POST" onsubmit="return confirm('¿Eliminar a <?php echo addslashes($row['gameTag']); ?>?');">
+                    <input type="hidden" name="eliminar_id" value="<?php echo $row['id_usuario']; ?>">
+                    <button type="submit" class="btn btn-eliminar">Eliminar</button>
+                </form>
+            </div>
+        <?php endwhile; ?>
+    <?php else: ?>
+        <p class="empty-msg">Aún no tienes amigos aceptados. ¡Explora la comunidad!</p>
+    <?php endif; ?>
+    
+</div>
+
 </body>
 </html>
