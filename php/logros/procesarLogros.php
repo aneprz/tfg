@@ -3,8 +3,6 @@ require_once __DIR__ . '/../../db/conexiones.php';
 
 $busqueda = isset($_GET['buscar']) ? trim($_GET['buscar']) : '';
 
-// Ajustado a tus nombres reales: nombre_logro y puntos_logro
-// NOTA: He quitado el JOIN con Videojuego porque no existe esa relación en tu tabla Logros
 $sql = "SELECT nombre_logro, descripcion, puntos_logro FROM Logros";
 
 if (!empty($busqueda)) {

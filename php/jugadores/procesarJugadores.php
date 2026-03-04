@@ -46,10 +46,9 @@ if ($es_ajax) {
             } else {
                 $img = "../../media/perfil_default.jpg";
             }
-            // --------------------------------
             
             $bio = $user['biografia'] ?? 'Sin biografía disponible.';
-            $bio_corta = mb_strlen($bio) > 60 ? mb_substr($bio, 0, 60) . "..." : $bio;
+            $bio_corta = mb_strlen($bio) > 20 ? mb_substr($bio, 0, 20) . "..." : $bio;
             
             echo '<div class="player-card">
                     <div class="player-avatar-wrapper">

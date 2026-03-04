@@ -17,8 +17,6 @@ if (!isset($_SESSION['id_usuario'])) {
     <link rel="stylesheet" href="../../estilos/estilos_jugadores.css">
     <link rel="icon" href="../../media/logoPlatino.png">
     <style>
-        /* Ajustes específicos para que la grid de jugadores use el estilo de cartas de juegos si prefieres, 
-           o mantenga su estructura pero con los colores de la otra página */
         .user-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

@@ -2,7 +2,6 @@
 session_start();
 require_once __DIR__ . '/../../db/conexiones.php';
 
-// Verificamos sesión para seguridad
 if (!isset($_SESSION['id_usuario'])) {
     header("Location: ../../index.php");
     exit();
@@ -74,7 +73,6 @@ if (!isset($_SESSION['id_usuario'])) {
                 .then(response => response.text())
                 .then(html => {
                     contenedor.innerHTML = html;
-                    // Si el servidor devuelve el aviso de no resultados o está vacío
                     if (html.includes('no-results') || html.trim() === "") {
                         sinResultados.hidden = false;
                     } else {
@@ -85,7 +83,7 @@ if (!isset($_SESSION['id_usuario'])) {
         };
 
         inputBusqueda.addEventListener('input', fetchLogros);
-        fetchLogros(); // Carga inicial
+        fetchLogros();
     });
     </script>
 </body>
