@@ -28,6 +28,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
+// Función auxiliar para procesar la ruta del avatar (Misma lógica que perfilOtros)
+function obtenerRutaAvatar($avatar_raw) {
+    $avatar_raw = trim($avatar_raw ?? '');
+    if (empty($avatar_raw)) {
+        return "../../../media/perfil_default.jpg";
+    }
+    // Si es una URL externa
+    if (filter_var($avatar_raw, FILTER_VALIDATE_URL) || strpos($avatar_raw, 'http') === 0) {
+        return $avatar_raw;
+    }
+    // Si es ruta local
+    $avatar_limpio = ltrim($avatar_raw, '/');
+    return (strpos($avatar_limpio, 'media/') === 0) 
+        ? "../../../" . $avatar_limpio 
+        : "../../../media/" . $avatar_limpio;
+}
+
 $sql_pendientes = "SELECT u.id_usuario, u.gameTag, u.avatar 
                    FROM Usuario u 
                    JOIN Amigos a ON u.id_usuario = a.id_usuario 
@@ -65,12 +82,12 @@ $total_amigos = $res_amigos->num_rows;
         .item-card { display: flex; justify-content: space-between; align-items: center; background: #1b2129; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #2c3440; transition: 0.3s; }
         .item-card:hover { border-color: #e0be00; transform: translateY(-2px); }
         .card-pendiente { border-left: 4px solid #e0be00; background: #1f252e; }
-        .info-perfil { display: flex; align-items: center; text-decoration: none; color: inherit; flex-grow: 1; }
-        .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid #e0be00; margin-right: 15px; background: #2c3440; }
+        .info-perfil { display: flex; align-items: center; text-decoration: none; color: inherit; flex-grow: 1; overflow: hidden; }
+        .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid #e0be00; margin-right: 15px; background: #2c3440; flex-shrink: 0; }
         .tag-name { margin: 0; font-size: 1.1rem; color: #fff; }
-        .bio-text { margin: 5px 0 0; color: #9ab3bc; font-size: 0.85rem; }
+        .bio-text { margin: 5px 0 0; color: #9ab3bc; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px; }
         .botones { display: flex; gap: 10px; margin-left: 10px; }
-        .btn { padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; text-decoration: none; font-size: 0.85rem; }
+        .btn { padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; text-decoration: none; font-size: 0.85rem; white-space: nowrap; }
         .btn-aceptar { background: #e0be00; color: #000; }
         .btn-aceptar:hover { background: #fff; }
         .btn-eliminar { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid #ff4444; }
@@ -90,7 +107,7 @@ $total_amigos = $res_amigos->num_rows;
         <?php while ($sol = $res_pendientes->fetch_assoc()): ?>
             <div class="item-card card-pendiente">
                 <div class="info-perfil">
-                    <img src="<?php echo !empty($sol['avatar']) ? "../../../".$sol['avatar'] : "../../../media/defaultAvatar.png"; ?>" class="avatar">
+                    <img src="<?php echo obtenerRutaAvatar($sol['avatar']); ?>" class="avatar">
                     <div>
                         <h3 class="tag-name"><?php echo htmlspecialchars($sol['gameTag']); ?></h3>
                         <p style="margin:0; font-size: 0.75rem; color: #e0be00;">Te ha enviado una solicitud</p>
@@ -111,11 +128,11 @@ $total_amigos = $res_amigos->num_rows;
         <?php while ($row = $res_amigos->fetch_assoc()): ?>
             <div class="item-card">
                 <a href="../amistades/perfilOtros.php?id=<?php echo $row['id_usuario']; ?>" class="info-perfil">
-                    <img src="<?php echo !empty($row['avatar']) ? "../../../".$row['avatar'] : "../../../media/defaultAvatar.png"; ?>" class="avatar">
+                    <img src="<?php echo obtenerRutaAvatar($row['avatar']); ?>" class="avatar">
                     <div>
                         <h3 class="tag-name"><?php echo htmlspecialchars($row['gameTag']); ?></h3>
                         <p class="bio-text">
-                            <?php echo htmlspecialchars(mb_strlen($row['biografia']) > 60 ? mb_substr($row['biografia'], 0, 60)."..." : ($row['biografia'] ?: "Jugador de SalsaBox")); ?>
+                            <?php echo htmlspecialchars(mb_strlen($row['biografia'] ?? '') > 60 ? mb_substr($row['biografia'], 0, 60)."..." : ($row['biografia'] ?: "Jugador de SalsaBox")); ?>
                         </p>
                     </div>
                 </a>

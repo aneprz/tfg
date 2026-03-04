@@ -11,7 +11,7 @@ $id_sesion = $_SESSION['id_usuario'];
 $id_objetivo = $_GET['id'];
 
 if ($id_sesion == $id_objetivo) {
-    header("Location: perfilSesion.php");
+    header("Location: ../perfiles/perfilSesion.php");
     exit();
 }
 
@@ -65,8 +65,23 @@ $q_relacion->close();
     <div class="perfil-container">
         <div class="perfil-card">
             <section class="perfil-header">
-                <?php $img = !empty($usuario['avatar']) ? "../../../".$usuario['avatar'] : "../../../media/perfil_default.jpg"; ?>
-                <img src="<?php echo $img; ?>" class="avatar-grande">
+                <?php 
+                    $avatar_raw = trim($usuario['avatar'] ?? '');
+                    
+                    if (!empty($avatar_raw)) {
+                        if (filter_var($avatar_raw, FILTER_VALIDATE_URL) || strpos($avatar_raw, 'http') === 0) {
+                            $img = $avatar_raw;
+                        } else {
+                            $avatar_limpio = ltrim($avatar_raw, '/');
+                            $img = (strpos($avatar_limpio, 'media/') === 0) 
+                                ? "../../../" . $avatar_limpio 
+                                : "../../../media/" . $avatar_limpio;
+                        }
+                    } else {
+                        $img = "../../../media/perfil_default.jpg";
+                    }
+                ?>
+                <img src="<?php echo $img; ?>" class="avatar-grande" style="object-fit: cover;">
                 
                 <h1><?php echo htmlspecialchars($usuario['gameTag']); ?></h1>
                 <div class="status">Jugador de SalsaBox</div>
