@@ -1,20 +1,18 @@
-/* --- RESET Y ESTRUCTURA GLOBAL --- */
 body.body-comunidad {
     margin: 0;
     padding: 0;
     height: 100vh;
-    overflow: hidden; /* Evita scroll doble */
+    overflow: hidden;
     background-color: #14181c;
 }
 
 .layout-comunidad {
     display: grid;
-    grid-template-columns: 260px 1fr 300px; /* Tres columnas fijas */
-    height: calc(100vh - 70px); /* Resta la altura del header */
+    grid-template-columns: 260px 1fr 300px;
+    height: calc(100vh - 70px);
     width: 100%;
 }
 
-/* --- COLUMNA IZQUIERDA: CANALES --- */
 .sidebar-canales {
     background-color: #1b2129;
     border-right: 1px solid #2c3440;
@@ -51,9 +49,8 @@ body.body-comunidad {
     color: #5c6370;
 }
 
-/* --- COLUMNA CENTRAL: EL MURO --- */
 .muro-comunidad {
-    overflow-y: auto; /* Solo el muro tiene scroll */
+    overflow-y: auto; 
     background-color: #14181c;
 }
 
@@ -75,7 +72,6 @@ body.body-comunidad {
     text-shadow: 0 4px 10px rgba(0,0,0,0.8);
 }
 
-/* --- CAJA DE PUBLICAR --- */
 .input-post {
     background-color: #1f252c;
     margin: 20px;
@@ -114,7 +110,6 @@ body.body-comunidad {
     cursor: pointer;
 }
 
-/* --- FEED DE POSTS --- */
 .feed {
     padding: 20px;
     display: flex;
@@ -136,7 +131,7 @@ body.body-comunidad {
 }
 
 .post-autor {
-    color: #e0be00; /* Tu color amarillo accent */
+    color: #e0be00;
     font-weight: bold;
 }
 
@@ -151,7 +146,6 @@ body.body-comunidad {
     margin: 0;
 }
 
-/* --- COLUMNA DERECHA: INFO --- */
 .sidebar-info {
     background-color: #1b2129;
     border-left: 1px solid #2c3440;
@@ -177,7 +171,6 @@ body.body-comunidad {
     margin: 5px 0;
 }
 
-/* Scrollbar personalizado para que no se vea feo */
 .muro-comunidad::-webkit-scrollbar {
     width: 8px;
 }

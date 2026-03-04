@@ -12,7 +12,6 @@ function textoValidarContraseña() {
 function validarTodo() {
     const val = contraseña.value;
     
-    // Reglas
     const reglas = {
         longitud: val.length >= 8,
         mayuscula: /[A-Z]/.test(val),
@@ -22,27 +21,23 @@ function validarTodo() {
         contraseñasRepetidas: val === repetirContraseña.value && val !== ""
     };
 
-    // Actualizar UI
     for (const [id, valida] of Object.entries(reglas)) {
         const elemento = document.getElementById(id);
         if (valida) {
             elemento.style.color = "green";
             elemento.innerHTML = checkIcon + " " + elemento.innerText;
         } else {
-            elemento.style.color = ""; // O el color por defecto de tu CSS
+            elemento.style.color = ""; 
             elemento.innerHTML = circleIcon + " " + elemento.innerText;
         }
     }
 
-    // Habilitar botón si todo es true
     botonRegistrarse.disabled = !Object.values(reglas).every(v => v === true);
 }
 
-// Listeners
 contraseña.addEventListener("input", validarTodo);
 repetirContraseña.addEventListener("input", validarTodo);
 
-// Función del Ojo (la que ya tenías)
 function configurarOjo(idInput, idBoton, idIcono) {
     const inputPass = document.getElementById(idInput);
     const btnPass = document.getElementById(idBoton);
@@ -51,7 +46,6 @@ function configurarOjo(idInput, idBoton, idIcono) {
     btnPass.addEventListener('click', () => {
         const esPass = inputPass.type === "password";
         inputPass.type = esPass ? "text" : "password";
-        // Aquí puedes alternar tus iconos de bootstrap como hacías antes
     });
 }
 

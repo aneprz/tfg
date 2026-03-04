@@ -1,4 +1,3 @@
-/* Contenedor principal para el buscador */
 .container-lista-busqueda {
     width: 95%;
     max-width: 1100px;
@@ -16,7 +15,6 @@
     margin-bottom: 10px;
 }
 
-/* Sección de búsqueda */
 .search-section {
     background: #1b1e23;
     padding: 20px;
@@ -57,7 +55,6 @@
     transform: scale(1.05);
 }
 
-/* Grid de Jugadores */
 .user-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

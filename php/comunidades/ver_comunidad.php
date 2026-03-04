@@ -87,7 +87,6 @@ if (!$comunidad) {
 
             <section class="feed">
                 <?php
-                // CONSULTA CORREGIDA: Ahora usa 'u.gameTag' que es tu columna real
                 $sqlPosts = "SELECT p.*, u.gameTag 
                              FROM post p 
                              JOIN usuario u ON p.id_usuario = u.id_usuario 

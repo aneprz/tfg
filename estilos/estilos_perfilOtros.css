@@ -62,7 +62,6 @@ body {
     font-weight: bold;
 }
 
-/* Botones de Acción */
 .btn-accion {
     border: none;
     padding: 10px 25px;
@@ -85,7 +84,6 @@ body {
     background-color: #f0cc00;
 }
 
-/* Estadísticas */
 .perfil-stats {
     display: flex;
     justify-content: space-around;

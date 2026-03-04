@@ -32,7 +32,6 @@ body {
     text-align: center;
 }
 
-/* Cabecera del perfil */
 .perfil-header {
     background: linear-gradient(to bottom, #1f252c, var(--card-bg));
     padding: 3rem 1rem 1.5rem;
@@ -66,7 +65,6 @@ body {
     margin-top: 5px;
 }
 
-/* Estadísticas */
 .perfil-stats {
     display: flex;
     justify-content: space-around;
@@ -92,7 +90,6 @@ body {
     text-transform: uppercase;
 }
 
-/* Cuerpo y Botones */
 .perfil-body {
     padding: 2rem;
     color: var(--text-muted);

@@ -2,7 +2,6 @@
 session_start();
 require '../../../db/conexiones.php';
 
-// Primero comprobamos la sesión para evitar errores
 if (!isset($_SESSION['tag'])) {
     header("Location: ../../../index.php");
     exit();

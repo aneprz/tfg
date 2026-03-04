@@ -23,14 +23,12 @@ body {
     min-height: 100vh;
 }
 
-/* Contenedor principal */
 .login-container {
     width: 100%;
     max-width: 400px;
     padding: 20px;
 }
 
-/* Tarjeta del Formulario */
 .login-form {
     background-color: var(--card-bg);
     padding: 2.5rem;
@@ -50,7 +48,6 @@ h2 {
     padding-bottom: 10px;
 }
 
-/* Grupos de entrada */
 .input-group {
     margin-bottom: 1.5rem;
 }
