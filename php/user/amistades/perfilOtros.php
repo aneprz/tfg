@@ -54,6 +54,19 @@ $relacion = $q_relacion->get_result()->fetch_assoc();
     <title>Perfil de <?php echo $usuario['gameTag']; ?> - SalsaBox</title>
     <link rel="icon" href="../../../media/logoPlatino.png">
     <link rel="stylesheet" href="../../../estilos/estilos_perfilOtros.css">
+    <style>
+        /* Estilo para que los enlaces de stats no parezcan enlaces azules feos */
+        .stat-link {
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s;
+        }
+        .stat-link:hover .stat-item {
+            transform: translateY(-5px);
+            background: rgba(224, 190, 0, 0.1);
+            border-radius: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="perfil-container">
@@ -81,25 +94,33 @@ $relacion = $q_relacion->get_result()->fetch_assoc();
                         <?php endif; ?>
                     
                     <?php else: ?>
-                        <button type="button" class="btn-accion" style="border: 1px solid var(--accent-color); background: none; color: var(--accent-color); cursor: default;">✓ Amigos</button>
+                        <button type="button" class="btn-accion" style="border: 1px solid #e0be00; background: none; color: #e0be00; cursor: default;">✓ Amigos</button>
                         <button type="submit" name="accion" value="eliminar" class="btn-logout" style="display:block; margin: 10px auto; color: #ff4444; background: none; border: none; cursor:pointer;">Eliminar amigo</button>
                     <?php endif; ?>
                 </form>
             </section>
 
             <section class="perfil-stats">
-                <div class="stat-item">
-                    <span class="stat-num"><?php echo $total_amigos; ?></span>
-                    <span class="stat-label">Amigos</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-num"><?php echo $total_juegos; ?></span>
-                    <span class="stat-label">Juegos</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-num"><?php echo $total_puntos; ?></span>
-                    <span class="stat-label">Puntos</span>
-                </div>
+                
+                <a href="juegosOtros.php?id=<?php echo $id_objetivo; ?>" class="stat-link">
+                    <div class="stat-item">
+                        <span class="stat-num"><?php echo $total_juegos; ?></span>
+                        <span class="stat-label">Juegos</span>
+                    </div>
+                </a>
+                <a href="logrosOtros.php?id=<?php echo $id_objetivo; ?>" class="stat-link">
+                    <div class="stat-item">
+                        <span class="stat-num"><?php echo $total_puntos; ?></span>
+                        <span class="stat-label">Puntos</span>
+                    </div>
+                </a>
+                
+                <a href="amigosOtros.php?id=<?php echo $id_objetivo; ?>" class="stat-link">
+                    <div class="stat-item">
+                        <span class="stat-num"><?php echo $total_amigos; ?></span>
+                        <span class="stat-label">Amigos</span>
+                    </div>
+                </a>
             </section>
 
             <div class="perfil-body">

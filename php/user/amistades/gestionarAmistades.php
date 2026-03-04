@@ -21,7 +21,7 @@ elseif ($accion == 'aceptar') {
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param("ii", $id_objetivo, $id_sesion);
 } 
-elseif ($accion == 'eliminar') { // Cambiado 'borrar' por 'eliminar' para que coincida con tu HTML
+elseif ($accion == 'eliminar') {
     $sql = "DELETE FROM Amigos WHERE (id_usuario = ? AND id_amigo = ?) OR (id_usuario = ? AND id_amigo = ?)";
     $stmt = $conexion->prepare($sql);
     $stmt->bind_param("iiii", $id_sesion, $id_objetivo, $id_objetivo, $id_sesion);

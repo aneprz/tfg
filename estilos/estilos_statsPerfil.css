@@ -154,21 +154,39 @@ p {
     color: var(--text-muted);
 }
 
+/* --- Media Queries --- */
 @media (max-width: 600px) {
     body { padding: 1rem; }
     th:nth-child(3), td:nth-child(3) { display: none; }
+    .item-card { flex-direction: column; text-align: center; }
+    .btn-eliminar { margin-left: 0; margin-top: 10px; width: 100%; }
 }
 
-.container-lista { display: block !important; opacity: 1 !important; visibility: visible !important; }
+/* --- Ajustes Finales de Contenedores --- */
+.container-lista { 
+    display: block !important; 
+    width: 100%;
+    max-width: 900px; /* Igual que tus títulos y tablas */
+    margin: 0 auto;
+}
+
 .item-card { 
     display: flex !important; 
     margin-bottom: 15px; 
-    background: #1b1e23; 
+    background: var(--bg-card); 
     padding: 15px; 
     border-radius: 8px; 
     align-items: center; 
     justify-content: space-between;
-.amigo-info-principal { display: flex; align-items: center; flex-grow: 1; }
+    width: 100%; /* Para que ocupe todo el ancho del contenedor */
+    box-sizing: border-box;
+}
+
+.amigo-info-principal { 
+    display: flex; 
+    align-items: center; 
+    flex-grow: 1; 
+}
 
 .btn-eliminar {
     background-color: #ff4d4d;
@@ -180,8 +198,9 @@ p {
     font-weight: bold;
     transition: background 0.3s;
     margin-left: 15px;
+    white-space: nowrap;
 }
+
 .btn-eliminar:hover {
     background-color: #cc0000;
-}
 }
