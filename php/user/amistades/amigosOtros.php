@@ -56,7 +56,6 @@ $resultado = $query->get_result();
     <link rel="stylesheet" href="../../../estilos/estilos_statsPerfil.css">
     <link rel="icon" href="../../../media/logoPlatino.png">
     <style>
-        /* Ajuste para asegurar que las imágenes se vean bien en la lista */
         .item-img {
             width: 60px;
             height: 60px;
