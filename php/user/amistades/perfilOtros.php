@@ -51,29 +51,16 @@ $relacion = $q_relacion->get_result()->fetch_assoc();
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Perfil de <?php echo $usuario['gameTag']; ?> - SalsaBox</title>
+    <title>Perfil de <?php echo htmlspecialchars($usuario['gameTag']); ?> - SalsaBox</title>
     <link rel="icon" href="../../../media/logoPlatino.png">
     <link rel="stylesheet" href="../../../estilos/estilos_perfilOtros.css">
-    <style>
-        /* Estilo para que los enlaces de stats no parezcan enlaces azules feos */
-        .stat-link {
-            text-decoration: none;
-            color: inherit;
-            transition: transform 0.2s;
-        }
-        .stat-link:hover .stat-item {
-            transform: translateY(-5px);
-            background: rgba(224, 190, 0, 0.1);
-            border-radius: 10px;
-        }
-    </style>
 </head>
 <body>
     <div class="perfil-container">
         <div class="perfil-card">
             <section class="perfil-header">
                 <?php $img = !empty($usuario['avatar']) ? "../../../".$usuario['avatar'] : "../../../media/perfil_default.jpg"; ?>
-                <img src="<?php echo $img; ?>" class="avatar-grande" style="object-fit: cover;">
+                <img src="<?php echo $img; ?>" class="avatar-grande">
                 
                 <h1><?php echo htmlspecialchars($usuario['gameTag']); ?></h1>
                 <div class="status">Jugador de SalsaBox</div>
@@ -86,22 +73,21 @@ $relacion = $q_relacion->get_result()->fetch_assoc();
                     
                     <?php elseif ($relacion['estado'] == 'pendiente'): ?>
                         <?php if ($relacion['id_usuario'] == $id_sesion): ?>
-                            <button type="button" class="btn-accion" style="background: #444; cursor: default;">Solicitud Enviada</button>
-                            <button type="submit" name="accion" value="eliminar" class="btn-logout" style="display:block; margin: 10px auto; color: #ff4444; background: none; border: none; cursor:pointer;">Cancelar solicitud</button>
+                            <button type="button" class="btn-accion" style="background: #444; cursor: default; color: #fff;">Solicitud Enviada</button>
+                            <button type="submit" name="accion" value="eliminar" class="btn-logout">Cancelar solicitud</button>
                         <?php else: ?>
                             <button type="submit" name="accion" value="aceptar" class="btn-accion btn-add">Aceptar Solicitud</button>
-                            <button type="submit" name="accion" value="eliminar" class="btn-logout" style="display:block; margin: 10px auto; color: #ff4444; background: none; border: none; cursor:pointer;">Rechazar</button>
+                            <button type="submit" name="accion" value="eliminar" class="btn-logout">Rechazar</button>
                         <?php endif; ?>
                     
                     <?php else: ?>
                         <button type="button" class="btn-accion" style="border: 1px solid #e0be00; background: none; color: #e0be00; cursor: default;">✓ Amigos</button>
-                        <button type="submit" name="accion" value="eliminar" class="btn-logout" style="display:block; margin: 10px auto; color: #ff4444; background: none; border: none; cursor:pointer;">Eliminar amigo</button>
+                        <button type="submit" name="accion" value="eliminar" class="btn-logout" onclick="return confirm('¿Eliminar de amigos?')">Eliminar amigo</button>
                     <?php endif; ?>
                 </form>
             </section>
 
             <section class="perfil-stats">
-                
                 <a href="juegosOtros.php?id=<?php echo $id_objetivo; ?>" class="stat-link">
                     <div class="stat-item">
                         <span class="stat-num"><?php echo $total_juegos; ?></span>
@@ -114,7 +100,6 @@ $relacion = $q_relacion->get_result()->fetch_assoc();
                         <span class="stat-label">Puntos</span>
                     </div>
                 </a>
-                
                 <a href="amigosOtros.php?id=<?php echo $id_objetivo; ?>" class="stat-link">
                     <div class="stat-item">
                         <span class="stat-num"><?php echo $total_amigos; ?></span>

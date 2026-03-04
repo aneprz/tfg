@@ -9,7 +9,6 @@ if (!isset($_SESSION['id_usuario'])) {
 
 $id_usuario = $_SESSION['id_usuario'];
 
-// --- LÓGICA DE ACCIONES ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['eliminar_id'])) {
         $id_borrar = $_POST['eliminar_id'];
@@ -20,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } 
     elseif (isset($_POST['aceptar_id'])) {
         $id_aceptar = $_POST['aceptar_id'];
-        // Importante: id_usuario es el que envió la solicitud, id_amigo eres TÚ (el que acepta)
         $sql = "UPDATE Amigos SET estado = 'aceptada' WHERE id_usuario = ? AND id_amigo = ?";
         $stmt = $conexion->prepare($sql);
         $stmt->bind_param("ii", $id_aceptar, $id_usuario);
@@ -30,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-// --- CONSULTA 1: Solicitudes que TE han enviado a TI ---
 $sql_pendientes = "SELECT u.id_usuario, u.gameTag, u.avatar 
                    FROM Usuario u 
                    JOIN Amigos a ON u.id_usuario = a.id_usuario 
@@ -40,7 +37,6 @@ $query_p->bind_param("i", $id_usuario);
 $query_p->execute();
 $res_pendientes = $query_p->get_result();
 
-// --- CONSULTA 2: Lista de Amigos Aceptados (Bidireccional) ---
 $sql_amigos = "SELECT u.id_usuario, u.gameTag, u.avatar, u.biografia 
                FROM Usuario u 
                JOIN Amigos a ON (u.id_usuario = a.id_usuario OR u.id_usuario = a.id_amigo)
@@ -66,30 +62,19 @@ $total_amigos = $res_amigos->num_rows;
         body { background-color: #14181c; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; }
         .container-lista { width: 90%; max-width: 800px; margin: 40px auto; padding: 20px; }
         .section-title { color: #e0be00; border-bottom: 1px solid #2c3440; padding-bottom: 10px; margin-top: 30px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .item-card { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: #1b2129; padding: 15px; border-radius: 12px; margin-bottom: 15px;
-            border: 1px solid #2c3440; transition: 0.3s;
-        }
+        .item-card { display: flex; justify-content: space-between; align-items: center; background: #1b2129; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #2c3440; transition: 0.3s; }
         .item-card:hover { border-color: #e0be00; transform: translateY(-2px); }
         .card-pendiente { border-left: 4px solid #e0be00; background: #1f252e; }
-        
         .info-perfil { display: flex; align-items: center; text-decoration: none; color: inherit; flex-grow: 1; }
         .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid #e0be00; margin-right: 15px; background: #2c3440; }
-        
         .tag-name { margin: 0; font-size: 1.1rem; color: #fff; }
         .bio-text { margin: 5px 0 0; color: #9ab3bc; font-size: 0.85rem; }
-
         .botones { display: flex; gap: 10px; margin-left: 10px; }
         .btn { padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; text-decoration: none; font-size: 0.85rem; }
-        
         .btn-aceptar { background: #e0be00; color: #000; }
         .btn-aceptar:hover { background: #fff; }
-        
         .btn-eliminar { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid #ff4444; }
         .btn-eliminar:hover { background: #ff4444; color: white; }
-
         .empty-msg { color: #9ab3bc; font-style: italic; padding: 20px 0; text-align: center; }
         .back-link { color: #e0be00; text-decoration: none; font-weight: bold; display: inline-block; margin-bottom: 20px; }
         .back-link:hover { text-decoration: underline; }
@@ -125,7 +110,7 @@ $total_amigos = $res_amigos->num_rows;
     <?php if ($total_amigos > 0): ?>
         <?php while ($row = $res_amigos->fetch_assoc()): ?>
             <div class="item-card">
-                <a href="perfilOtros.php?id=<?php echo $row['id_usuario']; ?>" class="info-perfil">
+                <a href="../amistades/perfilOtros.php?id=<?php echo $row['id_usuario']; ?>" class="info-perfil">
                     <img src="<?php echo !empty($row['avatar']) ? "../../../".$row['avatar'] : "../../../media/defaultAvatar.png"; ?>" class="avatar">
                     <div>
                         <h3 class="tag-name"><?php echo htmlspecialchars($row['gameTag']); ?></h3>

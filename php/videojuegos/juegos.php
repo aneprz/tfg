@@ -134,7 +134,6 @@ if (isset($conexion) && $conexion) {
                     visibles += 1;
                 }
             });
-
             sinResultados.hidden = visibles !== 0;
         });
     </script>
