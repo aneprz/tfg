@@ -1,7 +1,8 @@
 <?php
 session_start();
-require 'procesarJugadores.php';
+require_once __DIR__ . '/../../db/conexiones.php';
 
+// Verificamos sesión para seguridad
 if (!isset($_SESSION['id_usuario'])) {
     header("Location: ../../index.php");
     exit();
@@ -12,34 +13,24 @@ if (!isset($_SESSION['id_usuario'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SalsaBox - Comunidad de Jugadores</title>
-    <link rel="stylesheet" href="../../estilos/estilos_juegos.css">
-    <link rel="stylesheet" href="../../estilos/estilos_jugadores.css">
+    <title>SalsaBox - Logros</title>
+    <link rel="stylesheet" href="../../estilos/estilos_logros.css">
+    <link rel="stylesheet" href="../../estilos/estilos_index.css">
     <link rel="icon" href="../../media/logoPlatino.png">
-    <style>
-        /* Ajustes específicos para que la grid de jugadores use el estilo de cartas de juegos si prefieres, 
-           o mantenga su estructura pero con los colores de la otra página */
-        .user-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-    </style>
 </head>
 <body>
     <header>
         <div class="tituloWeb">
-            <img src="../../media/logoPlatino.png" alt="" width="40">
+            <img src="../../media/logoPlatino.png" alt="" width="40px">
             <a href="../../index.php" class="logo">Salsa<span>Box</span></a>
         </div>
         <nav>
             <ul>
                 <li><a href="../../index.php">Inicio</a></li>
                 <li><a href="../videojuegos/juegos.php">Juegos</a></li>
-                <li><a href="jugadores.php" class="activo">Jugadores</a></li>
+                <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
-                <li><a href="../logros/logros.php">Logros</a></li>
+                <li><a href="logros.php" class="activo">Logros</a></li>
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>
@@ -50,19 +41,21 @@ if (!isset($_SESSION['id_usuario'])) {
     </header>
 
     <div class="central">
-        <h1>Explora la comunidad</h1>
-        <p>Encuentra a otros gamers, revisa sus perfiles y descubre nuevas amistades dentro de SalsaBox.</p>
+        <h1>Logros</h1>
+        <p>Aquí podrás ver los logros que podrás ir ganando a lo largo de tu experiencia como gamer.</p>
         
         <div class="buscadorContainer">
-            <input type="text" id="input-busqueda" placeholder="Buscar por GameTag..." aria-label="Buscar jugador">
+            <input type="text" id="input-busqueda" placeholder="Buscar por nombre de logro o videojuego..." aria-label="Buscar logro">
         </div>
     </div>
 
     <main>
-        <h2>Todos los jugadores</h2>
-        <div class="user-grid" id="contenedor-resultados">
+        <h2>Galería de Retos</h2>
+        <div class="logros-grid" id="contenedor-logros">
             </div>
-        <p id="sinResultados" class="sinResultados" hidden>No se encontraron jugadores para esa búsqueda.</p>
+        <p id="sinResultados" class="sinResultados" hidden style="color: white; text-align: center; margin-top: 20px;">
+            No se encontraron logros que coincidan con tu búsqueda.
+        </p>
     </main>
 
     <footer>
@@ -72,15 +65,16 @@ if (!isset($_SESSION['id_usuario'])) {
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const inputBusqueda = document.getElementById('input-busqueda');
-        const contenedor = document.getElementById('contenedor-resultados');
+        const contenedor = document.getElementById('contenedor-logros');
         const sinResultados = document.getElementById('sinResultados');
 
-        const fetchJugadores = () => {
+        const fetchLogros = () => {
             const texto = inputBusqueda.value;
-            fetch(`procesarJugadores.php?buscar=${encodeURIComponent(texto)}&ajax=true`)
+            fetch(`procesarLogros.php?buscar=${encodeURIComponent(texto)}&ajax=true`)
                 .then(response => response.text())
                 .then(html => {
                     contenedor.innerHTML = html;
+                    // Si el servidor devuelve el aviso de no resultados o está vacío
                     if (html.includes('no-results') || html.trim() === "") {
                         sinResultados.hidden = false;
                     } else {
@@ -90,8 +84,8 @@ if (!isset($_SESSION['id_usuario'])) {
                 .catch(error => console.error('Error:', error));
         };
 
-        inputBusqueda.addEventListener('input', fetchJugadores);
-        fetchJugadores(); 
+        inputBusqueda.addEventListener('input', fetchLogros);
+        fetchLogros(); // Carga inicial
     });
     </script>
 </body>

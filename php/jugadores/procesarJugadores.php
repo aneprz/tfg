@@ -31,13 +31,29 @@ $resultado = $stmt->get_result();
 if ($es_ajax) {
     if ($resultado->num_rows > 0) {
         while($user = $resultado->fetch_assoc()) {
-            $img = !empty($user['avatar']) ? "../../".$user['avatar'] : "../../media/defaultAvatar.png";
+            
+            $avatar_raw = trim($user['avatar'] ?? '');
+            
+            if (!empty($avatar_raw)) {
+                if (filter_var($avatar_raw, FILTER_VALIDATE_URL) || strpos($avatar_raw, 'http') === 0) {
+                    $img = $avatar_raw;
+                } else {
+                    $avatar_limpio = ltrim($avatar_raw, '/');
+                    $img = (strpos($avatar_limpio, 'media/') === 0) 
+                        ? "../../" . $avatar_limpio 
+                        : "../../media/" . $avatar_limpio;
+                }
+            } else {
+                $img = "../../media/perfil_default.jpg";
+            }
+            // --------------------------------
+            
             $bio = $user['biografia'] ?? 'Sin biografía disponible.';
-            $bio_corta = strlen($bio) > 60 ? substr($bio, 0, 60) . "..." : $bio;
+            $bio_corta = mb_strlen($bio) > 60 ? mb_substr($bio, 0, 60) . "..." : $bio;
             
             echo '<div class="player-card">
                     <div class="player-avatar-wrapper">
-                        <img src="'.htmlspecialchars($img).'" alt="Avatar">
+                        <img src="'.$img.'" alt="Avatar" style="object-fit: cover;">
                     </div>
                     <div class="player-info">
                         <h3>'.htmlspecialchars($user['gameTag']).'</h3>

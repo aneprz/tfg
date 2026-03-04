@@ -49,6 +49,7 @@ if (isset($conexion) && $conexion) {
                 <li><a href="../videojuegos/juegos.php">Juegos</a></li>
                 <li><a href="../../php/jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="comunidades.php" class="activo">Comunidades</a></li>
+                <li><a href="../logros/logros.php">Logros</a></li>
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>
