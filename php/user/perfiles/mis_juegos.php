@@ -76,7 +76,6 @@ $total_juegos = $resultado->num_rows;
         <?php else: ?>
             <div class="item-card" style="border-left: 4px solid #ff4d4d; margin-top: 20px;">
                 <p>Parece que tu biblioteca está vacía. ¡Añade algunos juegos para empezar a trackear tus horas!</p>
-                <p style="font-size: 0.8rem; color: #888;">Tu ID de usuario es: <?php echo $id_usuario; ?></p>
             </div>
         <?php endif; ?>
     </div>
