@@ -1,0 +1,124 @@
+.container-lista-busqueda {
+    width: 95%;
+    max-width: 1100px;
+    margin: 40px auto;
+}
+
+.header-busqueda {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.header-busqueda h1 {
+    color: #e0be00;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.search-section {
+    background: #1b1e23;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 40px;
+    border: 1px solid #333;
+}
+
+.search-form {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.search-input {
+    flex: 1;
+    max-width: 500px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: 1px solid #e0be00;
+    background: #0d0f12;
+    color: white;
+    font-size: 1rem;
+}
+
+.btn-buscar {
+    background: #e0be00;
+    color: #000;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-buscar:hover {
+    transform: scale(1.05);
+}
+
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.player-card {
+    background: #1b1e23;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: 0.3s;
+    border: 1px solid #2a2d33;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px;
+    text-align: center;
+}
+
+.player-card:hover {
+    border-color: #e0be00;
+    transform: translateY(-5px);
+}
+
+.player-avatar-wrapper img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e0be00;
+    margin-bottom: 15px;
+}
+
+.player-info h3 {
+    color: #e0be00;
+    margin-bottom: 10px;
+    font-size: 1.4rem;
+}
+
+.player-bio {
+    color: #9ab3bc;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.btn-ver-perfil {
+    text-decoration: none;
+    color: #e0be00;
+    border: 1px solid #e0be00;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+
+.btn-ver-perfil:hover {
+    background: #e0be00;
+    color: #000;
+}
+
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px;
+    color: #9ab3bc;
+}

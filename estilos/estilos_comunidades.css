@@ -1,4 +1,3 @@
-/* --- GRID DE COMUNIDADES --- */
 .grid-comunidades {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -7,7 +6,6 @@
     padding-bottom: 4rem;
 }
 
-/* --- TARJETA INDIVIDUAL --- */
 .card-comunidad {
     background-color: var(--card-bg);
     border-radius: 12px;
@@ -24,7 +22,6 @@
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* --- CABECERA DE LA TARJETA (BANNER) --- */
 .banner-comunidad {
     height: 150px;
     background-size: cover;
@@ -46,7 +43,6 @@
     backdrop-filter: blur(4px);
 }
 
-/* --- CUERPO DE LA TARJETA --- */
 .cuerpo-comunidad {
     padding: 1.5rem;
     display: flex;
@@ -68,7 +64,6 @@
     color: var(--text-main);
 }
 
-/* --- BOTONES Y ACCIONES --- */
 .acciones-com {
     display: flex;
     justify-content: space-between;
@@ -89,7 +84,6 @@
     color: var(--text-main);
 }
 
-/* --- ESTADOS VACÍOS --- */
 .aviso-vacio {
     grid-column: 1 / -1;
     text-align: center;

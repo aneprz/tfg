@@ -75,7 +75,6 @@ input:focus {
     background-color: #252d35;
 }
 
-/* Estilo del Botón */
 button[type="submit"] {
     width: 100%;
     background-color: var(--accent-color);

@@ -1,16 +1,14 @@
-/* --- Variables de Diseño --- */
 :root {
-    --primary: #e0be00;        /* Dorado SalsaBox */
-    --bg-dark: #121417;       /* Fondo general */
-    --bg-card: #1b1e23;       /* Fondo contenedores */
-    --bg-item: #2c3440;       /* Fondo de cada fila/tarjeta */
+    --primary: #e0be00;
+    --bg-dark: #121417;
+    --bg-card: #1b1e23;
+    --bg-item: #2c3440;
     --text-main: #ffffff;
     --text-muted: #9ab3bc;
     --border: #454d5a;
     --success: #27ae60;
 }
 
-/* --- Base --- */
 body {
     background-color: var(--bg-dark);
     color: var(--text-main);
@@ -23,7 +21,6 @@ body {
     align-items: center;
 }
 
-/* --- Botón Volver y Títulos --- */
 .btn-volver {
     align-self: flex-start;
     color: var(--text-muted);
@@ -49,12 +46,11 @@ h1 {
     letter-spacing: 1px;
 }
 
-/* --- Contenedor de Tabla (Juegos) --- */
 table {
     width: 100%;
     max-width: 900px;
     border-collapse: separate;
-    border-spacing: 0 10px; /* Separa las filas como si fueran tarjetas */
+    border-spacing: 0 10px;
     margin-top: -10px;
 }
 
@@ -88,10 +84,9 @@ tr:hover td {
     box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
-/* --- Tarjetas (Logros y Amigos) --- */
 .logro-card, .item-card {
     width: 100%;
-    max-width: 868px; /* Ajuste para padding */
+    max-width: 868px;
     background: var(--bg-card);
     padding: 1.5rem;
     margin-bottom: 1.2rem;
@@ -109,7 +104,6 @@ tr:hover td {
     transform: translateX(5px);
 }
 
-/* Estilo específico para Amigos (Layout Horizontal) */
 .item-card {
     flex-direction: row;
     align-items: center;
@@ -124,7 +118,6 @@ tr:hover td {
     object-fit: cover;
 }
 
-/* --- Elementos Internos --- */
 .item-title, h3 {
     margin: 0;
     font-size: 1.2rem;
@@ -157,18 +150,34 @@ p {
 @media (max-width: 600px) {
     body { padding: 1rem; }
     th:nth-child(3), td:nth-child(3) { display: none; }
+    .item-card { flex-direction: column; text-align: center; }
+    .btn-eliminar { margin-left: 0; margin-top: 10px; width: 100%; }
 }
 
-.container-lista { display: block !important; opacity: 1 !important; visibility: visible !important; }
+.container-lista { 
+    display: block !important; 
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
 .item-card { 
     display: flex !important; 
     margin-bottom: 15px; 
-    background: #1b1e23; 
+    background: var(--bg-card); 
     padding: 15px; 
     border-radius: 8px; 
     align-items: center; 
     justify-content: space-between;
-.amigo-info-principal { display: flex; align-items: center; flex-grow: 1; }
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.amigo-info-principal { 
+    display: flex; 
+    align-items: center; 
+    flex-grow: 1; 
+}
 
 .btn-eliminar {
     background-color: #ff4d4d;
@@ -180,8 +189,9 @@ p {
     font-weight: bold;
     transition: background 0.3s;
     margin-left: 15px;
+    white-space: nowrap;
 }
+
 .btn-eliminar:hover {
     background-color: #cc0000;
-}
 }

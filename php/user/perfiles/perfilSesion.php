@@ -2,7 +2,6 @@
 session_start();
 require '../../../db/conexiones.php';
 
-// Primero comprobamos la sesión para evitar errores
 if (!isset($_SESSION['tag'])) {
     header("Location: ../../../index.php");
     exit();
@@ -73,7 +72,9 @@ $inicial = strtoupper(substr($_SESSION['tag'], 0, 1));
 
             <div class="perfil-body">
                 <h3>Sobre ti</h3>
-                <p><?php echo !empty($biografia) ? nl2br(htmlspecialchars($biografia)) : "Bienvenido. Aún no tienes biografía."; ?></p>
+                <p class="bio-text">
+                    <?php echo !empty($biografia) ? nl2br(htmlspecialchars($biografia)) : "Bienvenido. Aún no tienes biografía."; ?>
+                </p>
             </div>
 
             <div class="perfil-footer">

@@ -2,7 +2,6 @@
 session_start();
 require '../../../db/conexiones.php';
 
-// Si no está logueado, a la calle
 if (!isset($_SESSION['id_usuario'])) {
     header("Location: ../login/login.php");
     exit();
@@ -10,7 +9,6 @@ if (!isset($_SESSION['id_usuario'])) {
 
 $id = $_SESSION['id_usuario'];
 
-// 1. Obtener datos actuales para mostrarlos en los inputs
 $stmt = $conexion->prepare("SELECT gameTag, nombre_apellido, biografia, avatar FROM Usuario WHERE id_usuario = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
@@ -42,7 +40,7 @@ $user = $resultado->fetch_assoc();
 
         <div>
             <label>Biografía:</label><br>
-            <textarea name="biografia" rows="4" cols="30"><?php echo htmlspecialchars($user['biografia']); ?></textarea>
+            <textarea name="biografia" rows="4" cols="30" maxlength="296"><?php echo htmlspecialchars($user['biografia']); ?></textarea>
         </div>
 
         <br>
