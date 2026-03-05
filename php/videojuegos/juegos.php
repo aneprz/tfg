@@ -57,7 +57,7 @@ if (isset($conexion) && $conexion) {
     <header>
         <div class="tituloWeb">
             <img src="../../media/logoPlatino.png" alt="" width="40">
-            <a href="index.php" class="logo">Salsa<span>Box</span></a>
+            <a href="../../index.php" class="logo">Salsa<span>Box</span></a>
         </div>
         <nav>
             <ul>
