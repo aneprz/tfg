@@ -1,0 +1,99 @@
+:root {
+    --bg-color: #14181c;
+    --card-bg: hsl(212, 17%, 15%);
+    --accent-color: #e0be00;
+    --text-main: #ffffff;
+    --text-muted: #9ab;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+form {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 400px;
+    border-left: 4px solid var(--accent-color);
+}
+
+h2 {
+    text-align: center;
+    color: var(--text-main);
+    margin-bottom: 25px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1.2rem;
+}
+
+label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    display: block;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    background-color: var(--bg-color);
+    border: 1px solid #2c3440;
+    border-radius: 4px;
+    color: white;
+    box-sizing: border-box;
+    transition: border 0.3s;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--accent-color);
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #bfa200;
+    transform: translateY(-2px);
+}
+
+a {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+a:hover {
+    color: var(--text-main);
+}
+
+textarea {
+    resize: none;
+}
