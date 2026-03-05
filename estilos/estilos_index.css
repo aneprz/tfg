@@ -164,6 +164,9 @@ h2 {
 }
 
 .juego {
+    display: block;
+    color: inherit;
+    text-decoration: none;
     background-color: var(--card-bg);
     border-radius: 8px;
     overflow: hidden;

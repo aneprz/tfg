@@ -9,7 +9,22 @@ if (!isset($_SESSION['id_usuario'])) {
 
 $id_usuario = $_SESSION['id_usuario'];
 
-// Usamos una consulta limpia y directa
+// --- LÓGICA PARA ELIMINAR AMIGO ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_id'])) {
+    $id_amigo_borrar = $_POST['eliminar_id'];
+
+    // Borramos la relación en ambos sentidos para estar seguros
+    $sql_delete = "DELETE FROM Amigos WHERE (id_usuario = ? AND id_amigo = ?) OR (id_usuario = ? AND id_amigo = ?)";
+    $stmt_delete = $conexion->prepare($sql_delete);
+    $stmt_delete->bind_param("iiii", $id_usuario, $id_amigo_borrar, $id_amigo_borrar, $id_usuario);
+    $stmt_delete->execute();
+    
+    // Recargar para actualizar la lista
+    header("Location: mis_amigos.php");
+    exit();
+}
+
+// Consulta para listar amigos
 $sql = "SELECT u.id_usuario, u.gameTag, u.avatar, u.biografia 
         FROM Usuario u 
         WHERE u.id_usuario IN (
@@ -34,11 +49,7 @@ $total_amigos = $resultado->num_rows;
     <link rel="stylesheet" href="../../../estilos/estilos_statsPerfil.css">
     <link rel="icon" href="../../../media/logoPlatino.png">
 
-    <style>
-        /* Parche rápido por si el CSS falla */
-        .container-lista { display: block !important; opacity: 1 !important; visibility: visible !important; }
-        .item-card { display: flex !important; margin-bottom: 15px; background: #1b1e23; padding: 15px; border-radius: 8px; align-items: center; }
-    </style>
+    
 </head>
 <body>
     <div class="container-lista" style="width: 100%; max-width: 900px; margin: 0 auto; padding: 20px;">
@@ -53,33 +64,38 @@ $total_amigos = $resultado->num_rows;
             while ($row = $resultado->fetch_assoc()) {
                 $avatar_raw = $row['avatar'];
                 $ruta_avatar = (!empty($avatar_raw)) ? "../../../" . $avatar_raw : "../../../media/defaultAvatar.png";
-                
                 $bio = (!empty($row['biografia'])) ? $row['biografia'] : "Este gamer prefiere mantener el misterio.";
                 ?>
                 
                 <div class="item-card">
-                    <img src="<?php echo htmlspecialchars($ruta_avatar); ?>" 
-                         class="item-img" 
-                         alt="Avatar" 
-                         style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 20px; border: 2px solid #e0be00;">
-                    
-                    <div class="item-content">
-                        <h3 class="item-title" style="margin: 0; color: #e0be00;">
-                            <?php echo htmlspecialchars($row['gameTag']); ?>
-                        </h3>
-                        <p class="item-desc" style="margin: 5px 0 0; color: #9ab3bc; font-size: 0.9rem;">
-                            <?php 
-                                $bio_corta = (strlen($bio) > 100) ? substr($bio, 0, 100) . "..." : $bio;
-                                echo htmlspecialchars($bio_corta); 
-                            ?>
-                        </p>
+                    <div class="amigo-info-principal">
+                        <img src="<?php echo htmlspecialchars($ruta_avatar); ?>" 
+                             alt="Avatar" 
+                             style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-right: 20px; border: 2px solid #e0be00;">
+                        
+                        <div class="item-content">
+                            <h3 class="item-title" style="margin: 0; color: #e0be00;">
+                                <?php echo htmlspecialchars($row['gameTag']); ?>
+                            </h3>
+                            <p class="item-desc" style="margin: 5px 0 0; color: #9ab3bc; font-size: 0.9rem;">
+                                <?php 
+                                    $bio_corta = (strlen($bio) > 100) ? substr($bio, 0, 100) . "..." : $bio;
+                                    echo htmlspecialchars($bio_corta); 
+                                ?>
+                            </p>
+                        </div>
                     </div>
+
+                    <form method="POST" onsubmit="return confirm('¿Seguro que quieres eliminar a <?php echo $row['gameTag']; ?> de tu lista?');">
+                        <input type="hidden" name="eliminar_id" value="<?php echo $row['id_usuario']; ?>">
+                        <button type="submit" class="btn-eliminar">Eliminar</button>
+                    </form>
                 </div>
 
                 <?php
             }
         } else {
-            echo "<p>No tienes amigos aún. Tu ID es: $id_usuario</p>";
+            echo "<p style='color: white;'>No tienes amigos aún. Tu ID es: $id_usuario</p>";
         }
         ?>
     </div>

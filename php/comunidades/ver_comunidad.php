@@ -2,16 +2,10 @@
 session_start();
 require_once __DIR__ . '/../../db/conexiones.php';
 
-if (!isset($conexion)) {
-    die("Error de conexión.");
-}
-
 $id_comunidad = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($id_comunidad <= 0) {
-    header("Location: comunidades.php");
-    exit;
-}
+if ($id_comunidad <= 0) { header("Location: comunidades.php"); exit; }
 
+// Datos de comunidad y juego
 $sqlComunidad = "SELECT c.*, v.titulo AS juego_nombre, v.portada 
                  FROM comunidad c 
                  JOIN videojuego v ON c.id_videojuego_principal = v.id_videojuego 
@@ -19,111 +13,112 @@ $sqlComunidad = "SELECT c.*, v.titulo AS juego_nombre, v.portada
 $resCom = mysqli_query($conexion, $sqlComunidad);
 $comunidad = mysqli_fetch_assoc($resCom);
 
-if (!$comunidad) {
-    die("Comunidad no encontrada.");
+// Comprobar membresía
+$esMiembro = false;
+if (isset($_SESSION['id_usuario'])) {
+    $id_user = $_SESSION['id_usuario'];
+    $check = mysqli_query($conexion, "SELECT 1 FROM miembro_comunidad WHERE id_comunidad = $id_comunidad AND id_usuario = $id_user");
+    if (mysqli_num_rows($check) > 0) $esMiembro = true;
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($comunidad['nombre']); ?> - SalsaBox</title>
     <link rel="stylesheet" href="../../estilos/estilos_index.css">
     <link rel="stylesheet" href="../../estilos/estilos_comunidad_interna.css">
-    <link rel="icon" href="../../media/logoPlatino.png">
 </head>
 <body class="body-comunidad">
     <header>
         <div class="tituloWeb">
-            <img src="../../media/logoPlatino.png" alt="" width="40px">
+            <img src="../../media/logoPlatino.png" width="40px">
             <a href="../../index.php" class="logo">Salsa<span>Box</span></a>
         </div>
         <nav>
             <ul>
                 <li><a href="../../index.php">Inicio</a></li>
-                <li><a href="../videojuegos/juegos.php">Juegos</a></li>
                 <li><a href="comunidades.php" class="activo">Comunidades</a></li>
             </ul>
         </nav>
         <div class="user-zone">
             <?php if(isset($_SESSION['tag'])) : ?>
                 <a class="tag" href="../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
-            <?php else: ?>
-                <a href="../sesiones/login/login.php" class="botonCrearCuenta">Login</a>
             <?php endif; ?>
         </div>
     </header>
 
     <div class="layout-comunidad">
         <aside class="sidebar-canales">
-            <div class="header-sidebar">
-                <h3># Canales</h3>
-            </div>
+            <h3># Canales</h3>
             <nav class="lista-canales">
                 <a href="#" class="canal activo"><span>#</span> general</a>
                 <a href="#" class="canal"><span>#</span> clips-y-capturas</a>
-                <div style="height: 1px; background: #2c3440; margin: 15px 0;"></div>
-                <p style="font-size: 0.7rem; color: #5c6370; margin-bottom: 10px; font-weight: bold;">VOZ</p>
-                <a href="#" class="canal"><span>🔊</span> Lobby Principal</a>
             </nav>
         </aside>
 
         <main class="muro-comunidad">
-            <div class="banner-top" style="background-image: linear-gradient(to bottom, transparent, #14181c), url('../../<?php echo htmlspecialchars($comunidad['portada']); ?>')">
+            <div class="banner-top" style="background-image: linear-gradient(to bottom, transparent, #14181c), url('../../<?php echo $comunidad['portada']; ?>')">
                 <h1><?php echo htmlspecialchars($comunidad['nombre']); ?></h1>
             </div>
+
+            <section class="feed" id="chat-feed">
+                <?php
+                $sqlPosts = "SELECT p.*, u.gameTag FROM post p 
+                             JOIN usuario u ON p.id_usuario = u.id_usuario 
+                             WHERE p.id_comunidad = $id_comunidad 
+                             ORDER BY p.fecha_publicacion ASC";
+                $resPosts = mysqli_query($conexion, $sqlPosts);
+                while ($post = mysqli_fetch_assoc($resPosts)): ?>
+                    <div class="post-card">
+                        <div class="post-header">
+                            <span class="post-autor">@<?php echo htmlspecialchars($post['gameTag']); ?></span>
+                            <span class="post-fecha"><?php echo date('H:i', strtotime($post['fecha_publicacion'])); ?></span>
+                        </div>
+                        <div class="post-contenido"><?php echo nl2br(htmlspecialchars($post['contenido'])); ?></div>
+                    </div>
+                <?php endwhile; ?>
+            </section>
 
             <div class="input-post">
                 <form action="guardar_post.php" method="POST">
                     <input type="hidden" name="id_comunidad" value="<?php echo $id_comunidad; ?>">
-                    <textarea name="contenido" placeholder="Escribe un mensaje en #general..." required></textarea>
+                    <textarea name="contenido" placeholder="Escribe un mensaje..." required></textarea>
                     <div class="input-acciones">
-                        <button type="button" class="btn-subir-media">📁 Adjuntar</button>
-                        <button type="submit" class="botonCrearCuenta">Publicar</button>
+                        <button type="submit" class="botonCrearCuenta">Enviar</button>
                     </div>
                 </form>
             </div>
-
-            <section class="feed">
-                <?php
-                // CONSULTA CORREGIDA: Ahora usa 'u.gameTag' que es tu columna real
-                $sqlPosts = "SELECT p.*, u.gameTag 
-                             FROM post p 
-                             JOIN usuario u ON p.id_usuario = u.id_usuario 
-                             WHERE p.id_comunidad = $id_comunidad 
-                             ORDER BY p.fecha_publicacion DESC";
-                
-                $resPosts = mysqli_query($conexion, $sqlPosts);
-
-                if ($resPosts && mysqli_num_rows($resPosts) > 0): 
-                    while ($post = mysqli_fetch_assoc($resPosts)): ?>
-                        <article class="post-card">
-                            <div class="post-header">
-                                <span class="post-autor">@<?php echo htmlspecialchars($post['gameTag']); ?></span>
-                                <span class="post-fecha"><?php echo date('d M, H:i', strtotime($post['fecha_publicacion'])); ?></span>
-                            </div>
-                            <div class="post-contenido">
-                                <p><?php echo nl2br(htmlspecialchars($post['contenido'])); ?></p>
-                            </div>
-                        </article>
-                    <?php endwhile; 
-                else: ?>
-                    <div style="text-align: center; padding: 40px; color: #5c6370;">
-                        <p>No hay mensajes en esta comunidad. ¡Sé el primero!</p>
-                    </div>
-                <?php endif; ?>
-            </section>
         </main>
 
         <aside class="sidebar-info">
             <div class="info-juego-card">
-                <img src="../../<?php echo htmlspecialchars($comunidad['portada']); ?>" alt="Portada">
+                <img src="../../<?php echo $comunidad['portada']; ?>" width="100%" style="border-radius:8px">
                 <h4>Juego vinculado</h4>
-                <p><strong><?php echo htmlspecialchars($comunidad['juego_nombre']); ?></strong></p>
-                <button class="botonUnirse" style="width: 100%; margin-top: 20px;">Unirse al grupo</button>
+                <p><strong><?php echo $comunidad['juego_nombre']; ?></strong></p>
+                
+                <div class="botones-comunidad">
+                    <?php if ($esMiembro): ?>
+                        <a href="gestionar_miembro.php?accion=salir&id_comunidad=<?php echo $id_comunidad; ?>" class="botonSalir">Abandonar</a>
+                    <?php else: ?>
+                        <a href="gestionar_miembro.php?accion=unirse&id_comunidad=<?php echo $id_comunidad; ?>" class="botonUnirse">Unirse</a>
+                    <?php endif; ?>
+                    
+                    <button id="btnVerMiembros" class="btn-secundario">Ver Miembros</button>
+                </div>
             </div>
         </aside>
     </div>
+
+    <div id="modalMiembros" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Miembros de la comunidad</h3>
+            <ul class="lista-miembros-modal">
+                </ul>
+        </div>
+    </div>
+
+    <script src="../../js/comunidades.js"></script>
 </body>
 </html>

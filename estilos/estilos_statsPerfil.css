@@ -154,8 +154,34 @@ p {
     color: var(--text-muted);
 }
 
-/* --- Responsivo --- */
 @media (max-width: 600px) {
     body { padding: 1rem; }
-    th:nth-child(3), td:nth-child(3) { display: none; } /* Oculta estado en móvil */
+    th:nth-child(3), td:nth-child(3) { display: none; }
+}
+
+.container-lista { display: block !important; opacity: 1 !important; visibility: visible !important; }
+.item-card { 
+    display: flex !important; 
+    margin-bottom: 15px; 
+    background: #1b1e23; 
+    padding: 15px; 
+    border-radius: 8px; 
+    align-items: center; 
+    justify-content: space-between;
+.amigo-info-principal { display: flex; align-items: center; flex-grow: 1; }
+
+.btn-eliminar {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+    margin-left: 15px;
+}
+.btn-eliminar:hover {
+    background-color: #cc0000;
+}
 }
