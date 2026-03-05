@@ -16,6 +16,7 @@ function estrellasDesdeRating($rating) {
 
 $juegosPopulares = [];
 $comunidades = [];
+$idUsuarioSesion = isset($_SESSION['id_usuario']) ? (int) $_SESSION['id_usuario'] : 0;
 
 if (isset($conexion) && $conexion) {
     $sqlJuegos = "
@@ -41,7 +42,8 @@ if (isset($conexion) && $conexion) {
         SELECT
             c.id_comunidad,
             c.nombre,
-            COUNT(mc.id_usuario) AS total_miembros
+            COUNT(mc.id_usuario) AS total_miembros,
+            MAX(CASE WHEN mc.id_usuario = $idUsuarioSesion THEN 1 ELSE 0 END) AS es_miembro
         FROM comunidad c
         LEFT JOIN miembro_comunidad mc ON mc.id_comunidad = c.id_comunidad
         GROUP BY c.id_comunidad, c.nombre
@@ -128,7 +130,19 @@ if (isset($conexion) && $conexion) {
                             <h3><?php echo htmlspecialchars($comunidad['nombre']); ?></h3>
                             <p><?php echo number_format((int) $comunidad['total_miembros'], 0, ',', '.'); ?> miembros</p>
                         </div>
-                        <button class="botonUnirse">Unirse</button>
+                        <?php if (!isset($_SESSION['id_usuario'])): ?>
+                            <a href="php/sesiones/login/login.php" class="botonUnirse">Unirse</a>
+                        <?php elseif ((int) $comunidad['es_miembro'] === 1): ?>
+                            <a
+                                href="php/comunidades/ver_comunidad.php?id=<?php echo (int) $comunidad['id_comunidad']; ?>"
+                                class="botonUnirse"
+                            >Ver muro</a>
+                        <?php else: ?>
+                            <a
+                                href="php/comunidades/gestionar_miembro.php?accion=unirse&id_comunidad=<?php echo (int) $comunidad['id_comunidad']; ?>"
+                                class="botonUnirse"
+                            >Unirse</a>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>

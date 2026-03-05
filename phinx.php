@@ -21,7 +21,7 @@ return
         'development' => [
             'adapter' => 'mysql',
             'host' => 'localhost',
-            'name' => 'development_db',
+            'name' => 'salsabox_db',
             'user' => 'root',
             'pass' => '',
             'port' => '3306',

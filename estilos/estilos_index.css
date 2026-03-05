@@ -241,6 +241,7 @@ h2 {
     border-radius: 20px;
     cursor: pointer;
     transition: all 0.3s;
+    text-decoration: none;
 }
 
 .btn-join:hover {
