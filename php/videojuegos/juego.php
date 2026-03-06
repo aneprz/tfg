@@ -15,15 +15,15 @@ function estrellasDesdeRating($rating) {
 }
 
 function resolverPortada($portada) {
-    if (!$portada) {
+    if (empty($portada)) {
         return '../../media/logoPlatino.png';
     }
 
-    if (strpos($portada, 'http://') === 0 || strpos($portada, 'https://') === 0 || strpos($portada, '/') === 0) {
+    if (strpos($portada, 'http') === 0 || strpos($portada, '/') === 0) {
         return $portada;
     }
 
-    return '../../' . ltrim($portada, '/');
+    return '/media/' . $portada;
 }
 
 $idJuego = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -31,14 +31,14 @@ $juego = null;
 
 if (isset($conexion) && $conexion && $idJuego > 0) {
     $sql = "
-        SELECT
-            v.id_videojuego,
-            v.titulo,
-            v.descripcion,
-            v.fecha_lanzamiento,
-            v.developer,
-            v.rating_medio,
-            v.portada,
+        SELECT 
+            v.id_videojuego, 
+            v.titulo, 
+            v.descripcion, 
+            v.fecha_lanzamiento, 
+            v.developer, 
+            v.rating_medio, 
+            v.portada, 
             v.genero AS generos
         FROM videojuego v
         WHERE v.id_videojuego = ?
