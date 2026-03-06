@@ -13,7 +13,7 @@ $admin = true;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SalsaBox - Logros</title>
+    <title>SalsaBox - Administracion Logros</title>
     <link rel="stylesheet" href="../../../../estilos/estilos_indexAdmin.css">
     <link rel="stylesheet" href="../../../../estilos/estilos_index.css">
     <link rel="icon" href="../../../../media/logoPlatino.png">
@@ -44,20 +44,20 @@ $admin = true;
     <h2>Gestión de contenido</h2>
     <div class="admin-grid">
         <a href="#" class="admin-card">
-            <div class="card-icon">🎮</div>
-            <span>Ejemplo</span>
+            <div class="card-icon">➕🏆</div>
+            <span>Añadir logros</span>
         </a>
         <a href="#" class="admin-card">
-            <div class="card-icon">👤</div>
-            <span>Ejemplo</span>
+            <div class="card-icon">🗑️🏆</div>
+            <span>Eliminar logros</span>
         </a>
         <a href="#" class="admin-card">
-            <div class="card-icon">🌐</div>
-            <span>Ejemplo</span>
+            <div class="card-icon">✏️🏆</div>
+            <span>Editar logros</span>
         </a>
         <a href="#" class="admin-card">
-            <div class="card-icon">🏆</div>
-            <span>Ejemplo</span>
+            <div class="card-icon">👤🏆</div>
+            <span>Asignacion de logros</span>
         </a>
     </div>
 </div>

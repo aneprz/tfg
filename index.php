@@ -14,6 +14,16 @@ function estrellasDesdeRating($rating) {
     return str_repeat('★', $llenas) . str_repeat('☆', 5 - $llenas);
 }
 
+function resolverPortada($portada) {
+    if (!$portada) {
+        return 'media/logoPlatino.png';
+    }
+    if (strpos($portada, 'http') === 0 || strpos($portada, '/') === 0) {
+        return $portada;
+    }
+    return 'media/' . $portada;
+}
+
 $juegosPopulares = [];
 $comunidades = [];
 $idUsuarioSesion = isset($_SESSION['id_usuario']) ? (int) $_SESSION['id_usuario'] : 0;
@@ -107,7 +117,7 @@ if (isset($conexion) && $conexion) {
                 <?php foreach ($juegosPopulares as $juego): ?>
                     <a href="php/videojuegos/juego.php?id=<?php echo (int) $juego['id_videojuego']; ?>" class="juego">
                         <div class="portadaJuego">
-                            <img src="<?php echo htmlspecialchars($juego['portada'] ?: 'media/logoPlatino.png'); ?>" alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
+                            <img src="<?php echo htmlspecialchars(resolverPortada($juego['portada'])); ?>" alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
                         </div>
                         <div class="infoJuego">
                             <div class="tituloJuego"><?php echo htmlspecialchars($juego['titulo']); ?></div>

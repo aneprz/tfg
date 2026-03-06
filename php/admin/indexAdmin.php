@@ -13,7 +13,7 @@ $admin = true;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SalsaBox - Logros</title>
+    <title>SalsaBox - Administracion</title>
     <link rel="stylesheet" href="../../estilos/estilos_indexAdmin.css">
     <link rel="stylesheet" href="../../estilos/estilos_index.css">
     <link rel="icon" href="../../media/logoPlatino.png">
@@ -58,7 +58,7 @@ $admin = true;
             <span>Gestionar Jugadores</span>
         </a>
         <a href="gestion/gestionComunidades/gestionComunidades.php" class="admin-card">
-            <div class="card-icon">🌐</div>
+            <div class="card-icon">🏘️</div>
             <span>Gestionar Comunidades</span>
         </a>
         <a href="gestion/gestionLogros/gestionLogros.php" class="admin-card">

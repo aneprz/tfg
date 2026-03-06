@@ -13,7 +13,7 @@ $admin = true;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SalsaBox - Logros</title>
+    <title>SalsaBox - Administracion Videojuegos</title>
     <link rel="stylesheet" href="../../../../estilos/estilos_indexAdmin.css">
     <link rel="stylesheet" href="../../../../estilos/estilos_index.css">
     <link rel="icon" href="../../../../media/logoPlatino.png">
@@ -48,13 +48,13 @@ $admin = true;
             <span>Añadir Videojuego</span>
         </a>
         
-        <a href="#" class="admin-card">
+        <a href="eliminarVideojuego/eliminarVideojuego.php" class="admin-card">
             <div class="card-icon">🗑️🎮</div>
             <span>Eliminar Videojuego</span>
         </a>
         
-        <a href="#" class="admin-card">
-            <div class="card-icon">📝🎮</div>
+        <a href="editarVideojuego/listaEditarVideojuego.php" class="admin-card">
+            <div class="card-icon">✏️🎮</div>
             <span>Editar Videojuego</span>
         </a>
     </div>

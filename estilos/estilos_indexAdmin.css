@@ -67,9 +67,6 @@
     font-style: italic;
 }
 
-
-/* FORMULARIOS DE GESTION */
-/* Contenedor del formulario */
 form {
     background: rgba(255, 255, 255, 0.03);
     padding: 30px;
@@ -80,13 +77,14 @@ form {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    text-align: left;
 }
 
-/* Etiquetas */
 form label {
     color: #00d4ff; 
     font-weight: bold;
     font-size: 0.9rem;
+    margin-top: 10px;
 }
 
 form input, 
@@ -110,7 +108,7 @@ form select:focus {
 }
 
 form button {
-    margin-top: 10px;
+    margin-top: 20px;
     padding: 15px;
     background: #00d4ff;
     color: #1a1a1a;
@@ -126,11 +124,31 @@ form button:hover {
     background: #00aacc;
     transform: scale(1.02);
 }
+
 input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1); 
     cursor: pointer;
 }
 
-input[type="date"] {
-    color: white;
+.admin-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    color: #ddd;
+}
+
+.admin-table th, .admin-table td {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: left;
+}
+
+.btn-editar {
+    padding: 8px 15px;
+    background: #00d4ff;
+    color: #1a1a1a !important;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.9em;
 }
