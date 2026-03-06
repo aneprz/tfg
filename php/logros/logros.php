@@ -5,7 +5,8 @@ require_once __DIR__ . '/../../db/conexiones.php';
 if (!isset($_SESSION['id_usuario'])) {
     header("Location: ../../index.php");
     exit();
-}
+    }
+$admin = ($_SESSION['admin'] ?? false) === true;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -30,6 +31,9 @@ if (!isset($_SESSION['id_usuario'])) {
                 <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
                 <li><a href="logros.php" class="activo">Logros</a></li>
+                <?php if ($admin): ?>
+                    <li><a href="../admin/indexAdmin.php">Admin</a></li>
+                <?php endif; ?>
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>

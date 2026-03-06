@@ -17,6 +17,7 @@ function estrellasDesdeRating($rating) {
 $juegosPopulares = [];
 $comunidades = [];
 $idUsuarioSesion = isset($_SESSION['id_usuario']) ? (int) $_SESSION['id_usuario'] : 0;
+$admin = ($_SESSION['admin'] ?? false) === true;
 
 if (isset($conexion) && $conexion) {
     $sqlJuegos = "
@@ -82,6 +83,9 @@ if (isset($conexion) && $conexion) {
                 <li><a href="php/jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="php/comunidades/comunidades.php">Comunidades</a></li>
                 <li><a href="php/logros/logros.php">Logros</a></li>
+                <?php if ($admin): ?>
+                    <li><a href="php/admin/indexAdmin.php">Admin</a></li>
+                <?php endif; ?>
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>
