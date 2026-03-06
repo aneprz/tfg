@@ -5,15 +5,13 @@ require_once __DIR__ . '/../../db/conexiones.php';
 $id_comunidad = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id_comunidad <= 0) { header("Location: comunidades.php"); exit; }
 
-// Datos de comunidad y juego
 $sqlComunidad = "SELECT c.*, v.titulo AS juego_nombre, v.portada 
                  FROM comunidad c 
-                 JOIN videojuego v ON c.id_videojuego_principal = v.id_videojuego 
+                 LEFT JOIN videojuego v ON c.id_videojuego_principal = v.id_videojuego 
                  WHERE c.id_comunidad = $id_comunidad";
 $resCom = mysqli_query($conexion, $sqlComunidad);
 $comunidad = mysqli_fetch_assoc($resCom);
 
-// Comprobar membresía
 $esMiembro = false;
 if (isset($_SESSION['id_usuario'])) {
     $id_user = $_SESSION['id_usuario'];
