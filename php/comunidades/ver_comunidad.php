@@ -18,6 +18,7 @@ if (isset($_SESSION['id_usuario'])) {
     $check = mysqli_query($conexion, "SELECT 1 FROM miembro_comunidad WHERE id_comunidad = $id_comunidad AND id_usuario = $id_user");
     if (mysqli_num_rows($check) > 0) $esMiembro = true;
 }
+$admin = ($_SESSION['admin'] ?? false) === true;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -34,10 +35,18 @@ if (isset($_SESSION['id_usuario'])) {
             <a href="../../index.php" class="logo">Salsa<span>Box</span></a>
         </div>
         <nav>
+            <nav>
             <ul>
                 <li><a href="../../index.php">Inicio</a></li>
-                <li><a href="comunidades.php" class="activo">Comunidades</a></li>
+                <li><a href="../videojuegos/juegos.php">Juegos</a></li>
+                <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
+                <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
+                <li><a href="logros.php" class="activo">Logros</a></li>
+                <?php if ($admin): ?>
+                    <li><a href="../admin/indexAdmin.php">Admin</a></li>
+                <?php endif; ?>
             </ul>
+        </nav>
         </nav>
         <div class="user-zone">
             <?php if(isset($_SESSION['tag'])) : ?>
