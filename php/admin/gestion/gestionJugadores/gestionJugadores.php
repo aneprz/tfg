@@ -43,15 +43,15 @@ $admin = true;
     <div class="admin-container">
     <h2>Gestión de contenido</h2>
     <div class="admin-grid">
-        <a href="#" class="admin-card">
+        <a href="gestionarAdmins/gestionarAdmins.php" class="admin-card">
             <div class="card-icon">👑👤</div>
             <span>Gestionar Admins</span>
         </a>
-        <a href="#" class="admin-card">
+        <a href="eliminarJugadores/eliminarJugadores.php" class="admin-card">
             <div class="card-icon">🗑️👤</div>
             <span>Eliminar Jugadores</span>
         </a>
-        <a href="#" class="admin-card">
+        <a href="editarJugadores/editarJugadores.php" class="admin-card">
             <div class="card-icon">📝👤</div>
             <span>Editar Jugadores</span>
         </a>

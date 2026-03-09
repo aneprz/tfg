@@ -17,8 +17,8 @@ $resultado = $stmt->get_result();
 $user = $resultado->fetch_assoc();
 
 $biografia = $user['biografia'] ?? '';
-$avatar = $user['avatar'] ?? '';
-$inicial = strtoupper(substr($_SESSION['tag'], 0, 1));
+$avatar_db = trim($user['avatar'] ?? '');
+$img = (empty($avatar_db)) ? "../../../media/perfil_default.jpg" : "../../../media/" . $avatar_db;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -34,13 +34,7 @@ $inicial = strtoupper(substr($_SESSION['tag'], 0, 1));
         <div class="perfil-card">
             <div class="perfil-header">
                 <div class="avatar-grande">
-                    <?php if (!empty($avatar)): ?>
-                        <img src="<?php echo htmlspecialchars($avatar); ?>" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
-                    <?php else: ?>
-                        <div style="display:flex; justify-content:center; align-items:center; height:100%; width:100%; font-size:2rem; background: #2c3440; border-radius:50%; color: white;">
-                            <?php echo $inicial; ?>
-                        </div>
-                    <?php endif; ?>
+                    <img src="<?php echo htmlspecialchars($img); ?>" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
                 </div>
                 <h1><?php echo htmlspecialchars($_SESSION['tag']); ?></h1>
                 <p class="status">Miembro de SalsaBox</p><br>

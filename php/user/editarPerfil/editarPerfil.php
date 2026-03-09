@@ -26,7 +26,7 @@ $user = $resultado->fetch_assoc();
 </head>
 <body>
     
-    <form action="procesar_editar.php" method="POST">
+    <form action="procesar_editar.php" method="POST" enctype="multipart/form-data">
         <div>
             <label>Game Tag:</label><br>
             <input type="text" name="gameTag" value="<?php echo htmlspecialchars($user['gameTag']); ?>" required>
@@ -46,8 +46,14 @@ $user = $resultado->fetch_assoc();
         <br>
 
         <div>
-            <label>URL de la foto de perfil:</label><br>
-            <input type="text" name="avatar" value="<?php echo htmlspecialchars($user['avatar']); ?>">
+            <label>Foto de perfil actual:</label><br>
+            <?php 
+                $fotoActual = !empty($user['avatar']) ? $user['avatar'] : '../../../media/perfil_default.jpg'; 
+            ?>
+            <img src="../../../media/<?php echo htmlspecialchars($fotoActual); ?>" width="80" style="border-radius: 50%; object-fit: cover; height: 80px;"><br>
+            
+            <label>Subir nueva foto (reemplazará a la anterior):</label><br>
+            <input type="file" name="avatar_archivo" accept="image/*">
         </div>
 
         <br>

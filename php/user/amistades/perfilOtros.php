@@ -66,22 +66,10 @@ $q_relacion->close();
         <div class="perfil-card">
             <section class="perfil-header">
                 <?php 
-                    $avatar_raw = trim($usuario['avatar'] ?? '');
-                    
-                    if (!empty($avatar_raw)) {
-                        if (filter_var($avatar_raw, FILTER_VALIDATE_URL) || strpos($avatar_raw, 'http') === 0) {
-                            $img = $avatar_raw;
-                        } else {
-                            $avatar_limpio = ltrim($avatar_raw, '/');
-                            $img = (strpos($avatar_limpio, 'media/') === 0) 
-                                ? "../../../" . $avatar_limpio 
-                                : "../../../media/" . $avatar_limpio;
-                        }
-                    } else {
-                        $img = "../../../media/perfil_default.jpg";
-                    }
+                    $avatar_db = trim($usuario['avatar'] ?? '');
+                    $img = (empty($avatar_db)) ? "../../../media/perfil_default.jpg" : "../../../media/" . $avatar_db;
                 ?>
-                <img src="<?php echo $img; ?>" class="avatar-grande" style="object-fit: cover;">
+                <img src="<?php echo htmlspecialchars($img); ?>" class="avatar-grande" style="object-fit: cover;">
                 
                 <h1><?php echo htmlspecialchars($usuario['gameTag']); ?></h1>
                 <div class="status">Jugador de SalsaBox</div>

@@ -28,23 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-// Función auxiliar para procesar la ruta del avatar (Misma lógica que perfilOtros)
-function obtenerRutaAvatar($avatar_raw) {
-    $avatar_raw = trim($avatar_raw ?? '');
-    if (empty($avatar_raw)) {
-        return "../../../media/perfil_default.jpg";
-    }
-    // Si es una URL externa
-    if (filter_var($avatar_raw, FILTER_VALIDATE_URL) || strpos($avatar_raw, 'http') === 0) {
-        return $avatar_raw;
-    }
-    // Si es ruta local
-    $avatar_limpio = ltrim($avatar_raw, '/');
-    return (strpos($avatar_limpio, 'media/') === 0) 
-        ? "../../../" . $avatar_limpio 
-        : "../../../media/" . $avatar_limpio;
-}
-
 $sql_pendientes = "SELECT u.id_usuario, u.gameTag, u.avatar 
                    FROM Usuario u 
                    JOIN Amigos a ON u.id_usuario = a.id_usuario 
@@ -105,9 +88,13 @@ $total_amigos = $res_amigos->num_rows;
     <?php if ($res_pendientes->num_rows > 0): ?>
         <h2 class="section-title">Solicitudes Pendientes</h2>
         <?php while ($sol = $res_pendientes->fetch_assoc()): ?>
+            <?php 
+                $avatar_sol = trim($sol['avatar'] ?? '');
+                $img_sol = (empty($avatar_sol)) ? "../../../media/perfil_default.jpg" : "../../../media/" . $avatar_sol;
+            ?>
             <div class="item-card card-pendiente">
                 <div class="info-perfil">
-                    <img src="<?php echo obtenerRutaAvatar($sol['avatar']); ?>" class="avatar">
+                    <img src="<?php echo htmlspecialchars($img_sol); ?>" class="avatar">
                     <div>
                         <h3 class="tag-name"><?php echo htmlspecialchars($sol['gameTag']); ?></h3>
                         <p style="margin:0; font-size: 0.75rem; color: #e0be00;">Te ha enviado una solicitud</p>
@@ -126,9 +113,13 @@ $total_amigos = $res_amigos->num_rows;
     
     <?php if ($total_amigos > 0): ?>
         <?php while ($row = $res_amigos->fetch_assoc()): ?>
+            <?php 
+                $avatar_amigo = trim($row['avatar'] ?? '');
+                $img_amigo = (empty($avatar_amigo)) ? "../../../media/perfil_default.jpg" : "../../../media/" . $avatar_amigo;
+            ?>
             <div class="item-card">
                 <a href="../amistades/perfilOtros.php?id=<?php echo $row['id_usuario']; ?>" class="info-perfil">
-                    <img src="<?php echo obtenerRutaAvatar($row['avatar']); ?>" class="avatar">
+                    <img src="<?php echo htmlspecialchars($img_amigo); ?>" class="avatar">
                     <div>
                         <h3 class="tag-name"><?php echo htmlspecialchars($row['gameTag']); ?></h3>
                         <p class="bio-text">
