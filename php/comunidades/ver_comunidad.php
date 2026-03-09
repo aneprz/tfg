@@ -41,7 +41,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                 <li><a href="../videojuegos/juegos.php">Juegos</a></li>
                 <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
-                <li><a href="logros.php" class="activo">Logros</a></li>
+                <li><a href="../logros/logros.php" class="activo">Logros</a></li>
                 <?php if ($admin): ?>
                     <li><a href="../admin/indexAdmin.php">Admin</a></li>
                 <?php endif; ?>

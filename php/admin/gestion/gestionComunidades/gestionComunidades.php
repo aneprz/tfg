@@ -48,7 +48,7 @@ $admin = true;
     <span>Añadir Comunidad</span>
 </a>
 
-<a href="#" class="admin-card">
+<a href="eliminarComunidad/eliminarComunidad.php" class="admin-card">
     <div class="card-icon">🗑️🏘️</div>
     <span>Eliminar Comunidad</span>
 </a>
