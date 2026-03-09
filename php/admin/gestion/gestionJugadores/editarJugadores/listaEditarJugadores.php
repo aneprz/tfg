@@ -14,7 +14,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SalsaBox - Eliminar Videojuego</title>
+    <title>SalsaBox - Editar Jugador</title>
     <link rel="stylesheet" href="../../../../../estilos/estilos_indexAdmin.css">
     <link rel="stylesheet" href="../../../../../estilos/estilos_index.css">
     <link rel="icon" href="../../../../../media/logoPlatino.png">
