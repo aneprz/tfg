@@ -15,7 +15,7 @@ $nombreApellido = trim($_POST['nombreApellido'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $pass = $_POST['password'] ?? '';
 $biografia= '';
-$avatar = 'https://i.pinimg.com/474x/37/a6/2f/37a62f1efd07210aee6cf44312f08a95.jpg?nii=t';
+$avatar = '../../../media/perfil_default.jpg';
 
 if (empty($tag) || empty($email) || empty($pass)) {
     volverConError("Datos del formulario incompletos.");

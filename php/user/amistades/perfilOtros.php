@@ -8,7 +8,7 @@ if (!isset($_SESSION['id_usuario']) || !isset($_GET['id'])) {
 }
 
 $id_sesion = $_SESSION['id_usuario'];
-$id_objetivo = $_GET['id'];
+$id_objetivo = (int)$_GET['id'];
 
 if ($id_sesion == $id_objetivo) {
     header("Location: ../perfiles/perfilSesion.php");
@@ -19,31 +19,38 @@ $query = $conexion->prepare("SELECT gameTag, biografia, avatar FROM Usuario WHER
 $query->bind_param("i", $id_objetivo);
 $query->execute();
 $usuario = $query->get_result()->fetch_assoc();
-$biografia = $usuario['biografia'] ?? '';
 $query->close();
 
 if (!$usuario) { die("Usuario no encontrado."); }
 
-$q_amigos = $conexion->prepare("SELECT COUNT(*) as total FROM Amigos WHERE (id_usuario = ? OR id_amigo = ?) AND estado = 'aceptada'");
+$q_amigos = $conexion->prepare("
+    SELECT COUNT(*) as total 
+    FROM Amigos a
+    INNER JOIN Usuario u1 ON a.id_usuario = u1.id_usuario
+    INNER JOIN Usuario u2 ON a.id_amigo = u2.id_usuario
+    WHERE (a.id_usuario = ? OR a.id_amigo = ?) 
+    AND a.estado = 'aceptada'
+");
 $q_amigos->bind_param("ii", $id_objetivo, $id_objetivo);
 $q_amigos->execute();
-$total_amigos = $q_amigos->get_result()->fetch_assoc()['total'];
+$total_amigos = (int)$q_amigos->get_result()->fetch_assoc()['total'];
 $q_amigos->close();
 
-$q_juegos = $conexion->prepare("SELECT COUNT(*) as total FROM Biblioteca WHERE id_usuario = ?");
+$q_juegos = $conexion->prepare("
+    SELECT COUNT(b.id_videojuego) as total 
+    FROM Biblioteca b
+    INNER JOIN Videojuego v ON b.id_videojuego = v.id_videojuego
+    WHERE b.id_usuario = ?
+");
 $q_juegos->bind_param("i", $id_objetivo);
 $q_juegos->execute();
-$total_juegos = $q_juegos->get_result()->fetch_assoc()['total'];
+$total_juegos = (int)$q_juegos->get_result()->fetch_assoc()['total'];
 $q_juegos->close();
 
-$q_puntos = $conexion->prepare("
-    SELECT SUM(l.puntos_logro) as total 
-    FROM Logros_Usuario lu 
-    JOIN Logros l ON lu.id_logro = l.id_logro 
-    WHERE lu.id_usuario = ?");
+$q_puntos = $conexion->prepare("SELECT SUM(l.puntos_logro) as total FROM Logros_Usuario lu JOIN Logros l ON lu.id_logro = l.id_logro WHERE lu.id_usuario = ?");
 $q_puntos->bind_param("i", $id_objetivo);
 $q_puntos->execute();
-$total_puntos = $q_puntos->get_result()->fetch_assoc()['total'] ?? 0;
+$total_puntos = (int)($q_puntos->get_result()->fetch_assoc()['total'] ?? 0);
 $q_puntos->close();
 
 $q_relacion = $conexion->prepare("SELECT id_usuario, estado FROM Amigos WHERE (id_usuario = ? AND id_amigo = ?) OR (id_usuario = ? AND id_amigo = ?)");
@@ -52,7 +59,6 @@ $q_relacion->execute();
 $relacion = $q_relacion->get_result()->fetch_assoc();
 $q_relacion->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -70,16 +76,12 @@ $q_relacion->close();
                     $img = (empty($avatar_db)) ? "../../../media/perfil_default.jpg" : "../../../media/" . $avatar_db;
                 ?>
                 <img src="<?php echo htmlspecialchars($img); ?>" class="avatar-grande" style="object-fit: cover;">
-                
                 <h1><?php echo htmlspecialchars($usuario['gameTag']); ?></h1>
                 <div class="status">Jugador de SalsaBox</div>
-
                 <form action="gestionarAmistades.php" method="POST" style="margin-top: 20px;">
                     <input type="hidden" name="id_objetivo" value="<?php echo $id_objetivo; ?>">
-                    
                     <?php if (!$relacion): ?>
                         <button type="submit" name="accion" value="enviar" class="btn-accion btn-add">Añadir Amigo</button>
-                    
                     <?php elseif ($relacion['estado'] == 'pendiente'): ?>
                         <?php if ($relacion['id_usuario'] == $id_sesion): ?>
                             <button type="button" class="btn-accion" style="background: #444; cursor: default; color: #fff;">Solicitud Enviada</button>
@@ -88,14 +90,12 @@ $q_relacion->close();
                             <button type="submit" name="accion" value="aceptar" class="btn-accion btn-add">Aceptar Solicitud</button>
                             <button type="submit" name="accion" value="eliminar" class="btn-logout">Rechazar</button>
                         <?php endif; ?>
-                    
                     <?php else: ?>
                         <button type="button" class="btn-accion" style="border: 1px solid #e0be00; background: none; color: #e0be00; cursor: default;">✓ Amigos</button>
                         <button type="submit" name="accion" value="eliminar" class="btn-logout" onclick="return confirm('¿Eliminar de amigos?')">Eliminar amigo</button>
                     <?php endif; ?>
                 </form>
             </section>
-
             <section class="perfil-stats">
                 <a href="juegosOtros.php?id=<?php echo $id_objetivo; ?>" class="stat-link">
                     <div class="stat-item">
@@ -116,20 +116,12 @@ $q_relacion->close();
                     </div>
                 </a>
             </section>
-
             <div class="perfil-body">
                 <h3>Sobre este gamer</h3>
                 <p class="bio-text">
-                    <?php 
-                        if (!empty(trim($biografia))) {
-                            echo nl2br(htmlspecialchars($biografia));
-                        } else {
-                            echo "Este gamer prefiere mantener el misterio.";
-                        }
-                    ?>
+                    <?php echo !empty(trim($usuario['biografia'])) ? nl2br(htmlspecialchars($usuario['biografia'])) : "Este gamer prefiere mantener el misterio."; ?>
                 </p>
             </div>
-
             <div class="perfil-footer">
                 <a href="../../../php/jugadores/jugadores.php" class="btn-volver">← Volver a Explorar</a>
             </div>
