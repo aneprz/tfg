@@ -120,5 +120,6 @@ if (isset($_SESSION['id_usuario'])) {
     </div>
 
     <script src="../../js/comunidades.js"></script>
+    <script src="../../js/social.js"></script>
 </body>
 </html>
