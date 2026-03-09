@@ -33,7 +33,7 @@ $admin = true;
         <?php if(!isset($_SESSION['tag'])) : ?>
             <a href="../sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
         <?php else: ?>
-            <a class="tag" href="../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
+            <a class="tag" href="../../../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
         <?php endif; ?>
     </header>
     <div class="central">

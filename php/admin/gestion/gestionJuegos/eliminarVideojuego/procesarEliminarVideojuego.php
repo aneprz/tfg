@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
         
         $rutaPortada = __DIR__ . '/../../../../../media/' . $nombrePortada;
 
-        if (!empty($nombrePortada) && $nombrePortada !== 'logoPlatino.png' && file_exists($rutaPortada)) {
+        if (!empty($nombrePortada) && $nombrePortada !== '../../../../../media/perfil_default.jpg' && file_exists($rutaPortada)) {
             unlink($rutaPortada);
         }
 

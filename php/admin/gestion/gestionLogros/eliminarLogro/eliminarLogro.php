@@ -8,14 +8,14 @@
     }
     $admin = true;
 
-    $res = $conexion->query("SELECT id_usuario, gameTag FROM Usuario ORDER BY gameTag ASC");
+    $res = $conexion->query("SELECT id_logro, nombre_logro FROM logros ORDER BY nombre_logro ASC");
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SalsaBox - Eliminar Jugador</title>
+    <title>SalsaBox - Eliminar Logro</title>
     <link rel="stylesheet" href="../../../../../estilos/estilos_indexAdmin.css">
     <link rel="stylesheet" href="../../../../../estilos/estilos_index.css">
     <link rel="icon" href="../../../../../media/logoPlatino.png">
@@ -28,7 +28,7 @@
         </div>
         <nav>
             <ul>
-                <li><a href="../gestionJugadores.php">Volver al panel de gestión</a></li>
+                <li><a href="../gestionLogros.php">Volver al panel de gestión</a></li>
             </ul>
         </nav>
         <?php if(isset($_SESSION['tag'])) : ?>
@@ -36,25 +36,25 @@
         <?php endif; ?>
     </header>
     <div class="central">
-        <h1>Eliminar Jugador</h1>
+        <h1>Eliminar Logro</h1>
     </div>
     <div class="admin-container">
-        <input type="text" id="buscador" placeholder="Buscar jugador por nombre..." onkeyup="filtrarTabla()" style="width: 100%; padding: 10px; margin-bottom: 20px;">
+        <input type="text" id="buscador" placeholder="Buscar logro por nombre..." onkeyup="filtrarTabla()" style="width: 100%; padding: 10px; margin-bottom: 20px;">
 
         <table id="tablaJuegos" style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="text-align: left;">
-                    <th style="padding: 10px;">Nombre</th>
+                    <th style="padding: 10px;">Título</th>
                     <th style="padding: 10px;">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 <?php while ($row = $res->fetch_assoc()): ?>
                 <tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo htmlspecialchars($row['gameTag']); ?></td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo htmlspecialchars($row['nombre_logro']); ?></td>
                     <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-                        <form action="procesarEliminarJugadores.php" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este jugador permanentemente?');">
-                            <input type="hidden" name="id" value="<?php echo $row['id_usuario']; ?>">
+                        <form action="procesarEliminarLogro.php" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este logro permanentemente?');">
+                            <input type="hidden" name="id" value="<?php echo $row['id_logro']; ?>">
                             <button type="submit">Eliminar</button>
                         </form>
                     </td>

@@ -33,7 +33,7 @@ $admin = true;
         <?php if(!isset($_SESSION['tag'])) : ?>
             <a href="../sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
         <?php else: ?>
-            <a class="tag" href="../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
+            <a class="tag" href="../../../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
         <?php endif; ?>
     </header>
     <div class="central">
@@ -43,19 +43,19 @@ $admin = true;
     <div class="admin-container">
     <h2>Gestión de contenido</h2>
     <div class="admin-grid">
-        <a href="#" class="admin-card">
+        <a href="añadirLogro/añadirLogro.php" class="admin-card">
             <div class="card-icon">➕🏆</div>
             <span>Añadir logros</span>
         </a>
-        <a href="#" class="admin-card">
+        <a href="eliminarLogro/eliminarLogro.php" class="admin-card">
             <div class="card-icon">🗑️🏆</div>
             <span>Eliminar logros</span>
         </a>
-        <a href="#" class="admin-card">
+        <a href="editarLogro/editarLogro.php" class="admin-card">
             <div class="card-icon">✏️🏆</div>
             <span>Editar logros</span>
         </a>
-        <a href="#" class="admin-card">
+        <a href="asignarLogro/asignarLogro.php" class="admin-card">
             <div class="card-icon">👤🏆</div>
             <span>Asignacion de logros</span>
         </a>

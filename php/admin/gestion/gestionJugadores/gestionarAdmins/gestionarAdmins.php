@@ -15,7 +15,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SalsaBox - Eliminar Videojuego</title>
+    <title>SalsaBox - Gestionar Admins</title>
     <link rel="stylesheet" href="../../../../../estilos/estilos_indexAdmin.css">
     <link rel="stylesheet" href="../../../../../estilos/estilos_index.css">
     <link rel="icon" href="../../../../../media/logoPlatino.png">
@@ -32,7 +32,7 @@
             </ul>
         </nav>
         <?php if(isset($_SESSION['tag'])) : ?>
-            <a class="tag" href="../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
+            <a class="tag" href="../../../../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
         <?php endif; ?>
     </header>
 

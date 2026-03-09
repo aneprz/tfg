@@ -31,7 +31,7 @@
             </ul>
         </nav>
         <?php if(isset($_SESSION['tag'])) : ?>
-            <a class="tag" href="../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
+            <a class="tag" href="../../../../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
         <?php endif; ?>
     </header>
     <div class="central">
