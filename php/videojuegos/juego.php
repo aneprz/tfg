@@ -15,15 +15,15 @@ function estrellasDesdeRating($rating) {
 }
 
 function resolverPortada($portada) {
-    if (!$portada) {
+    if (empty($portada)) {
         return '../../media/logoPlatino.png';
     }
 
-    if (strpos($portada, 'http://') === 0 || strpos($portada, 'https://') === 0 || strpos($portada, '/') === 0) {
+    if (strpos($portada, 'http') === 0 || strpos($portada, '/') === 0) {
         return $portada;
     }
 
-    return '../../' . ltrim($portada, '/');
+    return '/media/' . $portada;
 }
 
 $idJuego = isset($_GET['id']) ? (int) $_GET['id'] : 0;
@@ -31,14 +31,14 @@ $juego = null;
 
 if (isset($conexion) && $conexion && $idJuego > 0) {
     $sql = "
-        SELECT
-            v.id_videojuego,
-            v.titulo,
-            v.descripcion,
-            v.fecha_lanzamiento,
-            v.developer,
-            v.rating_medio,
-            v.portada,
+        SELECT 
+            v.id_videojuego, 
+            v.titulo, 
+            v.descripcion, 
+            v.fecha_lanzamiento, 
+            v.developer, 
+            v.rating_medio, 
+            v.portada, 
             v.genero AS generos
         FROM videojuego v
         WHERE v.id_videojuego = ?
@@ -60,6 +60,7 @@ if (isset($conexion) && $conexion && $idJuego > 0) {
         error_log('Error al cargar juego.php: ' . $e->getMessage());
     }
 }
+$admin = ($_SESSION['admin'] ?? false) === true;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -80,8 +81,12 @@ if (isset($conexion) && $conexion && $idJuego > 0) {
             <ul>
                 <li><a href="../../index.php">Inicio</a></li>
                 <li><a href="juegos.php" class="activo">Juegos</a></li>
-                <li><a href="#">Listas</a></li>
+                <li><a href="../../php/jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
+                <li><a href="../logros/logros.php">Logros</a></li>
+                <?php if ($admin): ?>
+                    <li><a href="../admin/indexAdmin.php">Admin</a></li>
+                <?php endif; ?>
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>

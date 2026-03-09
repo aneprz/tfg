@@ -26,6 +26,7 @@ if (isset($conexion) && $conexion) {
         }
     }
 }
+$admin = ($_SESSION['admin'] ?? false) === true;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -50,6 +51,9 @@ if (isset($conexion) && $conexion) {
                 <li><a href="../../php/jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="comunidades.php" class="activo">Comunidades</a></li>
                 <li><a href="../logros/logros.php">Logros</a></li>
+                <?php if ($admin): ?>
+                    <li><a href="../admin/indexAdmin.php">Admin</a></li>
+                <?php endif; ?>
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>

@@ -14,8 +14,20 @@ function estrellasDesdeRating($rating) {
     return str_repeat('★', $llenas) . str_repeat('☆', 5 - $llenas);
 }
 
+function resolverPortada($portada) {
+    if (!$portada) {
+        return 'media/logoPlatino.png';
+    }
+    if (strpos($portada, 'http') === 0 || strpos($portada, '/') === 0) {
+        return $portada;
+    }
+    return 'media/' . $portada;
+}
+
 $juegosPopulares = [];
 $comunidades = [];
+$idUsuarioSesion = isset($_SESSION['id_usuario']) ? (int) $_SESSION['id_usuario'] : 0;
+$admin = ($_SESSION['admin'] ?? false) === true;
 
 if (isset($conexion) && $conexion) {
     $sqlJuegos = "
@@ -41,7 +53,8 @@ if (isset($conexion) && $conexion) {
         SELECT
             c.id_comunidad,
             c.nombre,
-            COUNT(mc.id_usuario) AS total_miembros
+            COUNT(mc.id_usuario) AS total_miembros,
+            MAX(CASE WHEN mc.id_usuario = $idUsuarioSesion THEN 1 ELSE 0 END) AS es_miembro
         FROM comunidad c
         LEFT JOIN miembro_comunidad mc ON mc.id_comunidad = c.id_comunidad
         GROUP BY c.id_comunidad, c.nombre
@@ -80,6 +93,9 @@ if (isset($conexion) && $conexion) {
                 <li><a href="php/jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="php/comunidades/comunidades.php">Comunidades</a></li>
                 <li><a href="php/logros/logros.php">Logros</a></li>
+                <?php if ($admin): ?>
+                    <li><a href="php/admin/indexAdmin.php">Admin</a></li>
+                <?php endif; ?>
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>
@@ -101,7 +117,7 @@ if (isset($conexion) && $conexion) {
                 <?php foreach ($juegosPopulares as $juego): ?>
                     <a href="php/videojuegos/juego.php?id=<?php echo (int) $juego['id_videojuego']; ?>" class="juego">
                         <div class="portadaJuego">
-                            <img src="<?php echo htmlspecialchars($juego['portada'] ?: 'media/logoPlatino.png'); ?>" alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
+                            <img src="<?php echo htmlspecialchars(resolverPortada($juego['portada'])); ?>" alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
                         </div>
                         <div class="infoJuego">
                             <div class="tituloJuego"><?php echo htmlspecialchars($juego['titulo']); ?></div>
@@ -128,7 +144,19 @@ if (isset($conexion) && $conexion) {
                             <h3><?php echo htmlspecialchars($comunidad['nombre']); ?></h3>
                             <p><?php echo number_format((int) $comunidad['total_miembros'], 0, ',', '.'); ?> miembros</p>
                         </div>
-                        <button class="botonUnirse">Unirse</button>
+                        <?php if (!isset($_SESSION['id_usuario'])): ?>
+                            <a href="php/sesiones/login/login.php" class="botonUnirse">Unirse</a>
+                        <?php elseif ((int) $comunidad['es_miembro'] === 1): ?>
+                            <a
+                                href="php/comunidades/ver_comunidad.php?id=<?php echo (int) $comunidad['id_comunidad']; ?>"
+                                class="botonUnirse"
+                            >Ver muro</a>
+                        <?php else: ?>
+                            <a
+                                href="php/comunidades/gestionar_miembro.php?accion=unirse&id_comunidad=<?php echo (int) $comunidad['id_comunidad']; ?>"
+                                class="botonUnirse"
+                            >Unirse</a>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
