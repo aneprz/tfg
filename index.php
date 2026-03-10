@@ -15,13 +15,30 @@ function estrellasDesdeRating($rating) {
 }
 
 function resolverPortada($portada) {
-    if (!$portada) {
+    $portada = is_string($portada) ? trim($portada) : '';
+
+    if ($portada === '') {
         return 'media/logoPlatino.png';
     }
-    if (strpos($portada, 'http') === 0 || strpos($portada, '/') === 0) {
+
+    if (preg_match('~^https?://~i', $portada) === 1 || strpos($portada, 'data:') === 0) {
         return $portada;
     }
-    return 'media/' . $portada;
+
+    $portada = str_replace('\\', '/', ltrim($portada, '/'));
+
+    if (preg_match('~(^|/)\\.\\.(?:/|$)~', $portada) === 1) {
+        return 'media/logoPlatino.png';
+    }
+
+    // Si solo viene el nombre del fichero, asumimos que está en /media/.
+    if (strpos($portada, '/') === false) {
+        $portada = 'media/' . $portada;
+    }
+
+    $rutaFs = __DIR__ . '/' . $portada;
+
+    return is_file($rutaFs) ? $portada : 'media/logoPlatino.png';
 }
 
 $juegosPopulares = [];
@@ -37,8 +54,8 @@ if (isset($conexion) && $conexion) {
             v.rating_medio,
             v.portada
         FROM Videojuego v
-        ORDER BY v.rating_medio DESC, v.titulo ASC
-        LIMIT 12
+        ORDER BY RAND()
+        LIMIT 6
     ";
 
     $resJuegos = mysqli_query($conexion, $sqlJuegos);

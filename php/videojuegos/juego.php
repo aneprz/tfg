@@ -14,6 +14,41 @@ function estrellasDesdeRating($rating) {
     return str_repeat('★', $llenas) . str_repeat('☆', 5 - $llenas);
 }
 
+function resolverAvatar($avatar) {
+    $avatar = is_string($avatar) ? trim($avatar) : '';
+
+    if ($avatar === '') {
+        return '../../media/perfil_default.jpg';
+    }
+
+    if (preg_match('~^https?://~i', $avatar) === 1 || strpos($avatar, 'data:') === 0 || strpos($avatar, '/') === 0) {
+        return $avatar;
+    }
+
+    $avatar = str_replace('\\', '/', $avatar);
+
+    // Normalizamos algunos formatos históricos tipo ../../../media/...
+    if (preg_match('~^(?:\\.\\./)+media/(.+)$~', $avatar, $m) === 1) {
+        $avatar = 'media/' . $m[1];
+    }
+
+    $avatar = ltrim($avatar, '/');
+
+    // Evitamos rutas con traversal.
+    if (preg_match('~(^|/)\\.\\.(?:/|$)~', $avatar) === 1) {
+        return '../../media/perfil_default.jpg';
+    }
+
+    if (strpos($avatar, '/') === false) {
+        $avatar = 'media/' . $avatar;
+    }
+
+    $rutaWeb = '../../' . $avatar;
+    $rutaFs = __DIR__ . '/../../' . $avatar;
+
+    return is_file($rutaFs) ? $rutaWeb : '../../media/perfil_default.jpg';
+}
+
 function resolverPortada($portada) {
     $portada = is_string($portada) ? trim($portada) : '';
 
@@ -153,6 +188,41 @@ if ($juego && $idUsuario) {
     mysqli_stmt_close($stmtMiRes);
 }
 
+$resenas = [];
+if ($juego && isset($conexion) && $conexion) {
+    $sqlResenas = "
+        SELECT
+            r.id_usuario,
+            u.gameTag,
+            u.avatar,
+            r.puntuacion,
+            r.texto_resena,
+            r.fecha_publicacion,
+            b.estado,
+            b.horas_totales
+        FROM Resena r
+        JOIN Usuario u ON u.id_usuario = r.id_usuario
+        LEFT JOIN Biblioteca b ON b.id_usuario = r.id_usuario AND b.id_videojuego = r.id_videojuego
+        WHERE r.id_videojuego = ?
+          AND ((r.texto_resena IS NOT NULL AND r.texto_resena <> '') OR r.puntuacion IS NOT NULL)
+        ORDER BY r.fecha_publicacion DESC
+        LIMIT 50
+    ";
+    $stmtResenas = mysqli_prepare($conexion, $sqlResenas);
+    if ($stmtResenas) {
+        mysqli_stmt_bind_param($stmtResenas, "i", $idJuego);
+        mysqli_stmt_execute($stmtResenas);
+        $res = mysqli_stmt_get_result($stmtResenas);
+        if ($res) {
+            while ($fila = mysqli_fetch_assoc($res)) {
+                $resenas[] = $fila;
+            }
+            mysqli_free_result($res);
+        }
+        mysqli_stmt_close($stmtResenas);
+    }
+}
+
 $admin = ($_SESSION['admin'] ?? false) === true;
 ?>
 <!DOCTYPE html>
@@ -269,6 +339,52 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                         <p><strong>Fecha de lanzamiento:</strong> <?php echo !empty($juego['fecha_lanzamiento']) ? htmlspecialchars($juego['fecha_lanzamiento']) : 'Sin fecha'; ?></p>
                         <p><strong>Desarrollador:</strong> <?php echo !empty($juego['developer']) ? htmlspecialchars($juego['developer']) : 'Sin developer'; ?></p>
                     </div>
+
+                    <section class="seccionResenas" aria-label="Reseñas del juego">
+                        <h2>Reseñas de usuarios</h2>
+                        <?php if (count($resenas) === 0): ?>
+                            <p class="resenasVacias">Todavía no hay reseñas para este juego.</p>
+                        <?php else: ?>
+                            <div class="listaResenas">
+                                <?php foreach ($resenas as $resena): ?>
+                                    <?php
+                                        $fechaRaw = (string)($resena['fecha_publicacion'] ?? '');
+                                        $fechaBonita = $fechaRaw !== '' ? date('d/m/Y H:i', strtotime($fechaRaw)) : '';
+                                    ?>
+                                    <article class="resena">
+                                        <div class="resenaHeader">
+                                            <div class="resenaUsuario">
+                                                <img class="resenaAvatar" src="<?php echo htmlspecialchars(resolverAvatar($resena['avatar'] ?? '')); ?>" alt="Avatar de <?php echo htmlspecialchars($resena['gameTag']); ?>">
+                                                <div class="resenaMeta">
+                                                    <div class="resenaTag"><?php echo htmlspecialchars($resena['gameTag']); ?></div>
+                                                    <div class="resenaSubmeta">
+                                                        <?php if ($fechaBonita !== ''): ?>
+                                                            <span class="resenaFecha"><?php echo htmlspecialchars($fechaBonita); ?></span>
+                                                        <?php endif; ?>
+                                                        <?php if (!empty($resena['estado'])): ?>
+                                                            <span class="resenaPunto">•</span>
+                                                            <span class="resenaEstado"><?php echo htmlspecialchars($resena['estado']); ?></span>
+                                                        <?php endif; ?>
+                                                        <?php if (isset($resena['horas_totales']) && (float)$resena['horas_totales'] > 0): ?>
+                                                            <span class="resenaPunto">•</span>
+                                                            <span class="resenaHoras"><?php echo htmlspecialchars(number_format((float)$resena['horas_totales'], 1)); ?> h</span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="resenaRating" aria-label="Puntuación">
+                                                <?php echo htmlspecialchars(estrellasDesdeRating($resena['puntuacion'])); ?>
+                                            </div>
+                                        </div>
+
+                                        <?php if (!empty($resena['texto_resena'])): ?>
+                                            <p class="resenaTexto"><?php echo nl2br(htmlspecialchars($resena['texto_resena'])); ?></p>
+                                        <?php endif; ?>
+                                    </article>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </section>
 
                     <a href="juegos.php" class="botonVolver">Volver al catalogo</a>
                 </div>

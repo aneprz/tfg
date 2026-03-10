@@ -286,6 +286,99 @@ h1 {
     font-weight: normal;
 }
 
+.seccionResenas {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.seccionResenas h2 {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+}
+
+.resenasVacias {
+    color: var(--text-muted);
+}
+
+.listaResenas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.resena {
+    background: #14181c;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.resenaHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.7rem;
+}
+
+.resenaUsuario {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 0;
+}
+
+.resenaAvatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--accent-color);
+    background: var(--card-bg);
+    flex-shrink: 0;
+}
+
+.resenaMeta {
+    min-width: 0;
+}
+
+.resenaTag {
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 460px;
+}
+
+.resenaSubmeta {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.resenaPunto {
+    opacity: 0.8;
+}
+
+.resenaRating {
+    color: var(--accent-color);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.resenaTexto {
+    color: #cfd8e3;
+    white-space: pre-wrap;
+}
+
 .botonVolver {
     display: inline-block;
     margin-top: 2.5rem;
