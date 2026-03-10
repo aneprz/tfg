@@ -36,7 +36,7 @@ if (isset($conexion) && $conexion) {
             v.titulo,
             v.rating_medio,
             v.portada
-        FROM videojuego v
+        FROM Videojuego v
         ORDER BY v.rating_medio DESC, v.titulo ASC
         LIMIT 12
     ";
@@ -55,8 +55,8 @@ if (isset($conexion) && $conexion) {
             c.nombre,
             COUNT(mc.id_usuario) AS total_miembros,
             MAX(CASE WHEN mc.id_usuario = $idUsuarioSesion THEN 1 ELSE 0 END) AS es_miembro
-        FROM comunidad c
-        LEFT JOIN miembro_comunidad mc ON mc.id_comunidad = c.id_comunidad
+        FROM Comunidad c
+        LEFT JOIN Miembro_comunidad mc ON mc.id_comunidad = c.id_comunidad
         GROUP BY c.id_comunidad, c.nombre
         ORDER BY total_miembros DESC, c.nombre ASC
         LIMIT 6
