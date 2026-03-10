@@ -37,7 +37,10 @@ $img = (empty($avatar_db)) ? "../../../media/perfil_default.jpg" : "../../../med
                     <img src="<?php echo htmlspecialchars($img); ?>" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
                 </div>
                 <h1><?php echo htmlspecialchars($_SESSION['tag']); ?></h1>
-                <p class="status">Miembro de SalsaBox</p><br>
+                <p class="status">
+                <?= ($_SESSION['admin'] == 1) ? 'Administrador de SalsaBox' : 'Miembro de SalsaBox'; ?>
+                </p>
+                <br>
                 <a href="../editarPerfil/editarPerfil.php" style="background-color: #e0be00; color:#000; padding: 0.6rem 1.2rem; border-radius:4px; text-decoration:none; font-weight:bold;">Editar Perfil</a>
             </div>
 

@@ -31,7 +31,7 @@ $juegos = [];
 if (isset($conexion) && $conexion) {
     $sql = "
         SELECT id_videojuego, titulo, rating_medio, portada
-        FROM videojuego
+        FROM Videojuego
         ORDER BY titulo ASC
     ";
 

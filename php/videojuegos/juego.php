@@ -40,7 +40,7 @@ if (isset($conexion) && $conexion && $idJuego > 0) {
             v.rating_medio, 
             v.portada, 
             v.genero AS generos
-        FROM videojuego v
+        FROM Videojuego v
         WHERE v.id_videojuego = ?
         LIMIT 1
     ";
