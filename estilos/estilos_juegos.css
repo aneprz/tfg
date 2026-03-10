@@ -1,135 +1,13 @@
-:root {
-    --bg-color: #14181c;
-    --card-bg: hsl(212, 17%, 15%);
-    --accent-color: #e0be00;
-    --text-main: #ffffff;
-    --text-muted: #9ab;
-    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    font-family: var(--font-family);
-    line-height: 1.6;
-}
-
-header {
-    background-color: rgba(20, 24, 28, 0.95);
-    padding: 1rem 5%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #2c3440;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.tituloWeb {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.logo {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: var(--text-main);
-    text-decoration: none;
-}
-
-.logo span {
-    color: var(--accent-color);
-}
-
-nav ul {
-    list-style: none;
-    display: flex;
-    gap: 2rem;
-}
-
-nav a {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s;
-}
-
-nav a:hover,
-nav a.activo {
-    color: var(--text-main);
-}
-
-.botonCrearCuenta {
-    background-color: var(--accent-color);
-    color: #000;
-    padding: 0.5rem 1.2rem;
-    border-radius: 4px;
-    font-weight: bold;
-    text-decoration: none;
-    transition: background 0.3s;
-}
-
-.botonCrearCuenta:hover {
-    background-color: #bfa200;
-}
-
-.tag {
-    color: var(--text-main);
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 0.95rem;
-    padding: 0.5rem 1rem;
-    background-color: var(--card-bg);
-    border: 1px solid #2c3440;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-.tag:hover {
-    border-color: var(--accent-color);
-    background-color: #1f252c;
-    color: var(--accent-color);
-    transform: translateY(-2px);
-}
-
-.tag::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    background-color: #2ecc71;
-    border-radius: 50%;
-    display: inline-block;
-    box-shadow: 0 0 5px #2ecc71;
-}
-
 .central {
     text-align: center;
     padding: 4rem 2rem 3rem;
     background: linear-gradient(to bottom, #1f252c, var(--bg-color));
+    animation: fadeInUp 0.6s ease-out;
 }
 
 .central h1 {
     font-size: 3rem;
     margin-bottom: 0.8rem;
-}
-
-.central p {
-    color: var(--text-muted);
-    font-size: 1.1rem;
-    max-width: 700px;
-    margin: 0 auto 2rem;
 }
 
 .buscadorContainer {
@@ -145,29 +23,19 @@ nav a.activo {
     border-radius: 8px;
     color: var(--text-main);
     font-size: 1rem;
-    transition: all 0.3s ease;
 }
 
 .buscadorContainer input:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 10px rgba(224, 190, 0, 0.35);
+    box-shadow: 0 0 15px rgba(224, 190, 0, 0.25);
 }
 
 main {
     padding: 2rem 5%;
     max-width: 1400px;
     margin: 0 auto;
-}
-
-h2 {
-    border-bottom: 1px solid #2c3440;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1.5rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    font-size: 1rem;
-    letter-spacing: 1px;
+    animation: fadeInUp 0.8s ease-out both;
 }
 
 .juegos {
@@ -187,15 +55,14 @@ h2 {
     background-color: var(--card-bg);
     border-radius: 8px;
     overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
     cursor: pointer;
     border: 2px solid transparent;
 }
 
 .juego:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
     border-color: var(--accent-color);
-    box-shadow: 0 5px 15px rgba(224, 190, 0, 0.2);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
 .portadaJuego {
@@ -212,6 +79,10 @@ h2 {
     display: block;
 }
 
+.juego:hover .portadaJuego img {
+    transform: scale(1.1);
+}
+
 .infoJuego {
     padding: 1rem;
 }
@@ -224,22 +95,8 @@ h2 {
     text-overflow: ellipsis;
 }
 
-.puntuacionJuego {
-    color: var(--accent-color);
-    font-size: 0.9rem;
-}
-
-.sinResultados {
-    color: var(--text-muted);
-    padding: 0.5rem;
-}
-
-footer {
-    text-align: center;
-    padding: 2rem;
-    color: var(--text-muted);
-    border-top: 1px solid #2c3440;
-    margin-top: 2rem;
+.tag::before {
+    animation: pulseGreen 2s infinite;
 }
 
 @media (max-width: 900px) {
@@ -247,12 +104,21 @@ footer {
         flex-wrap: wrap;
         gap: 0.8rem;
     }
-
     nav ul {
         gap: 1rem;
     }
-
     .central h1 {
         font-size: 2.1rem;
     }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGreen {
+    0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
 }

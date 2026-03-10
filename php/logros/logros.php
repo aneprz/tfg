@@ -45,7 +45,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
     <div class="central">
         <h1>Logros</h1>
-        <p>Aquí podrás ver los logros que podrás ir ganando a lo largo de tu experiencia como gamer.</p>
+        <p>Aquí podrás ver los logros que podrás ir ganando a lo largo de tu experiencia como gamer.</p><br>
         
         <div class="buscadorContainer">
             <input type="text" id="input-busqueda" placeholder="Buscar por nombre de logro o videojuego..." aria-label="Buscar logro">
