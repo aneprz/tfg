@@ -9,10 +9,50 @@ if (!isset($_SESSION['id_usuario'])) {
 
 $id_usuario = $_SESSION['id_usuario'];
 
+$resolverPortada = function ($portada): string {
+    $portada = is_string($portada) ? trim($portada) : '';
+
+    if ($portada === '') {
+        return '../../../media/default_game.png';
+    }
+
+    if (preg_match('~^https?://~i', $portada) === 1 || strpos($portada, 'data:') === 0) {
+        return $portada;
+    }
+
+    $portada = str_replace('\\', '/', ltrim($portada, '/'));
+
+    if (preg_match('~(^|/)\\.\\.(?:/|$)~', $portada) === 1) {
+        return '../../../media/default_game.png';
+    }
+
+    if (strpos($portada, '/') === false) {
+        $portada = 'media/' . $portada;
+    }
+
+    $rutaWeb = '../../../' . $portada;
+    $rutaFs = __DIR__ . '/../../../' . $portada;
+
+    return is_file($rutaFs) ? $rutaWeb : '../../../media/default_game.png';
+};
+
+function estrellasDesdePuntuacion($puntuacion): string
+{
+    if ($puntuacion === null || $puntuacion === '') {
+        return '☆☆☆☆☆';
+    }
+
+    $valor = (int) $puntuacion;
+    $valor = max(0, min(5, $valor));
+
+    return str_repeat('★', $valor) . str_repeat('☆', 5 - $valor);
+}
+
 $query = $conexion->prepare("
-    SELECT v.titulo, v.portada, b.estado, b.horas_totales 
+    SELECT v.id_videojuego, v.titulo, v.portada, b.estado, r.puntuacion
     FROM Biblioteca b
     JOIN Videojuego v ON b.id_videojuego = v.id_videojuego
+    LEFT JOIN Resena r ON r.id_usuario = b.id_usuario AND r.id_videojuego = b.id_videojuego
     WHERE b.id_usuario = ?
 ");
 $query->bind_param("i", $id_usuario);
@@ -46,20 +86,22 @@ $total_juegos = $resultado->num_rows;
                         <th>Portada</th>
                         <th>Título</th>
                         <th>Estado</th>
-                        <th>Horas</th>
+                        <th>Puntuación</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php while($row = $resultado->fetch_assoc()): ?>
-                    <tr>
+                    <?php $urlJuego = "../../videojuegos/juego.php?id=" . (int)$row['id_videojuego']; ?>
+                    <tr data-href="<?php echo htmlspecialchars($urlJuego); ?>">
                         <td>
-                            <?php 
-                                $ruta_portada = !empty($row['portada']) ? "../../../" . $row['portada'] : "../../../media/default_game.png";
-                            ?>
-                            <img src="<?php echo htmlspecialchars($ruta_portada); ?>" class="portada" alt="Juego">
+                            <a href="<?php echo htmlspecialchars($urlJuego); ?>" style="display:inline-block;">
+                                <img src="<?php echo htmlspecialchars($resolverPortada($row['portada'])); ?>" class="portada" alt="Juego">
+                            </a>
                         </td>
                         <td style="font-weight: bold; color: #e0be00;">
-                            <?php echo htmlspecialchars($row['titulo']); ?>
+                            <a href="<?php echo htmlspecialchars($urlJuego); ?>" style="color: inherit; text-decoration: none;">
+                                <?php echo htmlspecialchars($row['titulo']); ?>
+                            </a>
                         </td>
                         <td>
                             <span class="status-badge">
@@ -67,7 +109,7 @@ $total_juegos = $resultado->num_rows;
                             </span>
                         </td>
                         <td style="color: #9ab3bc;">
-                            <?php echo number_format($row['horas_totales'], 1); ?> h
+                            <?php echo htmlspecialchars(estrellasDesdePuntuacion($row['puntuacion'])); ?>
                         </td>
                     </tr>
                     <?php endwhile; ?>
@@ -79,5 +121,16 @@ $total_juegos = $resultado->num_rows;
             </div>
         <?php endif; ?>
     </div>
+    <script>
+        document.querySelectorAll('tr[data-href]').forEach(function (row) {
+            row.style.cursor = 'pointer';
+            row.addEventListener('click', function (e) {
+                if (e.target && e.target.closest && e.target.closest('a, button, input, textarea, select, label')) {
+                    return;
+                }
+                window.location.href = row.getAttribute('data-href');
+            });
+        });
+    </script>
 </body>
 </html>
