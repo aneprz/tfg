@@ -43,11 +43,6 @@ $admin = true;
     <div class="admin-container">
     <h2>Gestión de contenido</h2>
     <div class="admin-grid">
-        <a href="#" class="admin-card">
-    <div class="card-icon">➕🏘️</div>
-    <span>Añadir Comunidad</span>
-</a>
-
 <a href="eliminarComunidad/eliminarComunidad.php" class="admin-card">
     <div class="card-icon">🗑️🏘️</div>
     <span>Eliminar Comunidad</span>
