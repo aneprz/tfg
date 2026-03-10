@@ -224,21 +224,14 @@ footer {
     border-top: 1px solid #2c3440;
 }
 
-/* ============================================================
-   BLOQUE DE ANIMACIONES (Keyframes y efectos de carga)
-   ============================================================ */
-
-/* 1. Animación de entrada para el titulo central */
 .central h1, .central p {
     animation: fadeInDown 0.8s ease-out forwards;
 }
 
-/* 2. Animación para que las secciones aparezcan de abajo a arriba */
 main {
     animation: fadeInUp 1s ease-out;
 }
 
-/* 3. Definición de movimientos */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -261,7 +254,6 @@ main {
     }
 }
 
-/* 4. Efecto sutil de "pulso" en el punto verde del tag */
 .tag::before {
     animation: pulse Green 2s infinite;
 }
