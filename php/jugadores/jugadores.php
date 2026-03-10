@@ -15,6 +15,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SalsaBox - Comunidad de Jugadores</title>
     <link rel="stylesheet" href="../../estilos/estilos_juegos.css">
+    <link rel="stylesheet" href="../../estilos/estilos_index.css">
     <link rel="stylesheet" href="../../estilos/estilos_jugadores.css">
     <link rel="icon" href="../../media/logoPlatino.png">
     <style>
@@ -53,7 +54,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
     <div class="central">
         <h1>Explora la comunidad</h1>
-        <p>Encuentra a otros gamers, revisa sus perfiles y descubre nuevas amistades dentro de SalsaBox.</p>
+        <p>Encuentra a otros gamers, revisa sus perfiles y descubre nuevas amistades dentro de SalsaBox.</p><br>
         
         <div class="buscadorContainer">
             <input type="text" id="input-busqueda" placeholder="Buscar por GameTag..." aria-label="Buscar jugador">

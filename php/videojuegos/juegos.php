@@ -51,6 +51,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SalsaBox - Juegos</title>
+    <link rel="stylesheet" href="../../estilos/estilos_index.css">
     <link rel="stylesheet" href="../../estilos/estilos_juegos.css">
     <link rel="icon" href="../../media/logoPlatino.png">
 </head>
@@ -81,8 +82,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
     <div class="central">
         <h1>Encuentra tu proxima aventura</h1>
-        <p>Busca por nombre y descubre todos los videojuegos del catalogo visual de SalsaBox.</p>
-
+        <p>Busca por nombre y descubre todos los videojuegos del catalogo visual de SalsaBox.</p><br>
         <div class="buscadorContainer">
             <input type="text" id="buscadorJuegos" placeholder="Buscar videojuego..." aria-label="Buscar videojuego">
         </div>

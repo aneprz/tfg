@@ -1,8 +1,3 @@
-.container-lista-busqueda {
-    width: 95%;
-    max-width: 1100px;
-    margin: 40px auto;
-}
 
 .header-busqueda {
     text-align: center;
@@ -10,13 +5,13 @@
 }
 
 .header-busqueda h1 {
-    color: #e0be00;
+    color: var(--accent-color);
     font-size: 2.5rem;
     margin-bottom: 10px;
 }
 
 .search-section {
-    background: #1b1e23;
+    background: var(--card-bg);
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 40px;
@@ -34,25 +29,30 @@
     max-width: 500px;
     padding: 12px 20px;
     border-radius: 8px;
-    border: 1px solid #e0be00;
+    border: 1px solid var(--accent-color);
     background: #0d0f12;
     color: white;
     font-size: 1rem;
+    outline: none;
+}
+
+.search-input:focus {
+    box-shadow: 0 0 10px rgba(224, 190, 0, 0.3);
 }
 
 .btn-buscar {
-    background: #e0be00;
+    background: var(--accent-color);
     color: #000;
     border: none;
     padding: 12px 25px;
     border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.2s;
 }
 
 .btn-buscar:hover {
     transform: scale(1.05);
+    background-color: #fff;
 }
 
 .user-grid {
@@ -62,10 +62,9 @@
 }
 
 .player-card {
-    background: #1b1e23;
+    background: var(--card-bg);
     border-radius: 15px;
     overflow: hidden;
-    transition: 0.3s;
     border: 1px solid #2a2d33;
     display: flex;
     flex-direction: column;
@@ -75,8 +74,9 @@
 }
 
 .player-card:hover {
-    border-color: #e0be00;
-    transform: translateY(-5px);
+    border-color: var(--accent-color);
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
 }
 
 .player-avatar-wrapper img {
@@ -84,18 +84,18 @@
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #e0be00;
+    border: 3px solid var(--accent-color);
     margin-bottom: 15px;
 }
 
 .player-info h3 {
-    color: #e0be00;
+    color: var(--accent-color);
     margin-bottom: 10px;
     font-size: 1.4rem;
 }
 
 .player-bio {
-    color: #9ab3bc;
+    color: var(--text-muted);
     font-size: 0.9rem;
     margin-bottom: 20px;
     line-height: 1.4;
@@ -103,16 +103,15 @@
 
 .btn-ver-perfil {
     text-decoration: none;
-    color: #e0be00;
-    border: 1px solid #e0be00;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
     padding: 8px 18px;
     border-radius: 20px;
     font-size: 0.85rem;
-    transition: 0.3s;
 }
 
 .btn-ver-perfil:hover {
-    background: #e0be00;
+    background: var(--accent-color);
     color: #000;
 }
 
@@ -120,5 +119,27 @@
     grid-column: 1 / -1;
     text-align: center;
     padding: 50px;
-    color: #9ab3bc;
+    color: var(--text-muted);
+}
+
+.player-card {
+    animation: zoomInSlight 0.5s ease-out;
+}
+
+@keyframes zoomInSlight {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+}
+.container-lista-busqueda {
+    width: 95%;
+    max-width: 1100px;
+    margin: 40px auto;
+    animation: fadeInUp 1s ease-out; 
 }
