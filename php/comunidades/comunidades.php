@@ -6,17 +6,18 @@ require_once __DIR__ . '/../../db/conexiones.php';
 $comunidades = [];
 
 if (isset($conexion) && $conexion) {
-    $sqlComunidades = "
+   $sqlComunidades = "
         SELECT 
             c.id_comunidad, 
             c.nombre, 
-            v.portada,
+            c.banner_url,
+            v.portada AS portada_juego,
             v.titulo AS juego_nombre,
             COUNT(mc.id_usuario) AS total_miembros
         FROM comunidad c
         LEFT JOIN videojuego v ON c.id_videojuego_principal = v.id_videojuego
         LEFT JOIN miembro_comunidad mc ON mc.id_comunidad = c.id_comunidad
-        GROUP BY c.id_comunidad, c.nombre, v.portada, v.titulo
+        GROUP BY c.id_comunidad, c.nombre, c.banner_url, v.portada, v.titulo
         ORDER BY total_miembros DESC, c.nombre ASC";
 
     $res = mysqli_query($conexion, $sqlComunidades);
@@ -74,7 +75,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <?php if (count($comunidades) > 0): ?>
                 <?php foreach ($comunidades as $com): ?>
                     <article class="card-comunidad">
-                        <div class="banner-comunidad" style="background-image: url('../../<?php echo htmlspecialchars($com['portada'] ?: 'media/logoPlatino.png'); ?>')">
+                        <div class="banner-comunidad" style="background-image: url('../../media/<?php echo !empty($com['banner_url']) ? htmlspecialchars($com['banner_url']) : htmlspecialchars($com['portada_juego']); ?>')">
                             <div class="overlay-miembros">
                                 ● <?php echo number_format($com['total_miembros'], 0, ',', '.'); ?> miembros
                             </div>
