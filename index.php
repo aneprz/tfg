@@ -56,7 +56,7 @@ if (isset($conexion) && $conexion) {
             COUNT(mc.id_usuario) AS total_miembros,
             MAX(CASE WHEN mc.id_usuario = $idUsuarioSesion THEN 1 ELSE 0 END) AS es_miembro
         FROM Comunidad c
-        LEFT JOIN Miembro_comunidad mc ON mc.id_comunidad = c.id_comunidad
+        LEFT JOIN Miembro_Comunidad mc ON mc.id_comunidad = c.id_comunidad
         GROUP BY c.id_comunidad, c.nombre
         ORDER BY total_miembros DESC, c.nombre ASC
         LIMIT 6

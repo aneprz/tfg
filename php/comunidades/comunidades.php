@@ -16,7 +16,7 @@ if (isset($conexion) && $conexion) {
             COUNT(mc.id_usuario) AS total_miembros
         FROM Comunidad c
         LEFT JOIN Videojuego v ON c.id_videojuego_principal = v.id_videojuego
-        LEFT JOIN Miembro_comunidad mc ON mc.id_comunidad = c.id_comunidad
+        LEFT JOIN Miembro_Comunidad mc ON mc.id_comunidad = c.id_comunidad
         GROUP BY c.id_comunidad, c.nombre, v.portada, v.titulo
         ORDER BY total_miembros DESC, c.nombre ASC";
 

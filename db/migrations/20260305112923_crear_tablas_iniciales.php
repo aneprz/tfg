@@ -61,10 +61,10 @@ final class CrearTablasIniciales extends AbstractMigration
             ->addColumn('descripcion', 'text', ['null' => true])
             ->addColumn('fecha_lanzamiento', 'date', ['null' => true])
             ->addColumn('developer', 'string', ['limit' => 255, 'null' => true])
-            ->addColumn('rating_medio', 'decimal', ['precision' => 3, 'scale' => 2, 'null' => true])
+            ->addColumn('rating_medio', 'decimal', ['precision' => 3, 'scale' => 1, 'null' => true])
             ->addColumn('portada', 'string', ['limit' => 500, 'null' => true])
-            ->addColumn('genero', 'string', ['limit' => 20, 'null' => true])
-            ->addColumn('plataforma', 'string', ['limit' => 20, 'null' => true])
+            ->addColumn('genero', 'string', ['limit' => 255, 'null' => true])
+            ->addColumn('plataforma', 'string', ['limit' => 255, 'null' => true])
             ->create();
 
         // Genero
