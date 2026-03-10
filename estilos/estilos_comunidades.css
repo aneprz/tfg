@@ -1,95 +1,147 @@
+.btn-agregar {
+display: inline-block;
+margin-top: 15px;
+background-color: var(--accent-color);
+color: #000;
+padding: 0.8rem 1.5rem;
+border-radius: 50px;
+text-decoration: none;
+font-weight: bold;
+font-size: 0.9rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+box-shadow: 0 4px 15px rgba(224, 190, 0, 0.3);
+animation: fadeInDown 0.8s ease-out forwards, pulseButton 3s infinite 1.2s;
+opacity: 0;
+}
+
+.btn-agregar:hover {
+background-color: #fff;
+transform: scale(1.05) translateY(-2px);
+box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+transition: all 0.3s ease;
+}
+
 .grid-comunidades {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2.5rem;
-    margin-top: 2rem;
-    padding-bottom: 4rem;
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+gap: 2.5rem;
+margin-top: 2rem;
+padding-bottom: 4rem;
+animation: fadeInUp 0.8s ease-out;
 }
 
 .card-comunidad {
-    background-color: var(--card-bg);
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #2c3440;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
+background-color: var(--card-bg);
+border-radius: 12px;
+overflow: hidden;
+border: 1px solid #2c3440;
+display: flex;
+flex-direction: column;
 }
 
 .card-comunidad:hover {
-    transform: translateY(-8px);
-    border-color: var(--accent-color);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+transform: translateY(-8px);
+border-color: var(--accent-color);
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .banner-comunidad {
-    height: 150px;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-    border-bottom: 1px solid #2c3440;
+height: 150px;
+background-size: cover;
+background-position: center;
+position: relative;
+border-bottom: 1px solid #2c3440;
+}
+
+.card-comunidad:hover .banner-comunidad {
+filter: brightness(1.1);
 }
 
 .overlay-miembros {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    background: rgba(0, 0, 0, 0.75);
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    color: var(--accent-color);
-    font-weight: bold;
-    backdrop-filter: blur(4px);
+position: absolute;
+bottom: 10px;
+left: 10px;
+background: rgba(0, 0, 0, 0.8);
+padding: 5px 12px;
+border-radius: 20px;
+font-size: 0.75rem;
+color: var(--accent-color);
+font-weight: 800;
+backdrop-filter: blur(4px);
+border: 1px solid rgba(224, 190, 0, 0.3);
 }
 
 .cuerpo-comunidad {
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+padding: 1.5rem;
+display: flex;
+flex-direction: column;
+flex-grow: 1;
 }
 
 .juego-tag {
-    color: var(--accent-color);
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+color: var(--accent-color);
+font-size: 0.7rem;
+font-weight: 800;
+text-transform: uppercase;
+letter-spacing: 1.5px;
+margin-bottom: 5px;
 }
 
 .cuerpo-comunidad h3 {
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
-    color: var(--text-main);
+font-size: 1.4rem;
+margin-bottom: 0.5rem;
+color: var(--text-main);
 }
 
 .acciones-com {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: auto;
-    padding-top: 1rem;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-top: auto;
+padding-top: 1.5rem;
 }
 
 .btn-entrar {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: color 0.3s;
+color: var(--text-muted);
+text-decoration: none;
+font-weight: 600;
+font-size: 0.9rem;
 }
 
 .btn-entrar:hover {
-    color: var(--text-main);
+color: var(--accent-color);
+text-decoration: underline;
 }
 
 .aviso-vacio {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 4rem;
-    color: var(--text-muted);
-    background: var(--card-bg);
-    border-radius: 8px;
-    border: 2px dashed #2c3440;
-}   
+grid-column: 1 / -1;
+text-align: center;
+padding: 5rem;
+color: var(--text-muted);
+background: rgba(255, 255, 255, 0.02);
+border-radius: 12px;
+border: 2px dashed #2c3440;
+}
+
+@keyframes pulseButton {
+0% { box-shadow: 0 0 0 0 rgba(224, 190, 0, 0.4); }
+70% { box-shadow: 0 0 0 10px rgba(224, 190, 0, 0); }
+100% { box-shadow: 0 0 0 0 rgba(224, 190, 0, 0); }
+}
+
+@keyframes fadeInUp {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+from {
+opacity: 0;
+transform: translateY(-30px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
