@@ -15,15 +15,30 @@ function estrellasDesdeRating($rating) {
 }
 
 function resolverPortada($portada) {
-    if (!$portada) {
+    $portada = is_string($portada) ? trim($portada) : '';
+
+    if ($portada === '') {
         return '../../media/logoPlatino.png';
     }
 
-    if (strpos($portada, 'http') === 0 || strpos($portada, '/') === 0) {
+    if (preg_match('~^https?://~i', $portada) === 1 || strpos($portada, 'data:') === 0) {
         return $portada;
     }
 
-    return '../../media/' . $portada;
+    $portada = str_replace('\\', '/', ltrim($portada, '/'));
+
+    if (preg_match('~(^|/)\\.\\.(?:/|$)~', $portada) === 1) {
+        return '../../media/logoPlatino.png';
+    }
+
+    if (strpos($portada, '/') === false) {
+        $portada = 'media/' . $portada;
+    }
+
+    $rutaWeb = '../../' . $portada;
+    $rutaFs = __DIR__ . '/../../' . $portada;
+
+    return is_file($rutaFs) ? $rutaWeb : '../../media/logoPlatino.png';
 }
 
 $juegos = [];
