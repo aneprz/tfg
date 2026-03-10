@@ -340,6 +340,8 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                         <p><strong>Desarrollador:</strong> <?php echo !empty($juego['developer']) ? htmlspecialchars($juego['developer']) : 'Sin developer'; ?></p>
                     </div>
 
+                    <a href="juegos.php" class="botonVolver">Volver al catalogo</a>
+
                     <section class="seccionResenas" aria-label="Reseñas del juego">
                         <h2>Reseñas de usuarios</h2>
                         <?php if (count($resenas) === 0): ?>
@@ -353,7 +355,8 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                                     ?>
                                     <article class="resena">
                                         <div class="resenaHeader">
-                                            <div class="resenaUsuario">
+                                            <?php $urlPerfil = "../user/amistades/perfilOtros.php?id=" . (int)$resena['id_usuario']; ?>
+                                            <a class="resenaUsuario resenaUsuarioLink" href="<?php echo htmlspecialchars($urlPerfil); ?>">
                                                 <img class="resenaAvatar" src="<?php echo htmlspecialchars(resolverAvatar($resena['avatar'] ?? '')); ?>" alt="Avatar de <?php echo htmlspecialchars($resena['gameTag']); ?>">
                                                 <div class="resenaMeta">
                                                     <div class="resenaTag"><?php echo htmlspecialchars($resena['gameTag']); ?></div>
@@ -371,7 +374,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                                                         <?php endif; ?>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </a>
                                             <div class="resenaRating" aria-label="Puntuación">
                                                 <?php echo htmlspecialchars(estrellasDesdeRating($resena['puntuacion'])); ?>
                                             </div>
@@ -385,8 +388,6 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                             </div>
                         <?php endif; ?>
                     </section>
-
-                    <a href="juegos.php" class="botonVolver">Volver al catalogo</a>
                 </div>
             </section>
         <?php else: ?>

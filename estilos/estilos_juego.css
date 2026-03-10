@@ -332,6 +332,15 @@ h1 {
     min-width: 0;
 }
 
+.resenaUsuarioLink {
+    text-decoration: none;
+    color: inherit;
+}
+
+.resenaUsuarioLink:hover .resenaTag {
+    color: var(--accent-color);
+}
+
 .resenaAvatar {
     width: 42px;
     height: 42px;
@@ -370,7 +379,7 @@ h1 {
 
 .resenaRating {
     color: var(--accent-color);
-    font-weight: 700;
+    font-weight: 500;
     white-space: nowrap;
 }
 
@@ -381,7 +390,7 @@ h1 {
 
 .botonVolver {
     display: inline-block;
-    margin-top: 2.5rem;
+    margin-top: 1.5rem;
     background-color: transparent;
     color: var(--accent-color);
     border: 1px solid var(--accent-color);
