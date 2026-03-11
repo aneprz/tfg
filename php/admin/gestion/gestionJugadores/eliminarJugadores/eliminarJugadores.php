@@ -6,9 +6,9 @@
         header("Location: ../../index.php");
         exit();
     }
-    $admin = true;
-
-    $res = $conexion->query("SELECT id_usuario, gameTag FROM Usuario ORDER BY gameTag ASC");
+    
+    $id_sesion = $_SESSION['id_usuario'];
+    $res = $conexion->query("SELECT id_usuario, gameTag FROM Usuario WHERE id_usuario != $id_sesion ORDER BY gameTag ASC");
 ?>
 <!DOCTYPE html>
 <html lang="es">
