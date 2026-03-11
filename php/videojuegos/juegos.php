@@ -2,7 +2,8 @@
 session_start();
 require '../../db/conexiones.php';
 
-function ratingAEstrellas($rating) {
+function ratingAEstrellas($rating)
+{
     if ($rating === null || $rating === '') {
         return 0;
     }
@@ -10,7 +11,8 @@ function ratingAEstrellas($rating) {
     return max(0, min(5, (float)$rating / 2));
 }
 
-function resolverPortada($portada) {
+function resolverPortada($portada)
+{
     $portada = is_string($portada) ? trim($portada) : '';
 
     if ($portada === '') {
@@ -32,7 +34,7 @@ function resolverPortada($portada) {
     }
 
     $rutaWeb = '../../' . $portada;
-    $rutaFs = __DIR__ . '/../../' . $portada;
+    $rutaFs  = __DIR__ . '/../../' . $portada;
 
     return is_file($rutaFs) ? $rutaWeb : '../../media/logoPlatino.png';
 }
@@ -42,13 +44,45 @@ $juegos = [];
 /* PAGINACIÓN */
 
 $porPagina = 48;
-$pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+$pagina    = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 
 if ($pagina < 1) {
     $pagina = 1;
 }
 
 $offset = ($pagina - 1) * $porPagina;
+
+/* FILTRO ORDEN */
+
+$orden = $_GET['orden'] ?? 'nombre_asc';
+
+switch ($orden) {
+
+    case 'nombre_desc':
+        $orderBy = "titulo DESC";
+        break;
+
+    case 'nota_desc':
+        $orderBy = "rating_medio DESC";
+        break;
+
+    case 'nota_asc':
+        $orderBy = "rating_medio ASC";
+        break;
+
+    case 'fecha_desc':
+        $orderBy = "fecha_lanzamiento DESC";
+        break;
+
+    case 'fecha_asc':
+        $orderBy = "fecha_lanzamiento ASC";
+        break;
+
+    default:
+        $orderBy = "titulo ASC";
+        $orden   = "nombre_asc";
+}
+
 $totalPaginas = 1;
 
 if (isset($conexion) && $conexion) {
@@ -58,7 +92,7 @@ if (isset($conexion) && $conexion) {
     $totalQuery = mysqli_query($conexion, "SELECT COUNT(*) as total FROM Videojuego");
 
     if ($totalQuery) {
-        $filaTotal = mysqli_fetch_assoc($totalQuery);
+        $filaTotal   = mysqli_fetch_assoc($totalQuery);
         $totalJuegos = (int)$filaTotal['total'];
         $totalPaginas = ceil($totalJuegos / $porPagina);
 
@@ -70,7 +104,7 @@ if (isset($conexion) && $conexion) {
     $sql = "
         SELECT id_videojuego, titulo, rating_medio, portada
         FROM Videojuego
-        ORDER BY titulo ASC
+        ORDER BY $orderBy
         LIMIT $porPagina OFFSET $offset
     ";
 
@@ -115,7 +149,6 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     </div>
 
     <nav>
-
         <ul>
 
             <li><a href="../../index.php">Inicio</a></li>
@@ -129,10 +162,9 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <?php endif; ?>
 
         </ul>
-
     </nav>
 
-    <?php if (!isset($_SESSION['tag'])) : ?>
+    <?php if (!isset($_SESSION['tag'])): ?>
 
         <a href="../../php/sesiones/login/login.php" class="botonCrearCuenta">
             Iniciar sesion
@@ -160,10 +192,35 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     <br>
 
     <div class="buscadorContainer">
-        <input type="text"
-               id="buscadorJuegos"
-               placeholder="Buscar videojuego..."
-               aria-label="Buscar videojuego">
+        <input
+            type="text"
+            id="buscadorJuegos"
+            placeholder="Buscar videojuego..."
+            aria-label="Buscar videojuego"
+        >
+    </div>
+
+    <br>
+
+    <div class="filtrosContainer">
+
+        <form method="GET">
+
+            <select name="orden" onchange="this.form.submit()">
+
+                <option value="nombre_asc"  <?php if ($orden === 'nombre_asc')  echo 'selected'; ?>>Nombre A → Z</option>
+                <option value="nombre_desc" <?php if ($orden === 'nombre_desc') echo 'selected'; ?>>Nombre Z → A</option>
+
+                <option value="nota_desc"   <?php if ($orden === 'nota_desc')   echo 'selected'; ?>>Mejor puntuados</option>
+                <option value="nota_asc"    <?php if ($orden === 'nota_asc')    echo 'selected'; ?>>Peor puntuados</option>
+
+                <option value="fecha_desc"  <?php if ($orden === 'fecha_desc')  echo 'selected'; ?>>Más recientes</option>
+                <option value="fecha_asc"   <?php if ($orden === 'fecha_asc')   echo 'selected'; ?>>Más antiguos</option>
+
+            </select>
+
+        </form>
+
     </div>
 
 </div>
@@ -179,9 +236,11 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
             <?php foreach ($juegos as $juego): ?>
 
-                <a class="juegoLink"
-                   href="juego.php?id=<?php echo (int)$juego['id_videojuego']; ?>"
-                   data-titulo="<?php echo htmlspecialchars(strtolower($juego['titulo'])); ?>">
+                <a
+                    class="juegoLink"
+                    href="juego.php?id=<?php echo (int)$juego['id_videojuego']; ?>"
+                    data-titulo="<?php echo htmlspecialchars(strtolower($juego['titulo'])); ?>"
+                >
 
                     <article class="juego">
 
@@ -189,7 +248,8 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
                             <img
                                 src="<?php echo htmlspecialchars(resolverPortada($juego['portada'])); ?>"
-                                alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
+                                alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>"
+                            >
 
                         </div>
 
@@ -200,9 +260,9 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                             </div>
 
                             <?php
-                            $rating = $juego['rating_medio'];
-                            $estrellas = ratingAEstrellas($rating);
-                            $porcentaje = ($estrellas / 5) * 100;
+                            $rating      = $juego['rating_medio'];
+                            $estrellas   = ratingAEstrellas($rating);
+                            $porcentaje  = ($estrellas / 5) * 100;
                             ?>
 
                             <div class="puntuacionJuego">
@@ -244,11 +304,11 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     <div class="paginacion">
 
         <?php if ($pagina > 1): ?>
-            <a href="?pagina=<?php echo $pagina - 1; ?>" class="flecha">←</a>
+            <a href="?pagina=<?php echo $pagina - 1; ?>&orden=<?php echo $orden; ?>" class="flecha">←</a>
         <?php endif; ?>
 
         <?php if ($pagina < $totalPaginas): ?>
-            <a href="?pagina=<?php echo $pagina + 1; ?>" class="flecha">→</a>
+            <a href="?pagina=<?php echo $pagina + 1; ?>&orden=<?php echo $orden; ?>" class="flecha">→</a>
         <?php endif; ?>
 
     </div>
@@ -257,39 +317,37 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
 
 <footer>
-
     <p>&copy; 2026 SalsaBox. Creado para los gamers.</p>
-
 </footer>
 
 
 <script>
 
-    const buscador = document.getElementById('buscadorJuegos');
-    const tarjetas = document.querySelectorAll('.juegoLink');
-    const sinResultados = document.getElementById('sinResultados');
+const buscador = document.getElementById('buscadorJuegos');
+const tarjetas = document.querySelectorAll('.juegoLink');
+const sinResultados = document.getElementById('sinResultados');
 
-    buscador.addEventListener('input', function () {
+buscador.addEventListener('input', function () {
 
-        const termino = this.value.toLowerCase().trim();
-        let visibles = 0;
+    const termino = this.value.toLowerCase().trim();
+    let visibles = 0;
 
-        tarjetas.forEach(function (tarjeta) {
+    tarjetas.forEach(function (tarjeta) {
 
-            const titulo = tarjeta.dataset.titulo;
-            const coincide = titulo.includes(termino);
+        const titulo = tarjeta.dataset.titulo;
+        const coincide = titulo.includes(termino);
 
-            tarjeta.style.display = coincide ? 'block' : 'none';
+        tarjeta.style.display = coincide ? 'block' : 'none';
 
-            if (coincide) {
-                visibles++;
-            }
-
-        });
-
-        sinResultados.hidden = visibles !== 0;
+        if (coincide) {
+            visibles++;
+        }
 
     });
+
+    sinResultados.hidden = visibles !== 0;
+
+});
 
 </script>
 

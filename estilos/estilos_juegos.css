@@ -145,6 +145,26 @@ background:var(--accent-color);
 color:black;
 transform:scale(1.1);
 }
+.filtrosContainer{
+    margin-top:15px;
+    display:flex;
+    justify-content:center;
+}
+
+.filtrosContainer select{
+    padding:10px 14px;
+    border-radius:8px;
+    border:1px solid #2c3440;
+    background:var(--card-bg);
+    color:var(--text-main);
+    font-size:0.95rem;
+    cursor:pointer;
+}
+
+.filtrosContainer select:focus{
+    outline:none;
+    border-color:var(--accent-color);
+}
 
 @media (max-width: 900px) {
     header {
