@@ -1,9 +1,9 @@
 <?php
 session_start();
-
 require_once __DIR__ . '/../../db/conexiones.php';
 
 $comunidades = [];
+$id_usuario_sesion = $_SESSION['id_usuario'] ?? 0;
 
 if (isset($conexion) && $conexion) {
    $sqlComunidades = "
@@ -13,10 +13,10 @@ if (isset($conexion) && $conexion) {
             c.banner_url,
             v.portada AS portada_juego,
             v.titulo AS juego_nombre,
-            COUNT(mc.id_usuario) AS total_miembros
+            (SELECT COUNT(*) FROM Miembro_Comunidad WHERE id_comunidad = c.id_comunidad) AS total_miembros,
+            (SELECT COUNT(*) FROM Miembro_Comunidad WHERE id_comunidad = c.id_comunidad AND id_usuario = $id_usuario_sesion) AS ya_es_miembro
         FROM Comunidad c
         LEFT JOIN Videojuego v ON c.id_videojuego_principal = v.id_videojuego
-        LEFT JOIN Miembro_Comunidad mc ON mc.id_comunidad = c.id_comunidad
         GROUP BY c.id_comunidad, c.nombre, v.portada, v.titulo
         ORDER BY total_miembros DESC, c.nombre ASC";
 
@@ -58,14 +58,15 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             </ul>
         </nav>
         <?php if(!isset($_SESSION['tag'])) : ?>
-            <a href="../sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesion</a>
+            <a href="../sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
         <?php else: ?>
             <a class="tag" href="../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
         <?php endif; ?>
     </header>
 
     <div class="central">
-        <h1>Comunidades</h1> <a href="agregar_comunidad.php" class="btn-agregar">Añadir Comunidad</a>
+        <h1>Comunidades</h1> 
+        <a href="agregar_comunidad.php" class="btn-agregar">Añadir Comunidad</a>
         <p>Únete a grupos de tus juegos favoritos, comparte clips y conoce a otros jugadores.</p>
     </div>
 
@@ -86,7 +87,21 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                             
                             <div class="acciones-com">
                                 <a href="ver_comunidad.php?id=<?php echo $com['id_comunidad']; ?>" class="btn-entrar">Ver Muro</a>
-                                <button class="botonUnirse">Unirse</button>
+                                
+                                <?php if (!isset($_SESSION['id_usuario'])): ?>
+                                    <a href="../sesiones/login/login.php" class="botonUnirse">Unirse</a>
+                                <?php else: ?>
+                                    <button 
+                                        type="button"
+                                        class="botonUnirse btn-accion-comunidad" 
+                                        data-id="<?php echo $com['id_comunidad']; ?>" 
+                                        data-accion="<?php echo ($com['ya_es_miembro'] > 0) ? 'salir' : 'unirse'; ?>"
+                                        style="font-weight: bold; border-radius: 8px; padding: 8px 15px; cursor: pointer; <?php echo ($com['ya_es_miembro'] > 0) 
+                                            ? 'background-color: #ff4d4d; color: #000; border: 2px solid #cc0000;' 
+                                            : 'background-color: #f1c40f; color: #000; border: 2px solid #f1c40f;'; ?>">
+                                        <?php echo ($com['ya_es_miembro'] > 0) ? 'Abandonar' : 'Unirse'; ?>
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </article>
@@ -100,5 +115,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     <footer>
         <p>&copy; 2026 SalsaBox. Creado para los gamers.</p>
     </footer>
+
+    <script src="../../js/comunidades.js"></script>
 </body>
 </html>
