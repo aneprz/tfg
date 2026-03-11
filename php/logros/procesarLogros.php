@@ -6,12 +6,12 @@ $busqueda = isset($_GET['buscar']) ? trim($_GET['buscar']) : '';
 $sql = "SELECT nombre_logro, descripcion, puntos_logro FROM Logros";
 
 if (!empty($busqueda)) {
-    $sql .= " WHERE nombre_logro LIKE ? OR descripcion LIKE ? ORDER BY nombre_logro ASC";
+    $sql .= " WHERE nombre_logro LIKE ? OR descripcion LIKE ? ORDER BY nombre_logro ASC limit 500";
     $stmt = $conexion->prepare($sql);
     $termino = "%$busqueda%";
     $stmt->bind_param("ss", $termino, $termino);
 } else {
-    $sql .= " ORDER BY puntos_logro DESC";
+    $sql .= " ORDER BY puntos_logro DESC limit 500";
     $stmt = $conexion->prepare($sql);
 }
 

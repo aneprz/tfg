@@ -123,6 +123,28 @@ main {
     content: "★★★★★";
     color: gold;
 }
+.paginacion{
+margin-top:40px;
+display:flex;
+justify-content:center;
+gap:20px;
+}
+
+.paginacion .flecha{
+font-size:1.5rem;
+padding:10px 18px;
+background:#2c3440;
+border-radius:8px;
+text-decoration:none;
+color:white;
+transition:0.2s;
+}
+
+.paginacion .flecha:hover{
+background:var(--accent-color);
+color:black;
+transform:scale(1.1);
+}
 
 @media (max-width: 900px) {
     header {
