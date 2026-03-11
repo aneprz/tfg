@@ -36,6 +36,10 @@ final class AddSteamAchievements extends AbstractMigration
                 'limit' => 255,
                 'null' => true
             ])
+            ->addColumn('steam_api_name', 'string', [
+                'limit' => 255,
+                'null' => true
+            ])
             ->addColumn('icono_gris', 'string', [
                 'limit' => 255,
                 'null' => true

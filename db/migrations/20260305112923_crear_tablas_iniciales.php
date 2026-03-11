@@ -57,14 +57,14 @@ final class CrearTablasIniciales extends AbstractMigration
 
         // Videojuego
         $this->table('Videojuego', ['id' => 'id_videojuego'])
-            ->addColumn('titulo', 'string', ['limit' => 255])
+            ->addColumn('titulo', 'string', ['limit' => 500])
             ->addColumn('descripcion', 'text', ['null' => true])
             ->addColumn('fecha_lanzamiento', 'date', ['null' => true])
-            ->addColumn('developer', 'string', ['limit' => 255, 'null' => true])
+            ->addColumn('developer', 'string', ['limit' => 500, 'null' => true])
             ->addColumn('rating_medio', 'decimal', ['precision' => 3, 'scale' => 1, 'null' => true])
             ->addColumn('portada', 'string', ['limit' => 500, 'null' => true])
-            ->addColumn('genero', 'string', ['limit' => 255, 'null' => true])
-            ->addColumn('plataforma', 'string', ['limit' => 255, 'null' => true])
+            ->addColumn('genero', 'string', ['limit' => 500, 'null' => true])
+            ->addColumn('plataforma', 'string', ['limit' => 500, 'null' => true])
             ->create();
 
         // Genero

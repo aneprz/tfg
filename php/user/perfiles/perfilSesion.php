@@ -6,6 +6,21 @@ if (!isset($_SESSION['tag'])) {
     header("Location: ../../../index.php");
     exit();
 }
+if(isset($_SESSION["steam_vinculado"])): ?>
+
+<script>
+alert("Cuenta de Steam vinculada correctamente");
+</script>
+
+<?php
+unset($_SESSION["steam_vinculado"]);
+endif;
+
+if(isset($_SESSION["steam_sync"])){
+    echo "<script>alert('".$_SESSION["steam_sync"]."');</script>";
+    unset($_SESSION["steam_sync"]);
+}
+
 
 include 'statsUsuario.php'; 
 
@@ -66,7 +81,16 @@ $img = (empty($avatar_db)) ? "../../../media/perfil_default.jpg" : "../../../med
                     </div>
                 </a>
             </div>
-
+            <div>
+                <a href="../../../Steam/steam_login.php">
+                    <img src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_01.png">
+                </a>
+            </div>
+            <div>
+                <a href="../../../Steam/sync_logros_steam.php">
+                    Sincronizar logros de Steam
+                </a>
+            </div>
             <div class="perfil-body">
                 <h3>Sobre ti</h3>
                 <p class="bio-text">
