@@ -4,6 +4,17 @@ require "../db/conexiones.php";
 require "credenciales.php";
 
 /* =========================
+   PREPARAR INSERT
+   ========================= */
+
+$stmt = $conexion->prepare("
+INSERT IGNORE INTO Logros
+(id_videojuego,nombre_logro,descripcion,puntos_logro,icono,icono_gris,porcentaje_global,steam_api_name)
+VALUES (?,?,?,?,?,?,?,?)
+");
+
+
+/* =========================
    OBTENER JUEGOS CON APPID
    ========================= */
 
@@ -64,19 +75,19 @@ while($row = mysqli_fetch_assoc($result)){
         }
     }
 
-
     /* =========================
-       INSERTAR LOGROS
+       TRANSACCION (MUCHO MAS RAPIDO)
        ========================= */
+
+    $conexion->begin_transaction();
 
     foreach($achievements as $a){
 
-        $nombre = mysqli_real_escape_string($conexion,$a["displayName"] ?? "");
-        $descripcion = mysqli_real_escape_string($conexion,$a["description"] ?? "");
-        $icono = mysqli_real_escape_string($conexion,$a["icon"] ?? "");
-        $icono_gris = mysqli_real_escape_string($conexion,$a["icongray"] ?? "");
-
-        $steam_api_name = mysqli_real_escape_string($conexion,$a["name"]);
+        $nombre = $a["displayName"] ?? "";
+        $descripcion = $a["description"] ?? "";
+        $icono = $a["icon"] ?? "";
+        $icono_gris = $a["icongray"] ?? "";
+        $steam_api_name = $a["name"];
 
         $porcentaje = $stats[$steam_api_name] ?? null;
 
@@ -84,7 +95,7 @@ while($row = mysqli_fetch_assoc($result)){
 
 
         /* =========================
-           CALCULAR PUNTOS SEGÚN %
+           CALCULAR PUNTOS
            ========================= */
 
         if($porcentaje === null){
@@ -110,17 +121,24 @@ while($row = mysqli_fetch_assoc($result)){
         }
 
 
-        mysqli_query($conexion,"
-        INSERT IGNORE INTO Logros
-        (id_videojuego,nombre_logro,descripcion,puntos_logro,icono,icono_gris,porcentaje_global,steam_api_name)
-        VALUES
-        ('$id_videojuego','$nombre','$descripcion','$puntos','$icono','$icono_gris','$porcentaje','$steam_api_name')
-        ");
+        $stmt->bind_param(
+            "ississds",
+            $id_videojuego,
+            $nombre,
+            $descripcion,
+            $puntos,
+            $icono,
+            $icono_gris,
+            $porcentaje,
+            $steam_api_name
+        );
+
+        $stmt->execute();
 
         echo "🏆 $nombre ($porcentaje%) → $puntos puntos\n";
     }
 
-    sleep(1);
+    $conexion->commit();
 }
 
 echo "\nIMPORTACION DE LOGROS FINALIZADA\n";

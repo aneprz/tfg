@@ -4,8 +4,8 @@ require "../db/conexiones.php";
 require "credenciales.php";
 
 /* =========================
-   1️⃣ OBTENER TOKEN TWITCH
-   ========================= */
+1️⃣ OBTENER TOKEN TWITCH
+========================= */
 
 $url = "https://id.twitch.tv/oauth2/token";
 
@@ -31,10 +31,18 @@ $token = $result["access_token"];
 
 
 /* =========================
-   2️⃣ IMPORTAR JUEGOS
-   ========================= */
+2️⃣ IMPORTAR JUEGOS
+========================= */
 
 $limite = 500;
+
+/* PREPARAR INSERT (MUCHO MÁS RÁPIDO) */
+
+$stmt = $conexion->prepare("
+INSERT IGNORE INTO Videojuego
+(titulo, descripcion, fecha_lanzamiento, developer, rating_medio, portada, genero, plataforma, trailer_youtube_id)
+VALUES (?,?,?,?,?,?,?,?,?)
+");
 
 for ($offset = 0; $offset < 5000; $offset += $limite) {
 
@@ -50,7 +58,8 @@ for ($offset = 0; $offset < 5000; $offset += $limite) {
     cover.url,
     genres.name,
     platforms.name,
-    involved_companies.company.name;
+    involved_companies.company.name,
+    videos.video_id;
     where rating != null
     & cover != null
     & summary != null;
@@ -78,13 +87,8 @@ for ($offset = 0; $offset < 5000; $offset += $limite) {
 
     foreach ($games as $game) {
 
-        /* TITULO */
-
-        $titulo = mysqli_real_escape_string($conexion, $game["name"] ?? '');
-
-        /* DESCRIPCION */
-
-        $descripcion = mysqli_real_escape_string($conexion, $game["summary"] ?? '');
+        $titulo = $game["name"] ?? '';
+        $descripcion = $game["summary"] ?? '';
 
         /* FECHA */
 
@@ -93,7 +97,7 @@ for ($offset = 0; $offset < 5000; $offset += $limite) {
             $fecha = date("Y-m-d", $game["first_release_date"]);
         }
 
-        /* RATING (0-10) */
+        /* RATING */
 
         $rating = null;
 
@@ -109,10 +113,7 @@ for ($offset = 0; $offset < 5000; $offset += $limite) {
         $developer = null;
 
         if(isset($game["involved_companies"][0]["company"]["name"])) {
-            $developer = mysqli_real_escape_string(
-                $conexion,
-                $game["involved_companies"][0]["company"]["name"]
-            );
+            $developer = $game["involved_companies"][0]["company"]["name"];
         }
 
         /* PORTADA HD */
@@ -122,9 +123,15 @@ for ($offset = 0; $offset < 5000; $offset += $limite) {
         if(isset($game["cover"]["url"])) {
 
             $portada = "https:" . $game["cover"]["url"];
+            $portada = str_replace("t_thumb", "t_1080p", $portada);
+        }
 
-            // cambiar miniatura por HD
-            $portada = str_replace("t_thumb", "t_cover_big", $portada);
+        /* TRAILER */
+
+        $trailer = null;
+
+        if(isset($game["videos"][0]["video_id"])) {
+            $trailer = $game["videos"][0]["video_id"];
         }
 
         /* GENEROS */
@@ -137,7 +144,7 @@ for ($offset = 0; $offset < 5000; $offset += $limite) {
             }
         }
 
-        $genero = mysqli_real_escape_string($conexion, implode(", ", $generos));
+        $genero = implode(", ", $generos);
 
         /* PLATAFORMAS */
 
@@ -149,10 +156,10 @@ for ($offset = 0; $offset < 5000; $offset += $limite) {
             }
         }
 
-        $plataforma = mysqli_real_escape_string($conexion, implode(", ", $plataformas));
+        $plataforma = implode(", ", $plataformas);
 
 
-        /* FILTRO DATOS COMPLETOS */
+        /* FILTRO DATOS */
 
         if(
             empty($titulo) ||
@@ -169,19 +176,23 @@ for ($offset = 0; $offset < 5000; $offset += $limite) {
 
         /* INSERT */
 
-        $sql = "
-        INSERT INTO Videojuego
-        (titulo, descripcion, fecha_lanzamiento, developer, rating_medio, portada, genero, plataforma)
-        VALUES
-        ('$titulo','$descripcion','$fecha','$developer','$rating','$portada','$genero','$plataforma')
-        ";
+        $stmt->bind_param(
+            "sssssssss",
+            $titulo,
+            $descripcion,
+            $fecha,
+            $developer,
+            $rating,
+            $portada,
+            $genero,
+            $plataforma,
+            $trailer
+        );
 
-        mysqli_query($conexion,$sql);
+        $stmt->execute();
 
         echo "Insertado: $titulo\n";
     }
-
-    sleep(1);
 }
 
 echo "IMPORTACION FINALIZADA\n";
