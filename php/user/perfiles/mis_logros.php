@@ -10,12 +10,19 @@ if (!isset($_SESSION['id_usuario'])) {
 $id_usuario = $_SESSION['id_usuario'];
 
 $query = $conexion->prepare("
-    SELECT l.nombre_logro, l.descripcion, l.puntos_logro, lu.fecha_obtencion 
+    SELECT 
+        l.nombre_logro,
+        l.descripcion,
+        l.puntos_logro,
+        lu.fecha_obtencion,
+        v.titulo AS videojuego
     FROM Logros_Usuario lu
     JOIN Logros l ON lu.id_logro = l.id_logro
+    JOIN Videojuego v ON l.id_videojuego = v.id_videojuego
     WHERE lu.id_usuario = ?
     ORDER BY lu.fecha_obtencion DESC
 ");
+
 $query->bind_param("i", $id_usuario);
 $query->execute();
 $resultado = $query->get_result();
@@ -47,8 +54,11 @@ $total_logros = $resultado->num_rows;
                         <p class="item-desc">
                             <?php echo htmlspecialchars($row['descripcion']); ?>
                         </p>
+                        <p class="item-desc">
+                            <?php echo htmlspecialchars($row['videojuego']); ?>
+                        </p>
                         <span class="fecha">
-                            Obtenido el: <?php echo date('d/m/Y', strtotime($row['fecha_obtencion'])); ?>
+                            <?php echo date('d/m/Y', strtotime($row['fecha_obtencion'])); ?>
                         </span>
                     </div>
                 </div>
