@@ -14,6 +14,14 @@ function estrellasDesdeRating($rating) {
     return str_repeat('★', $llenas) . str_repeat('☆', 5 - $llenas);
 }
 
+function ratingAEstrellas($rating) {
+    if ($rating === null || $rating === '') {
+        return 0;
+    }
+
+    return max(0, min(5, (float)$rating / 2));
+}
+
 function resolverPortada($portada) {
     $portada = is_string($portada) ? trim($portada) : '';
 
@@ -48,6 +56,7 @@ if (isset($conexion) && $conexion) {
         SELECT id_videojuego, titulo, rating_medio, portada
         FROM Videojuego
         ORDER BY titulo ASC
+        LIMIT 500
     ";
 
     $resultado = mysqli_query($conexion, $sql);
@@ -115,11 +124,19 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                             </div>
                             <div class="infoJuego">
                                 <div class="tituloJuego"><?php echo htmlspecialchars($juego['titulo']); ?></div>
+                                <?php
+                                    $rating = $juego['rating_medio'];
+                                    $estrellas = ratingAEstrellas($rating);
+                                    $porcentaje = ($estrellas / 5) * 100;
+                                ?>
+
                                 <div class="puntuacionJuego">
-                                    <?php
-                                        $rating = $juego['rating_medio'];
-                                        echo estrellasDesdeRating($rating) . ' ' . ($rating !== null ? number_format((float) $rating, 1) : 'Sin nota');
-                                    ?>
+                                    <div class="estrellas">
+                                        <div class="relleno" style="width: <?php echo $porcentaje; ?>%"></div>
+                                    </div>
+                                    <span class="nota">
+                                        <?php echo ($rating !== null ? number_format((float)$rating,1) : 'Sin nota'); ?>
+                                    </span>
                                 </div>
                             </div>
                         </article>

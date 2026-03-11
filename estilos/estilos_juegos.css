@@ -99,6 +99,31 @@ main {
     animation: pulseGreen 2s infinite;
 }
 
+.estrellas {
+    position: relative;
+    display: inline-block;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.estrellas::before {
+    content: "★★★★★";
+    color: #ccc;
+}
+
+.estrellas .relleno {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.estrellas .relleno::before {
+    content: "★★★★★";
+    color: gold;
+}
+
 @media (max-width: 900px) {
     header {
         flex-wrap: wrap;
