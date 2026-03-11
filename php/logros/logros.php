@@ -50,6 +50,12 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         <div class="buscadorContainer">
             <input type="text" id="input-busqueda" placeholder="Buscar por nombre de logro o videojuego..." aria-label="Buscar logro">
         </div>
+        <div class="filtros-logros">
+            <select id="filtroLogros">
+                <option value="mas">Más logros</option>
+                <option value="menos">Menos logros</option>
+            </select>
+        </div>
     </div>
 
     <main>
@@ -66,29 +72,68 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     </footer>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const inputBusqueda = document.getElementById('input-busqueda');
-        const contenedor = document.getElementById('contenedor-logros');
-        const sinResultados = document.getElementById('sinResultados');
 
-        const fetchLogros = () => {
-            const texto = inputBusqueda.value;
-            fetch(`procesarLogros.php?buscar=${encodeURIComponent(texto)}&ajax=true`)
-                .then(response => response.text())
-                .then(html => {
-                    contenedor.innerHTML = html;
-                    if (html.includes('no-results') || html.trim() === "") {
-                        sinResultados.hidden = false;
-                    } else {
-                        sinResultados.hidden = true;
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        };
+        document.addEventListener('DOMContentLoaded', () => {
 
-        inputBusqueda.addEventListener('input', fetchLogros);
-        fetchLogros();
-    });
+            const inputBusqueda = document.getElementById('input-busqueda');
+            const contenedor = document.getElementById('contenedor-logros');
+            const sinResultados = document.getElementById('sinResultados');
+            const filtro = document.getElementById('filtroLogros');
+
+            let pagina = 1;
+
+            const fetchLogros = () => {
+
+                const texto = inputBusqueda.value;
+                const tipoFiltro = filtro.value;
+
+                fetch(`procesarLogros.php?buscar=${encodeURIComponent(texto)}&filtro=${tipoFiltro}&pagina=${pagina}&ajax=true`)
+                    .then(response => response.text())
+                    .then(html => {
+
+                        contenedor.innerHTML = html;
+
+                        if (html.includes('no-results') || html.trim() === "") {
+                            sinResultados.hidden = false;
+                        } else {
+                            sinResultados.hidden = true;
+                        }
+
+                        document.querySelectorAll('.pag-btn').forEach(btn => {
+
+                            btn.addEventListener('click', () => {
+
+                                pagina = btn.dataset.pagina;
+
+                                fetchLogros();
+
+                                window.scrollTo({
+                                    top: 0,
+                                    behavior: 'smooth'
+                                });
+
+                            });
+
+                        });
+
+                    });
+
+            };
+
+            inputBusqueda.addEventListener('input', () => {
+                pagina = 1;
+                fetchLogros();
+            });
+
+            filtro.addEventListener('change', () => {
+                pagina = 1;
+                fetchLogros();
+            });
+
+            fetchLogros();
+
+        });
+
     </script>
 </body>
 </html>
