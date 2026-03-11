@@ -1,254 +1,255 @@
 <?php
 
-    require "../db/conexiones.php";
+require "../db/conexiones.php";
 
-    /* =========================
-    CACHE STEAM LIST
-    ========================= */
 
-    $cache="steam_cache.json";
+/* =========================
+CACHE LISTA STEAM
+========================= */
 
-    if(file_exists($cache)){
+$cache="steam_cache.json";
 
-    $json=file_get_contents($cache);
+if(file_exists($cache)){
+$json=file_get_contents($cache);
+}else{
 
-    }else{
+$url="https://raw.githubusercontent.com/dgibbs64/SteamCMD-AppID-List/master/steamcmd_appid.json";
 
-    $url="https://raw.githubusercontent.com/dgibbs64/SteamCMD-AppID-List/master/steamcmd_appid.json";
+$json=file_get_contents($url);
+file_put_contents($cache,$json);
 
-    $json=file_get_contents($url);
+}
 
-    file_put_contents($cache,$json);
+$data=json_decode($json,true);
+$steamGames=$data["applist"]["apps"] ?? $data;
 
-    }
+echo "Steam cargados: ".count($steamGames)."\n";
 
-    $data=json_decode($json,true);
 
-    $steamGames=$data["applist"]["apps"] ?? $data;
+/* =========================
+NORMALIZAR TEXTO
+========================= */
 
-    echo "Steam cargados: ".count($steamGames)."\n";
+function norm($t){
 
+$t=strtolower($t);
 
-    /* =========================
-    NORMALIZAR
-    ========================= */
+$t=str_replace(
+["®","™","’","'","-","_",":","(",")","[","]","!","?","."],
+"",
+$t
+);
 
-    function norm($t){
+$t=preg_replace('/[^a-z0-9 ]/','',$t);
 
-    $t=strtolower($t);
+$t=preg_replace('/\s+/',' ',$t);
 
-    $t=str_replace(
-    ["®","™","’","'","-","_",":","(",")","[","]","!","?","."],
-    "",
-    $t
-    );
+return trim($t);
 
-    $t=preg_replace('/[^a-z0-9 ]/','',$t);
+}
 
-    $t=preg_replace('/\s+/',' ',$t);
 
-    return trim($t);
-    }
+/* =========================
+TRIGRAM
+========================= */
 
+function trigrams($s){
 
-    /* =========================
-    TRIGRAM
-    ========================= */
+$s="  ".$s." ";
+$tr=[];
 
-    function trigrams($s){
+for($i=0;$i<strlen($s)-2;$i++){
+$tr[]=substr($s,$i,3);
+}
 
-    $s="  ".$s." ";
+return $tr;
 
-    $tr=[];
+}
 
-    for($i=0;$i<strlen($s)-2;$i++){
+function trigram_similarity($a,$b){
 
-    $tr[]=substr($s,$i,3);
+$ta=trigrams($a);
+$tb=trigrams($b);
 
-    }
+$inter=array_intersect($ta,$tb);
 
-    return $tr;
+return count($inter)/max(count($ta),count($tb));
 
-    }
+}
 
-    function trigram_similarity($a,$b){
 
-    $ta=trigrams($a);
-    $tb=trigrams($b);
+/* =========================
+INDEXAR STEAM
+========================= */
 
-    $inter=array_intersect($ta,$tb);
+$exact=[];
+$tokenIndex=[];
+$steamData=[];
 
-    return count($inter) / max(count($ta),count($tb));
+foreach($steamGames as $g){
 
-    }
+if(empty($g["name"])) continue;
 
+$name=norm($g["name"]);
+if(!$name) continue;
 
-    /* =========================
-    INDEXAR STEAM
-    ========================= */
+$appid=$g["appid"];
 
-    $index=[];
+$tokens=explode(" ",$name);
 
-    foreach($steamGames as $g){
+$steamData[$name]=[
+"appid"=>$appid,
+"tokens"=>$tokens
+];
 
-    if(empty($g["name"])) continue;
+$exact[$name]=$appid;
 
-    $name=norm($g["name"]);
+foreach($tokens as $tok){
+$tokenIndex[$tok][]=$name;
+}
 
-    if(!$name) continue;
+}
 
-    $appid=$g["appid"];
+echo "Indice creado\n";
 
-    $tokens=explode(" ",$name);
 
-    foreach($tokens as $tok){
+/* =========================
+PREPARED UPDATE
+========================= */
 
-    $index[$tok][]=[
-    "name"=>$name,
-    "appid"=>$appid
-    ];
+$stmt=$conexion->prepare("
+UPDATE Videojuego
+SET steam_appid=?
+WHERE id_videojuego=?
+");
 
-    }
 
-    }
+/* =========================
+BUSCAR MATCHES
+========================= */
 
-    echo "Indice tokens creado\n";
+$result=mysqli_query($conexion,"
+SELECT id_videojuego,titulo
+FROM Videojuego
+WHERE steam_appid IS NULL
+");
 
+$total=0;
+$encontrados=0;
 
-    /* =========================
-    PREPARED UPDATE
-    ========================= */
+$conexion->begin_transaction();
 
-    $stmt=$conexion->prepare("
-    UPDATE Videojuego
-    SET steam_appid=?
-    WHERE id_videojuego=?
-    ");
+while($row=mysqli_fetch_assoc($result)){
 
+$total++;
 
-    /* =========================
-    BUSCAR MATCHES
-    ========================= */
+$id=$row["id_videojuego"];
+$titulo=$row["titulo"];
 
-    $result=mysqli_query($conexion,"
-    SELECT id_videojuego,titulo
-    FROM Videojuego
-    WHERE steam_appid IS NULL
-    ");
+$t=norm($titulo);
 
-    $total=0;
-    $encontrados=0;
 
-    $conexion->begin_transaction();
+/* =========================
+1️⃣ MATCH EXACTO
+========================= */
 
-    while($row=mysqli_fetch_assoc($result)){
+if(isset($exact[$t])){
 
-    $total++;
+$stmt->bind_param("ii",$exact[$t],$id);
+$stmt->execute();
 
-    $id=$row["id_videojuego"];
-    $titulo=$row["titulo"];
+$encontrados++;
 
-    $t=norm($titulo);
+echo "✔ $titulo → ".$exact[$t]."\n";
 
-    $tokens=explode(" ",$t);
+continue;
 
-    $candidatos=[];
+}
 
 
-    /* =========================
-    BUSCAR POR TOKENS
-    ========================= */
+/* =========================
+2️⃣ BUSCAR CANDIDATOS
+========================= */
 
-    foreach($tokens as $tok){
+$tokens=explode(" ",$t);
 
-    if(isset($index[$tok])){
+$candidatos=[];
 
-    $candidatos=array_merge($candidatos,$index[$tok]);
+foreach($tokens as $tok){
 
-    }
+if(isset($tokenIndex[$tok])){
 
-    }
+$candidatos=array_merge($candidatos,$tokenIndex[$tok]);
 
+}
 
-    /* =========================
-    QUITAR DUPLICADOS
-    ========================= */
+}
 
-    $tmp=[];
+$candidatos=array_unique($candidatos);
 
-    foreach($candidatos as $c){
 
-    $tmp[$c["name"]]=$c;
+/* =========================
+3️⃣ SIMILARIDAD
+========================= */
 
-    }
+$mejorScore=0;
+$mejorApp=null;
 
-    $candidatos=array_values($tmp);
+foreach($candidatos as $name){
 
+$c=$steamData[$name];
 
-    /* =========================
-    CALCULAR SCORE
-    ========================= */
+$tokOverlap=count(array_intersect($tokens,$c["tokens"]));
 
-    $mejorScore=0;
-    $mejorApp=null;
+if($tokOverlap==0) continue;
 
-    foreach($candidatos as $c){
+$tokScore=$tokOverlap/max(count($tokens),count($c["tokens"]));
 
-    $nombre=$c["name"];
+if($tokScore<0.3) continue;
 
-    $trigram=trigram_similarity($t,$nombre);
+$trigram=trigram_similarity($t,$name);
 
-    $tokOverlap=count(array_intersect(
-    explode(" ",$t),
-    explode(" ",$nombre)
-    ));
+$score=($trigram*0.7)+($tokScore*0.3);
 
-    $tokScore=$tokOverlap/max(
-    count(explode(" ",$t)),
-    count(explode(" ",$nombre))
-    );
+if($score>$mejorScore){
 
-    $score=($trigram*0.7)+($tokScore*0.3);
+$mejorScore=$score;
+$mejorApp=$c["appid"];
 
-    if($score>$mejorScore){
+}
 
-    $mejorScore=$score;
-    $mejorApp=$c["appid"];
+}
 
-    }
 
-    }
+/* =========================
+UMBRAL
+========================= */
 
+if($mejorScore>0.55){
 
-    /* =========================
-    UMBRAL
-    ========================= */
+$stmt->bind_param("ii",$mejorApp,$id);
+$stmt->execute();
 
-    if($mejorScore>0.55){
+$encontrados++;
 
-    $stmt->bind_param("ii",$mejorApp,$id);
-    $stmt->execute();
+echo "✔ $titulo → $mejorApp (score $mejorScore)\n";
 
-    $encontrados++;
+}else{
 
-    echo "✔ $titulo → $mejorApp (score $mejorScore)\n";
+echo "✖ $titulo\n";
 
-    }else{
+}
 
-    echo "✖ $titulo\n";
+}
 
-    }
+$conexion->commit();
 
-    }
 
-    $conexion->commit();
+/* =========================
+RESULTADO
+========================= */
 
-
-    /* =========================
-    RESULTADO
-    ========================= */
-
-    echo "\n";
-    echo "Total juegos: $total\n";
-    echo "Steam encontrados: $encontrados\n";
-    echo "Finalizado\n";
+echo "\n";
+echo "Total juegos: $total\n";
+echo "Steam encontrados: $encontrados\n";
+echo "Finalizado\n";
