@@ -1,13 +1,7 @@
 <?php
     session_start();
     require_once __DIR__ . '/../../../../../db/conexiones.php';
-
-    if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
-        header("Location: ../../index.php");
-        exit();
-    }
-    
-    $res = $conexion->query("SELECT id_logro, nombre_logro, puntos_logro FROM Logros ORDER BY nombre_logro ASC");
+    if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) { header("Location: ../../index.php"); exit(); }
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -18,6 +12,25 @@
     <link rel="stylesheet" href="../../../../../estilos/estilos_indexAdmin.css">
     <link rel="stylesheet" href="../../../../../estilos/estilos_index.css">
     <link rel="icon" href="../../../../../media/logoPlatino.png">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        .dataTables_wrapper .dataTables_length select { background-color: #2c3440 !important; color: #ffffff !important; border: 1px solid #444; padding: 5px; }
+        .dataTables_wrapper .dataTables_filter input { background-color: #2c3440 !important; color: #ffffff !important; border: 1px solid #444; }
+        .dataTables_wrapper { color: #ffffff !important; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button { color: #ffffff !important; }
+        .dataTables_wrapper .dataTables_info { color: #ffffff !important; }
+        #tablaLogros thead th { border-bottom: 2px solid #e0be00 !important; }
+        .select2-container--default .select2-selection--single { background-color: #2c3440 !important; border: 1px solid #444 !important; height: 40px; }
+        .select2-container--default .select2-selection__rendered { color: #ffffff !important; line-height: 40px !important; }
+        .select2-dropdown { background-color: #2c3440 !important; border: 1px solid #444 !important; }
+        .select2-search--dropdown .select2-search__field { background-color: #2c3440 !important; color: #ffffff !important; border: 1px solid #555 !important; }
+        .select2-results__option { color: #ffffff !important; }
+        .select2-results__option--highlighted { background-color: #e0be00 !important; color: #000 !important; }
+    </style>
 </head>
 <body>
     <header>
@@ -26,54 +39,48 @@
             <a href="../../../../../index.php" class="logo">Salsa<span>Box</span></a>
         </div>
         <nav>
-            <ul>
-                <li><a href="../gestionLogros.php">Volver al panel de gestión</a></li>
-            </ul>
+            <ul><li><a href="../gestionLogros.php">Volver al panel de gestión</a></li></ul>
         </nav>
         <?php if(isset($_SESSION['tag'])) : ?>
             <a class="tag" href="../../../../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
         <?php endif; ?>
     </header>
-
-    <div class="central">
-        <h1>Seleccionar Logro a Editar</h1>
-    </div>
-
+    <div class="central"><h1>Seleccionar Logro a Editar</h1></div>
     <div class="admin-container">
-        <input type="text" id="buscador" placeholder="🔍 Buscar logro por nombre..." onkeyup="filtrar()" style="width:100%; padding:12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px;">
-
-        <table class="admin-table" id="tablaLogros">
-            <thead>
-                <tr>
-                    <th>Título del Logro</th>
-                    <th>Puntos</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php while ($row = $res->fetch_assoc()): ?>
-                    <tr>
-                        <td><?php echo htmlspecialchars($row['nombre_logro']); ?></td>
-                        <td><?php echo (int)$row['puntos_logro']; ?></td>
-                        <td>
-                            <a href="editarLogro.php?id=<?php echo (int)$row['id_logro']; ?>" class="btn-editar">Editar</a>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
+        <div style="margin-bottom: 20px;">
+            <label>Filtrar por juego:</label>
+            <select id="filtroJuego" style="width: 300px;"></select>
+        </div>
+        <table id="tablaLogros" style="width: 100%;">
+            <thead><tr><th>Título</th><th>Puntos</th><th>Acción</th></tr></thead>
         </table>
     </div>
-
     <script>
-        function filtrar() {
-            let val = document.getElementById("buscador").value.toLowerCase();
-            let tabla = document.getElementById("tablaLogros");
-            let filas = tabla.getElementsByTagName("tr");
-            for(let i = 1; i < filas.length; i++) {
-                let titulo = filas[i].cells[0].textContent.toLowerCase();
-                filas[i].style.display = titulo.includes(val) ? "" : "none";
-            }
-        }
+        $(document).ready(function() {
+            $('#filtroJuego').select2({
+                placeholder: "Buscar juego...",
+                ajax: { url: 'buscar_juegos.php', dataType: 'json', delay: 250, data: function(p) { return {q: p.term}; }, processResults: function(d) { return {results: d.results}; } },
+                minimumInputLength: 2,
+                allowClear: true
+            });
+            var table = $('#tablaLogros').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "ajax": {
+                    "url": "obtener_datos_logros.php",
+                    "data": function(d) { d.id_juego = $('#filtroJuego').val(); }
+                },
+                "columns": [
+                    { "data": "nombre_logro" },
+                    { "data": "puntos_logro" },
+                    { "data": "id_logro", "render": function(data) {
+                        return `<a href="editarLogro.php?id=${data}" class="btn-editar">Editar</a>`;
+                    }}
+                ],
+                "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" }
+            });
+            $('#filtroJuego').on('change', function() { table.ajax.reload(); });
+        });
     </script>
 </body>
 </html>
