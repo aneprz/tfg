@@ -15,7 +15,7 @@ if (!empty($id_juego)) {
     $types .= "i";
 }
 
-$sql = "SELECT id_logro, nombre_logro FROM logros $where LIMIT ?, ?";
+$sql = "SELECT id_logro, nombre_logro, puntos_logro FROM logros $where LIMIT ?, ?";
 $params[] = $start;
 $params[] = $length;
 $types .= "ii";

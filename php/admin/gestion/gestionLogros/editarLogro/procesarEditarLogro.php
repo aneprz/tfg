@@ -14,10 +14,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
     $puntos = (int)$_POST['puntos'];
 
     if (!empty($_FILES["portada"]["name"])) {
-        $res = $conexion->prepare("SELECT imagen FROM Logro WHERE id_logro = ?");
+        $res = $conexion->prepare("SELECT imagen FROM logros WHERE id_logro = ?");
         $res->bind_param("i", $id);
         $res->execute();
-        $antigua = $res->get_result()->fetch_assoc()['imagen'];
+        $antigua = $res->get_result()->fetch_assoc()['imagen'] ?? '';
         $res->close();
 
         if (!empty($antigua) && $antigua !== 'default_logro.jpg' && file_exists("../../../../../media/" . $antigua)) {
@@ -26,19 +26,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
         $nombreNuevo = time() . '_' . basename($_FILES["portada"]["name"]);
         move_uploaded_file($_FILES["portada"]["tmp_name"], "../../../../../media/" . $nombreNuevo);
         
-        $sql = "UPDATE Logros SET nombre_logro=?, descripcion=?, puntos_logro=?, imagen=? WHERE id_logro=?";
+        $sql = "UPDATE logros SET nombre_logro=?, descripcion=?, puntos_logro=?, imagen=? WHERE id_logro=?";
         $stmt = $conexion->prepare($sql);
         $stmt->bind_param("ssisi", $titulo, $desc, $puntos, $nombreNuevo, $id);
     } else {
-        $sql = "UPDATE Logros SET nombre_logro=?, descripcion=?, puntos_logro=? WHERE id_logro=?";
+        $sql = "UPDATE logros SET nombre_logro=?, descripcion=?, puntos_logro=? WHERE id_logro=?";
         $stmt = $conexion->prepare($sql);
         $stmt->bind_param("ssii", $titulo, $desc, $puntos, $id);
     }
 
     if ($stmt->execute()) {
-        echo "<script> window.location.href='listaEditarLogro.php';</script>";
+        echo "<script>window.location.href='listaEditarLogro.php';</script>";
     } else {
-        echo "<script>alert('Error al actualizar'); window.history.back();</script>";
+        echo "<script>alert('Error al actualizar: " . $stmt->error . "'); window.history.back();</script>";
     }
     $stmt->close();
 }
