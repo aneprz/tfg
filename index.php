@@ -47,23 +47,113 @@ $idUsuarioSesion = isset($_SESSION['id_usuario']) ? (int) $_SESSION['id_usuario'
 $admin = ($_SESSION['admin'] ?? false) === true;
 
 if (isset($conexion) && $conexion) {
-    $sqlJuegos = "
+    $limiteJuegos = 6;
+
+    $obtenerListaIds = static function (array $juegos): string {
+        $idsExistentes = array_map(
+            static fn ($juego) => (int) ($juego['id_videojuego'] ?? 0),
+            $juegos
+        );
+        $idsExistentes = array_values(array_filter($idsExistentes, static fn ($id) => $id > 0));
+
+        return count($idsExistentes) > 0 ? implode(',', $idsExistentes) : '0';
+    };
+
+    // Populares globales (Steam): media de jugadores concurrentes de los últimos 7 días.
+    // Se alimenta con snapshots guardados por un script (ver API/sync_steam_popularidad.php).
+    $sqlJuegosPopularesSemana = "
         SELECT
             v.id_videojuego,
             v.titulo,
             v.rating_medio,
-            v.portada
+            v.portada,
+            s.avg_players_semana
         FROM Videojuego v
-        ORDER BY RAND()
-        LIMIT 6
+        INNER JOIN (
+            SELECT
+                steam_appid,
+                AVG(current_players) AS avg_players_semana,
+                MAX(captured_at) AS last_captured_at
+            FROM Steam_Players_History
+            WHERE captured_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY steam_appid
+        ) s ON s.steam_appid = v.steam_appid
+        ORDER BY s.avg_players_semana DESC, s.last_captured_at DESC, v.rating_medio DESC, v.titulo ASC
+        LIMIT $limiteJuegos
     ";
 
-    $resJuegos = mysqli_query($conexion, $sqlJuegos);
+    $resJuegos = mysqli_query($conexion, $sqlJuegosPopularesSemana);
     if ($resJuegos) {
         while ($fila = mysqli_fetch_assoc($resJuegos)) {
             $juegosPopulares[] = $fila;
         }
         mysqli_free_result($resJuegos);
+    }
+
+    $faltan = $limiteJuegos - count($juegosPopulares);
+    if ($faltan > 0) {
+        $listaIds = $obtenerListaIds($juegosPopulares);
+
+        // Si aún no hay suficientes snapshots en 7 días, usamos el último snapshot disponible (popularidad actual).
+        $sqlRellenoPopularActual = "
+            SELECT
+                v.id_videojuego,
+                v.titulo,
+                v.rating_medio,
+                v.portada,
+                s.current_players
+            FROM Videojuego v
+            INNER JOIN (
+                SELECT
+                    h.steam_appid,
+                    h.current_players,
+                    h.captured_at
+                FROM Steam_Players_History h
+                INNER JOIN (
+                    SELECT
+                        steam_appid,
+                        MAX(captured_at) AS captured_at
+                    FROM Steam_Players_History
+                    GROUP BY steam_appid
+                ) last ON last.steam_appid = h.steam_appid AND last.captured_at = h.captured_at
+            ) s ON s.steam_appid = v.steam_appid
+            WHERE v.id_videojuego NOT IN ($listaIds)
+            ORDER BY s.current_players DESC, v.rating_medio DESC, v.titulo ASC
+            LIMIT $faltan
+        ";
+
+        $resRelleno = mysqli_query($conexion, $sqlRellenoPopularActual);
+        if ($resRelleno) {
+            while ($fila = mysqli_fetch_assoc($resRelleno)) {
+                $juegosPopulares[] = $fila;
+            }
+            mysqli_free_result($resRelleno);
+        }
+    }
+
+    $faltan = $limiteJuegos - count($juegosPopulares);
+    if ($faltan > 0) {
+        $listaIds = $obtenerListaIds($juegosPopulares);
+
+        $sqlRellenoRating = "
+            SELECT
+                v.id_videojuego,
+                v.titulo,
+                v.rating_medio,
+                v.portada
+            FROM Videojuego v
+            WHERE v.id_videojuego NOT IN ($listaIds)
+            ORDER BY (v.rating_medio IS NULL) ASC, v.rating_medio DESC, v.titulo ASC
+            LIMIT $faltan
+        ";
+
+        $resRelleno = mysqli_query($conexion, $sqlRellenoRating);
+        if ($resRelleno) {
+            while ($fila = mysqli_fetch_assoc($resRelleno)) {
+                $juegosPopulares[] = $fila;
+            }
+            mysqli_free_result($resRelleno);
+        }
     }
 
     $sqlComunidades = "
