@@ -1,7 +1,7 @@
 <?php
-session_start();
-require_once __DIR__ . '/../../db/conexiones.php';
-$admin = ($_SESSION['admin'] ?? false) === true;
+    session_start();
+    require_once __DIR__ . '/../../db/conexiones.php';
+    $admin = ($_SESSION['admin'] ?? false) === true;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -16,28 +16,11 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel="icon" href="../../media/logoPlatino.png">
     <style>
-        .select2-container--default .select2-selection--single {
-            background-color: var(--card-bg) !important;
-            border: 1px solid #2c3440 !important;
-            height: 48px !important;
-            padding: 8px;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: white !important;
-            line-height: 30px !important;
-        }
-        .select2-dropdown {
-            background-color: var(--card-bg) !important;
-            border: 1px solid var(--accent-color) !important;
-        }
-        .select2-search__field {
-            background-color: #0d0f12 !important;
-            color: white !important;
-        }
-        .select2-results__option--highlighted {
-            background-color: var(--accent-color) !important;
-            color: #000 !important;
-        }
+        .select2-container--default .select2-selection--single { background-color: var(--card-bg) !important; border: 1px solid #2c3440 !important; height: 48px !important; padding: 8px; }
+        .select2-container--default .select2-selection--single .select2-selection__rendered { color: white !important; line-height: 30px !important; }
+        .select2-dropdown { background-color: var(--card-bg) !important; border: 1px solid var(--accent-color) !important; }
+        .select2-search__field { background-color: #0d0f12 !important; color: white !important; }
+        .select2-results__option--highlighted { background-color: var(--accent-color) !important; color: #000 !important; }
     </style>
 </head>
 <body>
@@ -80,14 +63,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <label for="id_videojuego" style="color: var(--accent-color); font-weight: bold;">Videojuego Principal</label>
                 <select name="id_videojuego" id="id_videojuego" class="select-buscable" required style="width: 100%;">
-                    <option value="">Selecciona un videojuego...</option>
-                    <?php
-                    $sqlJuegos = "SELECT id_videojuego, titulo FROM videojuego ORDER BY titulo ASC";
-                    $resJ = mysqli_query($conexion, $sqlJuegos);
-                    while($j = mysqli_fetch_assoc($resJ)){
-                        echo "<option value='{$j['id_videojuego']}'>".htmlspecialchars($j['titulo'])."</option>";
-                    }
-                    ?>
+                    <option value="">Buscar videojuego...</option>
                 </select>
             </div>
 
@@ -98,9 +74,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
             <input type="hidden" name="id_creador" value="<?php echo $_SESSION['id_usuario']; ?>">
 
-            <button type="submit" class="btn-agregar" style="border: none; cursor: pointer; align-self: center; width: 100%;">
-                Crear Comunidad
-            </button>
+            <button type="submit" class="btn-agregar" style="border: none; cursor: pointer; align-self: center; width: 100%;">Crear Comunidad</button>
         </form>
     </main>
 
@@ -108,7 +82,16 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     $(document).ready(function() {
         $('.select-buscable').select2({
             placeholder: "Buscar videojuego...",
-            allowClear: true
+            allowClear: true,
+            ajax: {
+                url: 'buscar_juegos.php',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) { return { q: params.term }; },
+                processResults: function (data) { return { results: data.results }; },
+                cache: true
+            },
+            minimumInputLength: 2
         });
     });
     </script>

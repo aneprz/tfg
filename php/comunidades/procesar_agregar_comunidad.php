@@ -6,7 +6,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['id_usuario'])) {
     $nombre = mysqli_real_escape_string($conexion, $_POST['nombre']);
     $id_videojuego = (int)$_POST['id_videojuego'];
     $id_creador = (int)$_SESSION['id_usuario'];
-    
     $nombreArchivo = "";
 
     if (isset($_FILES['banner']) && $_FILES['banner']['error'] === 0) {
@@ -16,13 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['id_usuario'])) {
 
         if (in_array($extension, $permitidos)) {
             $nombreArchivo = "banner_com_" . time() . "_" . uniqid() . "." . $extension;
-            $rutaDestino = $rutaMedia . $nombreArchivo;
-
-            if (!move_uploaded_file($_FILES['banner']['tmp_name'], $rutaDestino)) {
-                die("Error al mover el archivo de imagen.");
+            if (!move_uploaded_file($_FILES['banner']['tmp_name'], $rutaMedia . $nombreArchivo)) {
+                die("Error al mover el archivo.");
             }
         } else {
-            die("Formato de imagen no permitido.");
+            die("Formato no permitido.");
         }
     }
 
@@ -33,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['id_usuario'])) {
         header("Location: comunidades.php?mensaje=creada");
         exit();
     } else {
-        echo "Error al registrar la comunidad: " . $stmt->error;
+        echo "Error: " . $stmt->error;
     }
     $stmt->close();
 } else {
