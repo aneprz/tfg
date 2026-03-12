@@ -52,8 +52,19 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         </div>
         <div class="filtros-logros">
             <select id="filtroLogros">
+
                 <option value="mas">Más logros</option>
                 <option value="menos">Menos logros</option>
+
+                <option value="nombre_asc">Nombre A → Z</option>
+                <option value="nombre_desc">Nombre Z → A</option>
+
+                <option value="nota_desc">Mejor puntuados</option>
+                <option value="nota_asc">Peor puntuados</option>
+
+                <option value="fecha_desc">Más recientes</option>
+                <option value="fecha_asc">Más antiguos</option>
+
             </select>
         </div>
     </div>

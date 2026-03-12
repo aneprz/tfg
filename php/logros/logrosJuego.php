@@ -58,66 +58,66 @@ $logros = $stmt->get_result();
 
 <body>
 
-<header>
+    <header>
 
-    <a href="logros.php" class="botonVolver">
-        Volver al catalogo
-    </a>
+        <a href="logros.php" class="botonVolver">
+            Volver al catalogo
+        </a>
 
-</header>
+    </header>
 
-<main>
+    <main>
 
-    <h1>
-        <?php echo htmlspecialchars($juego['titulo']); ?>
-    </h1>
+        <h1>
+            <?php echo htmlspecialchars($juego['titulo']); ?>
+        </h1>
 
-    <div class="logros-grid">
+        <div class="logros-grid">
 
-        <?php while ($logro = $logros->fetch_assoc()): ?>
+            <?php while ($logro = $logros->fetch_assoc()): ?>
 
-            <div class="logro-card">
+                <div class="logro-card">
 
-                <div class="logro-icono">
+                    <div class="logro-icono">
 
-                    <?php if ($logro['icono']): ?>
+                        <?php if ($logro['icono']): ?>
 
-                        <img 
-                            src="<?php echo htmlspecialchars($logro['icono']); ?>" 
-                            width="40"
-                        >
+                            <img 
+                                src="<?php echo htmlspecialchars($logro['icono']); ?>" 
+                                width="40"
+                            >
 
-                    <?php else: ?>
+                        <?php else: ?>
 
-                        🏆
+                            🏆
 
-                    <?php endif; ?>
+                        <?php endif; ?>
+
+                    </div>
+
+                    <div class="logro-info">
+
+                        <h3>
+                            <?php echo htmlspecialchars($logro['nombre_logro']); ?>
+                        </h3>
+
+                        <p>
+                            <?php echo htmlspecialchars($logro['descripcion']); ?>
+                        </p>
+
+                        <span class="puntos">
+                            <?php echo $logro['puntos_logro']; ?> G
+                        </span>
+
+                    </div>
 
                 </div>
 
-                <div class="logro-info">
+            <?php endwhile; ?>
 
-                    <h3>
-                        <?php echo htmlspecialchars($logro['nombre_logro']); ?>
-                    </h3>
+        </div>
 
-                    <p>
-                        <?php echo htmlspecialchars($logro['descripcion']); ?>
-                    </p>
-
-                    <span class="puntos">
-                        <?php echo $logro['puntos_logro']; ?> G
-                    </span>
-
-                </div>
-
-            </div>
-
-        <?php endwhile; ?>
-
-    </div>
-
-</main>
+    </main>
 
 </body>
 </html>

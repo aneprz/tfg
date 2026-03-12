@@ -14,12 +14,39 @@ $offset = ($pagina - 1) * $porPagina;
 
 /* ORDEN */
 
-$order = "DESC";
+$orderBy = "total_logros DESC";
 
-if ($filtro === "menos") {
-    $order = "ASC";
+switch ($filtro) {
+
+    case "menos":
+        $orderBy = "total_logros ASC";
+        break;
+
+    case "nombre_asc":
+        $orderBy = "v.titulo ASC";
+        break;
+
+    case "nombre_desc":
+        $orderBy = "v.titulo DESC";
+        break;
+
+    case "nota_desc":
+        $orderBy = "v.rating_medio DESC";
+        break;
+
+    case "nota_asc":
+        $orderBy = "v.rating_medio ASC";
+        break;
+
+    case "fecha_desc":
+        $orderBy = "v.fecha_lanzamiento DESC";
+        break;
+
+    case "fecha_asc":
+        $orderBy = "v.fecha_lanzamiento ASC";
+        break;
+
 }
-
 /* QUERY BASE */
 
 $sqlBase = "
@@ -64,7 +91,7 @@ SELECT
 $sqlBase
 $where
 GROUP BY v.id_videojuego
-ORDER BY total_logros $order
+ORDER BY $orderBy
 LIMIT $porPagina OFFSET $offset
 ";
 
