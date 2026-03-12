@@ -7,8 +7,6 @@
         exit();
     }
     $admin = true;
-
-    $res = $conexion->query("SELECT id_videojuego, titulo FROM Videojuego ORDER BY titulo ASC");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -19,6 +17,9 @@
     <link rel="stylesheet" href="../../../../../estilos/estilos_indexAdmin.css">
     <link rel="stylesheet" href="../../../../../estilos/estilos_index.css">
     <link rel="icon" href="../../../../../media/logoPlatino.png">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 </head>
 <body>
     <header>
@@ -39,42 +40,34 @@
         <h1>Eliminar Videojuego</h1>
     </div>
     <div class="admin-container">
-        <input type="text" id="buscador" placeholder="Buscar juego por nombre..." onkeyup="filtrarTabla()" style="width: 100%; padding: 10px; margin-bottom: 20px;">
-
-        <table id="tablaJuegos" style="width: 100%; border-collapse: collapse;">
+        <table id="tablaJuegos" style="width: 100%;">
             <thead>
-                <tr style="text-align: left;">
-                    <th style="padding: 10px;">Título</th>
-                    <th style="padding: 10px;">Acción</th>
+                <tr>
+                    <th>Título</th>
+                    <th>Acción</th>
                 </tr>
             </thead>
-            <tbody>
-                <?php while ($row = $res->fetch_assoc()): ?>
-                <tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><?php echo htmlspecialchars($row['titulo']); ?></td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-                        <form action="procesarEliminarVideojuego.php" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este videojuego permanentemente?');">
-                            <input type="hidden" name="id" value="<?php echo $row['id_videojuego']; ?>">
-                            <button type="submit">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-            </tbody>
         </table>
     </div>
 
     <script>
-        function filtrarTabla() {
-            let input = document.getElementById("buscador").value.toLowerCase();
-            let tabla = document.getElementById("tablaJuegos");
-            let filas = tabla.getElementsByTagName("tr");
-            
-            for (let i = 1; i < filas.length; i++) {
-                let titulo = filas[i].getElementsByTagName("td")[0].textContent.toLowerCase();
-                filas[i].style.display = titulo.includes(input) ? "" : "none";
-            }
-        }
+        $(document).ready(function() {
+            $('#tablaJuegos').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "ajax": "obtener_datos_juegos.php",
+                "columns": [
+                    { "data": "titulo" },
+                    { "data": "id_videojuego", "render": function(data) {
+                        return `<form action="procesarEliminarVideojuego.php" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este videojuego permanentemente?');">
+                                    <input type="hidden" name="id" value="${data}">
+                                    <button type="submit">Eliminar</button>
+                                </form>`;
+                    }}
+                ],
+                "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" }
+            });
+        });
     </script>
 </body>
 </html>
