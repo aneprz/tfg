@@ -16,9 +16,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $plataforma = $_POST['plataforma'];
     $rating = 0.00;
 
+    // $nombreArchivo = time() . '_' . basename($_FILES["portada"]["name"]);
+    // $directorioDestino = "../../../../../media/";
+    // $rutaFinal = $directorioDestino . $nombreArchivo;
+
+    //!! ACABO DE CAMBIAR - NAHIA
     $nombreArchivo = time() . '_' . basename($_FILES["portada"]["name"]);
-    $directorioDestino = "../../../../../media/";
-    $rutaFinal = $directorioDestino . $nombreArchivo;
+
+    $directorioDestino = realpath(__DIR__ . "/../../../../../media");
+
+    $rutaFinal = $directorioDestino . "/" . $nombreArchivo;
+
+    echo "Ruta final: $rutaFinal";
+
+    //!!!!!!!!!
 
     if (move_uploaded_file($_FILES["portada"]["tmp_name"], $rutaFinal)) {
         $sql = "INSERT INTO Videojuego (titulo, developer, descripcion, fecha_lanzamiento, portada, genero, plataforma, rating_medio) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
