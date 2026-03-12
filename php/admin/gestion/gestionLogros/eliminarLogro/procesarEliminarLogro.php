@@ -10,22 +10,20 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
     $id = (int)$_POST['id'];
 
-    $stmt = $conexion->prepare("SELECT nombre_logro FROM logros WHERE id_logro = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
-    $juego = $resultado->fetch_assoc();
-    $stmt->close();
+    $stmt1 = $conexion->prepare("DELETE FROM Logros_Usuario WHERE id_logro = ?");
+    $stmt1->bind_param("i", $id);
+    $stmt1->execute();
 
-$stmtDelete = $conexion->prepare("DELETE FROM logros WHERE id_logro = ?");
-$stmtDelete->bind_param("i", $id);
-
-if ($stmtDelete->execute()) {
-    echo "<script> window.location.href='eliminarLogro.php';</script>";
-} else {
-    echo "Error al eliminar de la base de datos: " . $stmtDelete->error;
-}
-$stmtDelete->close();
+    $stmt2 = $conexion->prepare("DELETE FROM logros WHERE id_logro = ?");
+    $stmt2->bind_param("i", $id);
+    
+    if ($stmt2->execute()) {
+        header("Location: eliminarLogro.php");
+    } else {
+        echo "Error: " . $stmt2->error;
+    }
+    $stmt1->close();
+    $stmt2->close();
 }
 $conexion->close();
 ?>
