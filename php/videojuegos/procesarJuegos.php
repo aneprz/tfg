@@ -64,17 +64,17 @@ $totalQuery = mysqli_query(
 $filaTotal = mysqli_fetch_assoc($totalQuery);
 $total = (int)$filaTotal['total'];
 
-$totalPaginas = ceil($total / $porPagina);
+$totalPaginas = max(1, ceil($total / $porPagina));
 
 
 /* JUEGOS */
 
 $sql = "
-    SELECT id_videojuego, titulo, rating_medio, portada
-    FROM Videojuego
-    $where
-    ORDER BY $orderBy
-    LIMIT $porPagina OFFSET $offset
+SELECT id_videojuego, titulo, rating_medio, portada
+FROM Videojuego
+$where
+ORDER BY $orderBy
+LIMIT $porPagina OFFSET $offset
 ";
 
 $resultado = mysqli_query($conexion, $sql);
@@ -85,50 +85,49 @@ while ($fila = mysqli_fetch_assoc($resultado)) {
 
     $titulo = htmlspecialchars($fila['titulo']);
     $id = (int)$fila['id_videojuego'];
+
     $rating = $fila['rating_medio'];
 
     $estrellas = ($rating !== null) ? max(0, min(5, $rating / 2)) : 0;
     $porcentaje = ($estrellas / 5) * 100;
 
-    $portada = $fila['portada'] ?: '../../media/logoPlatino.png';
+    $portada = htmlspecialchars($fila['portada'] ?: '../../media/logoPlatino.png');
 
     $html .= "
 
-    <a class='juegoLink' href='juego.php?id=$id'>
+<a class='juegoLink' href='juego.php?id=$id'>
 
-        <article class='juego'>
+<article class='juego'>
 
-            <div class='portadaJuego'>
+<div class='portadaJuego'>
+<img src='$portada' alt='Portada de $titulo'>
+</div>
 
-                <img src='$portada' alt='Portada de $titulo'>
+<div class='infoJuego'>
 
-            </div>
+<div class='tituloJuego'>
+$titulo
+</div>
 
-            <div class='infoJuego'>
+<div class='puntuacionJuego'>
 
-                <div class='tituloJuego'>
-                    $titulo
-                </div>
+<div class='estrellas'>
+<div class='relleno' style='width: {$porcentaje}%'></div>
+</div>
 
-                <div class='puntuacionJuego'>
+<span class='nota'>
+".($rating !== null ? number_format((float)$rating,1) : "Sin nota")."
+</span>
 
-                    <div class='estrellas'>
-                        <div class='relleno' style='width: {$porcentaje}%'></div>
-                    </div>
+</div>
 
-                    <span class='nota'>
-                        ".($rating !== null ? number_format($rating,1) : "Sin nota")."
-                    </span>
+</div>
 
-                </div>
+</article>
 
-            </div>
+</a>
 
-        </article>
-
-    </a>
-
-    ";
+";
 }
 
 
