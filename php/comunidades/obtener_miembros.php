@@ -5,7 +5,6 @@ require_once __DIR__ . '/../../db/conexiones.php';
 $id_comunidad = (int)$_GET['id'];
 $miId = isset($_SESSION['id_usuario']) ? (int)$_SESSION['id_usuario'] : 0;
 
-// Consulta que trae miembros y el estado de la relación con el usuario logueado
 $sql = "SELECT u.id_usuario, u.gameTag, u.avatar, a.estado, a.id_usuario AS solicitante
         FROM miembro_comunidad mc 
         JOIN usuario u ON mc.id_usuario = u.id_usuario 
