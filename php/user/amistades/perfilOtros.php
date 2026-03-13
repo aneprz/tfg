@@ -72,7 +72,7 @@ $q_relacion->close();
         <div class="perfil-card">
             <section class="perfil-header">
                 <?php 
-                    $avatar_db = trim($usuario['avatar'] ?? '');
+                    $avatar_db = trim((string)$usuario['avatar']);
                     $img = (empty($avatar_db)) ? "../../../media/perfil_default.jpg" : "../../../media/" . $avatar_db;
                 ?>
                 <img src="<?php echo htmlspecialchars($img); ?>" class="avatar-grande" style="object-fit: cover;">
@@ -119,7 +119,10 @@ $q_relacion->close();
             <div class="perfil-body">
                 <h3>Sobre este gamer</h3>
                 <p class="bio-text">
-                    <?php echo !empty(trim($usuario['biografia'])) ? nl2br(htmlspecialchars($usuario['biografia'])) : "Este gamer prefiere mantener el misterio."; ?>
+                    <?php 
+                    $bio = trim((string)$usuario['biografia']);
+                    echo $bio !== "" ? nl2br(htmlspecialchars($bio)) : "Este gamer prefiere mantener el misterio.";
+                    ?>
                 </p>
             </div>
             <div class="perfil-footer">
