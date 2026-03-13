@@ -246,6 +246,36 @@ main {
     animation: fadeInUp 1s ease-out;
 }
 
+.puntuacionJuego{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.estrellas{
+    position:relative;
+    display:inline-block;
+    font-size:18px;
+}
+
+.estrellas::before{
+    content:"★★★★★";
+    color:#ccc;
+}
+
+.estrellas .relleno{
+    position:absolute;
+    top:0;
+    left:0;
+    overflow:hidden;
+    white-space:nowrap;
+}
+
+.estrellas .relleno::before{
+    content:"★★★★★";
+    color:gold;
+}
+
 @keyframes fadeInUp {
     from {
         opacity: 0;

@@ -2,19 +2,8 @@
 session_start();
 require_once __DIR__ . '/db/conexiones.php';
 
-function estrellasDesdeRating($rating) {
-    if ($rating === null || $rating === '') {
-        return '☆☆☆☆☆';
-    }
-
-    $valor = (float) $rating;
-    $llenas = (int) round($valor);
-    $llenas = max(0, min(5, $llenas));
-
-    return str_repeat('★', $llenas) . str_repeat('☆', 5 - $llenas);
-}
-
-function resolverPortada($portada) {
+function resolverPortada($portada)
+{
     $portada = is_string($portada) ? trim($portada) : '';
 
     if ($portada === '') {
@@ -31,7 +20,6 @@ function resolverPortada($portada) {
         return 'media/logoPlatino.png';
     }
 
-    // Si solo viene el nombre del fichero, asumimos que está en /media/.
     if (strpos($portada, '/') === false) {
         $portada = 'media/' . $portada;
     }
@@ -47,20 +35,9 @@ $idUsuarioSesion = isset($_SESSION['id_usuario']) ? (int) $_SESSION['id_usuario'
 $admin = ($_SESSION['admin'] ?? false) === true;
 
 if (isset($conexion) && $conexion) {
+
     $limiteJuegos = 6;
 
-    $obtenerListaIds = static function (array $juegos): string {
-        $idsExistentes = array_map(
-            static fn ($juego) => (int) ($juego['id_videojuego'] ?? 0),
-            $juegos
-        );
-        $idsExistentes = array_values(array_filter($idsExistentes, static fn ($id) => $id > 0));
-
-        return count($idsExistentes) > 0 ? implode(',', $idsExistentes) : '0';
-    };
-
-    // Populares globales (Steam): media de jugadores concurrentes de los últimos 7 días.
-    // Se alimenta con snapshots guardados por un script (ver API/sync_steam_popularidad.php).
     $sqlJuegosPopularesSemana = "
         SELECT
             v.id_videojuego,
@@ -78,82 +55,20 @@ if (isset($conexion) && $conexion) {
             WHERE captured_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
             GROUP BY steam_appid
         ) s ON s.steam_appid = v.steam_appid
-        ORDER BY s.avg_players_semana DESC, s.last_captured_at DESC, v.rating_medio DESC, v.titulo ASC
+        ORDER BY s.avg_players_semana DESC,
+                 s.last_captured_at DESC,
+                 v.rating_medio DESC,
+                 v.titulo ASC
         LIMIT $limiteJuegos
     ";
 
     $resJuegos = mysqli_query($conexion, $sqlJuegosPopularesSemana);
+
     if ($resJuegos) {
         while ($fila = mysqli_fetch_assoc($resJuegos)) {
             $juegosPopulares[] = $fila;
         }
         mysqli_free_result($resJuegos);
-    }
-
-    $faltan = $limiteJuegos - count($juegosPopulares);
-    if ($faltan > 0) {
-        $listaIds = $obtenerListaIds($juegosPopulares);
-
-        // Si aún no hay suficientes snapshots en 7 días, usamos el último snapshot disponible (popularidad actual).
-        $sqlRellenoPopularActual = "
-            SELECT
-                v.id_videojuego,
-                v.titulo,
-                v.rating_medio,
-                v.portada,
-                s.current_players
-            FROM Videojuego v
-            INNER JOIN (
-                SELECT
-                    h.steam_appid,
-                    h.current_players,
-                    h.captured_at
-                FROM Steam_Players_History h
-                INNER JOIN (
-                    SELECT
-                        steam_appid,
-                        MAX(captured_at) AS captured_at
-                    FROM Steam_Players_History
-                    GROUP BY steam_appid
-                ) last ON last.steam_appid = h.steam_appid AND last.captured_at = h.captured_at
-            ) s ON s.steam_appid = v.steam_appid
-            WHERE v.id_videojuego NOT IN ($listaIds)
-            ORDER BY s.current_players DESC, v.rating_medio DESC, v.titulo ASC
-            LIMIT $faltan
-        ";
-
-        $resRelleno = mysqli_query($conexion, $sqlRellenoPopularActual);
-        if ($resRelleno) {
-            while ($fila = mysqli_fetch_assoc($resRelleno)) {
-                $juegosPopulares[] = $fila;
-            }
-            mysqli_free_result($resRelleno);
-        }
-    }
-
-    $faltan = $limiteJuegos - count($juegosPopulares);
-    if ($faltan > 0) {
-        $listaIds = $obtenerListaIds($juegosPopulares);
-
-        $sqlRellenoRating = "
-            SELECT
-                v.id_videojuego,
-                v.titulo,
-                v.rating_medio,
-                v.portada
-            FROM Videojuego v
-            WHERE v.id_videojuego NOT IN ($listaIds)
-            ORDER BY (v.rating_medio IS NULL) ASC, v.rating_medio DESC, v.titulo ASC
-            LIMIT $faltan
-        ";
-
-        $resRelleno = mysqli_query($conexion, $sqlRellenoRating);
-        if ($resRelleno) {
-            while ($fila = mysqli_fetch_assoc($resRelleno)) {
-                $juegosPopulares[] = $fila;
-            }
-            mysqli_free_result($resRelleno);
-        }
     }
 
     $sqlComunidades = "
@@ -163,13 +78,15 @@ if (isset($conexion) && $conexion) {
             COUNT(mc.id_usuario) AS total_miembros,
             MAX(CASE WHEN mc.id_usuario = $idUsuarioSesion THEN 1 ELSE 0 END) AS es_miembro
         FROM Comunidad c
-        LEFT JOIN Miembro_Comunidad mc ON mc.id_comunidad = c.id_comunidad
+        LEFT JOIN Miembro_Comunidad mc
+            ON mc.id_comunidad = c.id_comunidad
         GROUP BY c.id_comunidad, c.nombre
         ORDER BY total_miembros DESC, c.nombre ASC
         LIMIT 6
     ";
 
     $resComunidades = mysqli_query($conexion, $sqlComunidades);
+
     if ($resComunidades) {
         while ($fila = mysqli_fetch_assoc($resComunidades)) {
             $comunidades[] = $fila;
@@ -178,103 +95,201 @@ if (isset($conexion) && $conexion) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salsabox - Tu diario de videojuegos</title>
+
     <link rel="stylesheet" href="estilos/estilos_index.css">
     <link rel="icon" href="media/logoPlatino.png">
-</head>
-<body>
-    <header>
-        <div class="tituloWeb">
-            <img src="media/logoPlatino.png" alt="" width="40px">
-            <a href="index.php" class="logo">Salsa<span>Box</span></a>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="index.php" class="activo">Inicio</a></li>
-                <li><a href="php/videojuegos/juegos.php">Juegos</a></li>
-                <li><a href="php/jugadores/jugadores.php">Jugadores</a></li>
-                <li><a href="php/comunidades/comunidades.php">Comunidades</a></li>
-                <li><a href="php/logros/logros.php">Logros</a></li>
-                <?php if ($admin): ?>
-                    <li><a href="php/admin/indexAdmin.php">Admin</a></li>
-                <?php endif; ?>
-            </ul>
-        </nav>
-        <?php if(!isset($_SESSION['tag'])) : ?>
-            <a href="php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesion</a>
-        <?php else: ?>
-            <a class="tag" href="/php/user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
-        <?php endif; ?>
-    </header>
 
-    <div class="central">
-        <h1>Registra, puntua y debate.</h1>
-        <p>La red social para amantes de los videojuegos. Guarda lo que has jugado, puntua tus favoritos y unete a las comunidades de tus juegos preferidos.</p>
+</head>
+
+<body>
+
+<header>
+
+    <div class="tituloWeb">
+        <img src="media/logoPlatino.png" width="40">
+        <a href="index.php" class="logo">Salsa<span>Box</span></a>
     </div>
 
-    <main>
-        <h2>Populares esta semana</h2>
-        <div class="juegos">
-            <?php if (count($juegosPopulares) > 0): ?>
-                <?php foreach ($juegosPopulares as $juego): ?>
-                    <a href="php/videojuegos/juego.php?id=<?php echo (int) $juego['id_videojuego']; ?>" class="juego">
-                        <div class="portadaJuego">
-                            <img src="<?php echo htmlspecialchars(resolverPortada($juego['portada'])); ?>" alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
-                        </div>
-                        <div class="infoJuego">
-                            <div class="tituloJuego"><?php echo htmlspecialchars($juego['titulo']); ?></div>
-                            <div class="puntuacionJuego">
-                                <?php
-                                    $rating = $juego['rating_medio'];
-                                    echo estrellasDesdeRating($rating) . ' ' . ($rating !== null ? number_format((float) $rating, 1) : 'Sin nota');
-                                ?>
-                            </div>
-                        </div>
-                    </a>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>No hay videojuegos cargados en la base de datos todavia.</p>
+    <nav>
+        <ul>
+
+            <li><a href="index.php" class="activo">Inicio</a></li>
+            <li><a href="php/videojuegos/juegos.php">Juegos</a></li>
+            <li><a href="php/jugadores/jugadores.php">Jugadores</a></li>
+            <li><a href="php/comunidades/comunidades.php">Comunidades</a></li>
+            <li><a href="php/logros/logros.php">Logros</a></li>
+
+            <?php if ($admin): ?>
+                <li><a href="php/admin/indexAdmin.php">Admin</a></li>
             <?php endif; ?>
+
+        </ul>
+    </nav>
+
+    <?php if (!isset($_SESSION['tag'])): ?>
+
+        <a href="php/sesiones/login/login.php" class="botonCrearCuenta">
+            Iniciar sesion
+        </a>
+
+    <?php else: ?>
+
+        <a class="tag" href="/php/user/perfiles/perfilSesion.php">
+            <?php echo htmlspecialchars($_SESSION['tag']); ?>
+        </a>
+
+    <?php endif; ?>
+
+</header>
+
+
+<div class="central">
+
+    <h1>Registra, puntua y debate.</h1>
+
+    <p>
+        La red social para amantes de los videojuegos.
+        Guarda lo que has jugado, puntua tus favoritos
+        y unete a las comunidades de tus juegos preferidos.
+    </p>
+
+</div>
+
+
+<main>
+
+<h2>Populares esta semana</h2>
+
+<div class="juegos">
+
+<?php if (count($juegosPopulares) > 0): ?>
+
+<?php foreach ($juegosPopulares as $juego): ?>
+
+<?php
+    $rating = $juego['rating_medio'];
+    $estrellas = ($rating !== null) ? max(0, min(5, $rating / 2)) : 0;
+    $porcentaje = ($estrellas / 5) * 100;
+?>
+
+<a href="php/videojuegos/juego.php?id=<?php echo (int)$juego['id_videojuego']; ?>" class="juego">
+
+    <div class="portadaJuego">
+        <img
+            src="<?php echo htmlspecialchars(resolverPortada($juego['portada'])); ?>"
+            alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>"
+        >
+    </div>
+
+    <div class="infoJuego">
+
+        <div class="tituloJuego">
+            <?php echo htmlspecialchars($juego['titulo']); ?>
         </div>
 
-        <h2>Comunidades Activas</h2>
-        <div class="comunidades">
-            <?php if (count($comunidades) > 0): ?>
-                <?php foreach ($comunidades as $comunidad): ?>
-                    <div class="comunidad">
-                        <div class="infoComunidad">
-                            <h3><?php echo htmlspecialchars($comunidad['nombre']); ?></h3>
-                            <p><?php echo number_format((int) $comunidad['total_miembros'], 0, ',', '.'); ?> miembros</p>
-                        </div>
-                        <?php if (!isset($_SESSION['id_usuario'])): ?>
-                            <a href="php/sesiones/login/login.php" class="botonUnirse">Unirse</a>
-                        <?php elseif ((int) $comunidad['es_miembro'] === 1): ?>
-                            <a
-                                href="php/comunidades/ver_comunidad.php?id=<?php echo (int) $comunidad['id_comunidad']; ?>"
-                                class="botonUnirse"
-                            >Ver muro</a>
-                        <?php else: ?>
-                            <a
-                                href="php/comunidades/gestionar_miembro.php?accion=unirse&id_comunidad=<?php echo (int) $comunidad['id_comunidad']; ?>"
-                                class="botonUnirse"
-                            >Unirse</a>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p>No hay comunidades cargadas en la base de datos todavia.</p>
-            <?php endif; ?>
-        </div>
-    </main>
+        <div class="puntuacionJuego">
 
-    <footer>
-        <p>&copy; 2026 SalsaBox. Creado para los gamers.</p>
-    </footer>
+            <div class="estrellas">
+                <div class="relleno" style="width: <?php echo $porcentaje; ?>%"></div>
+            </div>
+
+            <span class="nota">
+                <?php echo ($rating !== null ? number_format((float)$rating, 1) : "Sin nota"); ?>
+            </span>
+
+        </div>
+
+    </div>
+
+</a>
+
+<?php endforeach; ?>
+
+<?php else: ?>
+
+<p>No hay videojuegos cargados en la base de datos todavia.</p>
+
+<?php endif; ?>
+
+</div>
+
+
+<h2>Comunidades Activas</h2>
+
+<div class="comunidades">
+
+<?php if (count($comunidades) > 0): ?>
+
+<?php foreach ($comunidades as $comunidad): ?>
+
+<div class="comunidad">
+
+    <div class="infoComunidad">
+
+        <h3><?php echo htmlspecialchars($comunidad['nombre']); ?></h3>
+
+        <p>
+            <?php echo number_format((int)$comunidad['total_miembros'], 0, ',', '.'); ?>
+            miembros
+        </p>
+
+    </div>
+
+<?php if (!isset($_SESSION['id_usuario'])): ?>
+
+    <a href="php/sesiones/login/login.php" class="botonUnirse">
+        Unirse
+    </a>
+
+<?php elseif ((int)$comunidad['es_miembro'] === 1): ?>
+
+    <a
+        href="php/comunidades/ver_comunidad.php?id=<?php echo (int)$comunidad['id_comunidad']; ?>"
+        class="botonUnirse"
+    >
+        Ver muro
+    </a>
+
+<?php else: ?>
+
+    <a
+        href="php/comunidades/gestionar_miembro.php?accion=unirse&id_comunidad=<?php echo (int)$comunidad['id_comunidad']; ?>"
+        class="botonUnirse"
+    >
+        Unirse
+    </a>
+
+<?php endif; ?>
+
+</div>
+
+<?php endforeach; ?>
+
+<?php else: ?>
+
+<p>No hay comunidades cargadas en la base de datos todavia.</p>
+
+<?php endif; ?>
+
+</div>
+
+</main>
+
+
+<footer>
+
+<p>&copy; 2026 SalsaBox. Creado para los gamers.</p>
+
+</footer>
 
 </body>
 </html>
