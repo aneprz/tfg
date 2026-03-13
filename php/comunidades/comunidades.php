@@ -67,6 +67,8 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     <div class="central">
         <h1>Comunidades</h1> 
         <a href="agregar_comunidad.php" class="btn-agregar">Añadir Comunidad</a>
+        <br>
+        <br>
         <p>Únete a grupos de tus juegos favoritos, comparte clips y conoce a otros jugadores.</p>
     </div>
 
