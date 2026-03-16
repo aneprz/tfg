@@ -7,5 +7,13 @@
     },
     "require-dev": {
         "robmorgan/phinx": "^0.16.10"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "require": {
+        "phpmailer/phpmailer": "^7.0"
     }
 }
