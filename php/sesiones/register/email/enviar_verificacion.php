@@ -5,6 +5,77 @@ require __DIR__ . '/../../../../API/credenciales.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+function enviarCorreoReset($email,$link){
+
+    global $gmail_email;
+    global $gmail_password;
+
+    $mail = new PHPMailer(true);
+
+    $mail->isSMTP();
+    $mail->Host="smtp.gmail.com";
+    $mail->SMTPAuth=true;
+    $mail->Username=$gmail_email;
+    $mail->Password=$gmail_password;
+    $mail->SMTPSecure=PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port=587;
+
+    $mail->setFrom($gmail_email,"SalsaBox");
+    $mail->addAddress($email);
+
+    $mail->isHTML(true);
+    $mail->CharSet="UTF-8";
+    $mail->Subject="Recuperar contraseña SalsaBox";
+
+    $mail->Body='
+    <table width="100%" style="background:#14181c;padding:40px;font-family:Segoe UI;">
+    <tr>
+    <td align="center">
+
+    <table width="420" style="background:#1f252c;border:1px solid #2c3440;padding:40px;border-radius:12px;color:white;">
+
+    <tr>
+    <td align="center">
+    <h2 style="border-bottom:2px solid #e0be00;padding-bottom:10px;">Recuperar contraseña</h2>
+    </td>
+    </tr>
+
+    <tr>
+    <td style="text-align:center;color:#9ab;padding:20px;">
+    Recibimos una solicitud para cambiar tu contraseña.
+    </td>
+    </tr>
+
+    <tr>
+    <td align="center">
+    <a href="'.$link.'" style="
+    background:#e0be00;
+    padding:14px 28px;
+    color:black;
+    text-decoration:none;
+    border-radius:6px;
+    font-weight:bold;
+    ">
+    CAMBIAR CONTRASEÑA
+    </a>
+    </td>
+    </tr>
+
+    <tr>
+    <td style="text-align:center;color:#9ab;padding-top:20px;font-size:12px;">
+    Este enlace expira en 30 minutos
+    </td>
+    </tr>
+
+    </table>
+
+    </td>
+    </tr>
+    </table>
+    ';
+
+    $mail->send();
+}
 
 function enviarCorreoVerificacion($email, $token)
 {

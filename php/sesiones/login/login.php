@@ -28,6 +28,9 @@
             <p class="form-footer">
                 ¿No tienes cuenta? <a href="../register/register.php">Regístrate aquí</a>
             </p>
+            <p class="form-footer">
+                <a href="../reset/solicitar_reset.php">¿Olvidaste tu contraseña?</a>
+            </p>
         </form>
     </main>
 
