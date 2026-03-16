@@ -113,7 +113,6 @@ if (isset($conexion) && $conexion) {
 <body>
 
 <header>
-
     <div class="tituloWeb">
         <img src="media/logoPlatino.png" width="40">
         <a href="index.php" class="logo">Salsa<span>Box</span></a>
@@ -121,34 +120,45 @@ if (isset($conexion) && $conexion) {
 
     <nav>
         <ul>
-
             <li><a href="index.php" class="activo">Inicio</a></li>
             <li><a href="php/videojuegos/juegos.php">Juegos</a></li>
             <li><a href="php/jugadores/jugadores.php">Jugadores</a></li>
             <li><a href="php/comunidades/comunidades.php">Comunidades</a></li>
             <li><a href="php/logros/logros.php">Logros</a></li>
-
             <?php if ($admin): ?>
                 <li><a href="php/admin/indexAdmin.php">Admin</a></li>
             <?php endif; ?>
-
         </ul>
     </nav>
 
     <?php if (!isset($_SESSION['tag'])): ?>
-
-        <a href="php/sesiones/login/login.php" class="botonCrearCuenta">
-            Iniciar sesion
-        </a>
-
+    <a href="php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
     <?php else: ?>
+        <div class="user-actions">
+            <div class="notif-wrapper">
+                <div id="bell-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z" fill="currentColor"/>
+                    </svg>
+                    <span id="notif-badge">0</span>
+                </div>
 
-        <a class="tag" href="/php/user/perfiles/perfilSesion.php">
-            <?php echo htmlspecialchars($_SESSION['tag']); ?>
-        </a>
+                <div id="notif-dropdown">
+                    <div class="notif-header">
+                        <span>Notificaciones</span>
+                        <button onclick="marcarLeidas()">Limpiar</button>
+                    </div>
+                    <ul id="notif-list"></ul>
+                </div>
+            </div>
 
+            <a class="tag" href="/php/user/perfiles/perfilSesion.php">
+                <?php echo htmlspecialchars($_SESSION['tag']); ?>
+            </a>
+        </div>
     <?php endif; ?>
 
+    <script src="js/notificaciones.js"></script>
 </header>
 
 
@@ -291,5 +301,6 @@ if (isset($conexion) && $conexion) {
 
 </footer>
 
+<script src="js/notificaciones.js"></script>
 </body>
 </html>
