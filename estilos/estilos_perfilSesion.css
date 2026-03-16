@@ -159,3 +159,24 @@ body {
     white-space: pre-wrap;     
     max-width: 100%;            
 }
+
+.btn-sync-steam {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 18px;
+    background-color: #171a21; /* estilo Steam */
+    color: #c7d5e0;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 6px;
+    border: 1px solid #66c0f4;
+    transition: 0.25s ease;
+}
+
+.btn-sync-steam:hover {
+    background-color: #1b2838;
+    color: #ffffff;
+    border-color: #a4d7ff;
+    transform: scale(1.04);
+}
+

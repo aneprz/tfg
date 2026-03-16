@@ -81,13 +81,14 @@ $img = (empty($avatar_db)) ? "../../../media/perfil_default.jpg" : "../../../med
                     </div>
                 </a>
             </div>
+            <br>
             <div>
                 <a href="../../../Steam/steam_login.php">
                     <img src="https://steamcommunity-a.akamaihd.net/public/images/signinthroughsteam/sits_01.png">
                 </a>
             </div>
             <div>
-                <a href="../../../Steam/sync_logros_steam.php">
+                <a href="../../../Steam/sync_logros_steam.php" class="btn-sync-steam">
                     Sincronizar logros de Steam
                 </a>
             </div>
