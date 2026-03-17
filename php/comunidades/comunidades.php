@@ -57,11 +57,22 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                 <?php endif; ?>
             </ul>
         </nav>
-        <?php if(!isset($_SESSION['tag'])) : ?>
-            <a href="../sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
-        <?php else: ?>
+        <div class="user-actions" style="display: flex; align-items: center; gap: 15px;">
+            <div class="notif-wrapper">
+                <svg id="bell-icon" viewBox="0 0 24 24" style="width:24px; cursor:pointer; fill:#ffcc00;"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                <div id="notif-badge" style="display:none; position:absolute; top:-5px; right:-8px; background:red; color:white; border-radius:50%; padding:2px 5px; font-size:10px;">0</div>
+                <div id="notif-dropdown" style="display:none; position:absolute; right:0; top:40px; background:#1a1a1a; border:1px solid #333; width:280px; z-index:999; border-radius:8px;">
+                    <div class="notif-header" style="padding:10px; border-bottom:1px solid #333; color:#ffcc00; display:flex; justify-content:space-between;">
+                        <span>Notificaciones</span>
+                        <button onclick="marcarLeidas()" style="background:none; border:none; color:#888; cursor:pointer; font-size:11px;">Limpiar</button>
+                    </div>
+                    <ul id="notif-list" style="list-style:none; margin:0; padding:0; max-height:250px; overflow-y:auto;"></ul>
+                </div>
+            </div>
             <a class="tag" href="../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
-        <?php endif; ?>
+        </div>
+
+        <script src="../../js/notificaciones.js"></script>
     </header>
 
     <div class="central">

@@ -9,6 +9,7 @@ if (!isset($_SESSION['id_usuario'])) {
 
 $id_sesion = $_SESSION['id_usuario'];
 
+// Solo notificaciones no leídas para el usuario en sesión
 $sql = "SELECT * FROM Notificacion WHERE id_usuario_destino = ? AND leida = 0 ORDER BY fecha_creacion DESC";
 $stmt = $conexion->prepare($sql);
 $stmt->bind_param("i", $id_sesion);
@@ -21,19 +22,17 @@ $total = 0;
 if ($resultado->num_rows > 0) {
     while ($fila = $resultado->fetch_assoc()) {
         $total++;
-        // Creamos el diseño de cada notificación aquí
-        $html .= '<li style="padding: 10px; border-bottom: 1px solid #eee;">';
-        $html .= '<a href="' . $fila['url_destino'] . '" style="text-decoration:none; color:black;">';
-        $html .= '<div style="font-size: 14px;">' . htmlspecialchars($fila['mensaje']) . '</div>';
-        $html .= '<div style="font-size: 11px; color: #888;">' . $fila['fecha_creacion'] . '</div>';
+        $html .= '<li style="border-bottom: 1px solid #222;">';
+        $html .= '<a href="' . $fila['url_destino'] . '" style="text-decoration:none; display:block; padding:10px;">';
+        $html .= '<div style="color:#ffffff; font-size:13px; margin-bottom:3px;">' . htmlspecialchars($fila['mensaje']) . '</div>';
+        $html .= '<small style="color:#888; font-size:11px;">' . $fila['fecha_creacion'] . '</small>';
         $html .= '</a>';
         $html .= '</li>';
     }
 } else {
-    $html = '<li style="padding: 15px; color: #666; text-align: center;">No tienes notificaciones</li>';
+    $html = '<li style="padding: 15px; color: #888; text-align: center;">No hay notificaciones nuevas</li>';
 }
 
-// Enviamos el objeto exacto que el JS espera
 echo json_encode([
     'total' => $total,
     'html' => $html

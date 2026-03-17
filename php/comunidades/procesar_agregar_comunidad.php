@@ -10,31 +10,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['id_usuario'])) {
 
     if (isset($_FILES['banner']) && $_FILES['banner']['error'] === 0) {
         $rutaMedia = __DIR__ . '/../../media/';
-        $permitidos = ['jpg', 'jpeg', 'png', 'webp'];
         $extension = strtolower(pathinfo($_FILES['banner']['name'], PATHINFO_EXTENSION));
-
-        if (in_array($extension, $permitidos)) {
-            $nombreArchivo = "banner_com_" . time() . "_" . uniqid() . "." . $extension;
-            if (!move_uploaded_file($_FILES['banner']['tmp_name'], $rutaMedia . $nombreArchivo)) {
-                die("Error al mover el archivo.");
-            }
-        } else {
-            die("Formato no permitido.");
-        }
+        $nombreArchivo = "banner_com_" . time() . "_" . uniqid() . "." . $extension;
+        move_uploaded_file($_FILES['banner']['tmp_name'], $rutaMedia . $nombreArchivo);
     }
 
     $stmt = $conexion->prepare("INSERT INTO Comunidad (nombre, id_videojuego_principal, id_creador, banner_url) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("siis", $nombre, $id_videojuego, $id_creador, $nombreArchivo);
 
     if ($stmt->execute()) {
+        $id_nueva_com = $stmt->insert_id;
+
+        // 1. Unir al creador automáticamente
+        $conexion->query("INSERT INTO Miembro_Comunidad (id_comunidad, id_usuario, rol) VALUES ($id_nueva_com, $id_creador, 'Admin')");
+
+        // 2. ENVIAR NOTIFICACIÓN (Esto es lo nuevo)
+        $mensaje = "🚀 ¡Comunidad creada! Bienvenido a $nombre.";
+        $url = "/php/comunidades/ver_comunidad.php?id=" . $id_nueva_com;
+        $insNotif = $conexion->prepare("INSERT INTO Notificacion (mensaje, url_destino, tipo, id_usuario_destino) VALUES (?, ?, 'comunidad', ?)");
+        $insNotif->bind_param("ssi", $mensaje, $url, $id_creador);
+        $insNotif->execute();
+
         header("Location: comunidades.php?mensaje=creada");
         exit();
-    } else {
-        echo "Error: " . $stmt->error;
     }
-    $stmt->close();
-} else {
-    header("Location: ../../index.php");
-    exit();
 }
-?>
