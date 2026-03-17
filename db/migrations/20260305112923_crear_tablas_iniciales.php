@@ -95,7 +95,7 @@ final class CrearTablasIniciales extends AbstractMigration
             ->addColumn('id_usuario', 'integer', ['signed' => false])
             ->addColumn('id_videojuego', 'integer', ['signed' => false])
             ->addColumn('puntuacion', 'decimal', [
-                'precision' => 2,
+                'precision' => 3,
                 'scale' => 1,
                 'null' => true
             ])
