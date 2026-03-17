@@ -128,12 +128,12 @@ while($row = mysqli_fetch_assoc($res)){
 $logros_bd = [];
 
 $res = mysqli_query($conexion,"
-SELECT id_logro, steam_api_name, id_videojuego
+SELECT id_logro, steam_api_name, id_videojuego, puntos_logro
 FROM Logros
 ");
 
 while($row = mysqli_fetch_assoc($res)){
-    $logros_bd[$row["id_videojuego"]][$row["steam_api_name"]] = $row["id_logro"];
+    $logros_bd[$row["id_videojuego"]][$row["steam_api_name"]] = $row;
 }
 
 
@@ -204,7 +204,7 @@ $achievements_data = steam_multi_api($achievement_urls);
 
 
 /* =========================
-   PROCESAR LOGROS
+   PROCESAR LOGROS + WALLET
    ========================= */
 
 foreach($achievements_data as $appid => $data){
@@ -227,7 +227,9 @@ foreach($achievements_data as $appid => $data){
             continue;
         }
 
-        $id_logro = $logros_bd[$id_videojuego][$api_name];
+        $logro = $logros_bd[$id_videojuego][$api_name];
+        $id_logro = $logro["id_logro"];
+        $puntos = $logro["puntos_logro"] ?? 0;
 
         $fecha = null;
 
@@ -241,6 +243,25 @@ foreach($achievements_data as $appid => $data){
         VALUES
         ('$id_usuario','$id_logro','$fecha')
         ");
+
+        // 🔥 SOLO SI ES NUEVO → DAR PUNTOS
+        if(mysqli_affected_rows($conexion) > 0){
+
+            // sumar puntos al usuario
+            mysqli_query($conexion,"
+            UPDATE Usuario
+            SET puntos_actuales = puntos_actuales + $puntos
+            WHERE id_usuario = '$id_usuario'
+            ");
+
+            // registrar movimiento
+            mysqli_query($conexion,"
+            INSERT INTO Movimientos_Puntos
+            (id_usuario,puntos,tipo,descripcion)
+            VALUES
+            ('$id_usuario',$puntos,'logro','Logro desbloqueado')
+            ");
+        }
     }
 }
 

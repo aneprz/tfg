@@ -25,13 +25,14 @@ if(isset($_SESSION["steam_sync"])){
 include 'statsUsuario.php'; 
 
 $id = $_SESSION['id_usuario'];
-$stmt = $conexion->prepare("SELECT biografia, avatar FROM Usuario WHERE id_usuario = ?");
+$stmt = $conexion->prepare("SELECT biografia, avatar, puntos_actuales FROM Usuario WHERE id_usuario = ?");
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $resultado = $stmt->get_result();
 $user = $resultado->fetch_assoc();
 
 $biografia = $user['biografia'] ?? '';
+$puntos_actuales = $user['puntos_actuales'] ?? 0;
 $avatar_db = trim($user['avatar'] ?? '');
 $img = (empty($avatar_db)) ? "../../../media/perfil_default.jpg" : "../../../media/" . $avatar_db;
 ?>
@@ -69,7 +70,7 @@ $img = (empty($avatar_db)) ? "../../../media/perfil_default.jpg" : "../../../med
 
                 <a href="mis_logros.php" class="stat-link">
                     <div class="stat-item">
-                        <span class="stat-num"><?php echo $totalPuntos; ?></span>
+                        <span class="stat-num"><?php echo $puntos_actuales; ?></span>
                         <span class="stat-label">Puntos</span>
                     </div>
                 </a>
