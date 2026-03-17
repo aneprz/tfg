@@ -302,6 +302,79 @@ main {
     animation: pulse Green 2s infinite;
 }
 
+/* notificiones */
+/* Estilos para el contenedor de la campana */
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espacio entre campana y perfil */
+}
+
+.notif-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#bell-icon {
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    fill: #ffcc00; /* Color amarillo SalsaBox */
+    position: relative;
+    transition: transform 0.2s;
+}
+
+#bell-icon:hover { transform: scale(1.1); }
+
+#notif-badge {
+    display: none;
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: #ffcc00;
+    color: #000;
+    border-radius: 50%;
+    padding: 2px 5px;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid #121212;
+}
+
+#notif-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    width: 280px;
+    z-index: 9999;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+}
+
+.notif-header {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    color: #ffcc00;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.notif-header button {
+    background: none; border: none; color: #888; cursor: pointer; text-decoration: underline; font-size: 11px;
+}
+
+#notif-list { list-style: none; margin: 0; padding: 0; max-height: 250px; overflow-y: auto; }
+#notif-list li { padding: 10px; border-bottom: 1px solid #222; font-size: 12px; }
+#notif-list li a { color: #eee; text-decoration: none; display: block; }
+#notif-list li:hover { background: #252525; }
+
+/*  */
+
 @keyframes pulseGreen {
     0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
     70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
