@@ -188,32 +188,6 @@ main {
     border-color: var(--accent-color);
 }
 
-/* SISTEMA DE ESTRELLAS CSS (De derecha a izquierda para hover effect) */
-.clasificacionEstrellas {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    gap: 5px;
-}
-
-.clasificacionEstrellas input {
-    display: none;
-}
-
-.clasificacionEstrellas label {
-    font-size: 1.8rem;
-    color: #444;
-    cursor: pointer;
-    transition: color 0.2s;
-    margin-bottom: 0 !important;
-}
-
-.clasificacionEstrellas label:hover,
-.clasificacionEstrellas label:hover ~ label,
-.clasificacionEstrellas input:checked ~ label {
-    color: var(--accent-color);
-}
-
 .botonGuardar {
     width: 100%;
     background-color: #2ecc71;
@@ -419,6 +393,61 @@ footer {
     border-top: 1px solid var(--border-color);
     margin-top: 3rem;
 }
+/* ESTRELLAS (lectura - reseñas y media global) */
+.estrellas {
+    position: relative;
+    display: inline-block;
+    font-size: 20px;
+    color: #444;
+}
+
+.estrellas::before {
+    content: "★★★★★";
+}
+
+.estrellas .relleno {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    color: gold;
+}
+
+.estrellas .relleno::before {
+    content: "★★★★★";
+}
+
+.clasificacionEstrellas {
+    display: flex;
+    gap: 6px;
+}
+
+.estrella {
+    font-size: 28px;
+    color: #444;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.15s ease, color 0.2s ease;
+}
+
+.estrella.activa {
+    color: gold;
+}
+
+.estrella.media::before {
+    content: "★";
+    position: absolute;
+    left: 0;
+    width: 50%;
+    overflow: hidden;
+    color: gold;
+}
+
+.estrella:hover {
+    transform: scale(1.15);
+}
+
 
 @media (max-width: 860px) {
     header {

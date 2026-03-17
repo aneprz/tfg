@@ -2,18 +2,6 @@
 session_start();
 require '../../db/conexiones.php';
 
-function estrellasDesdeRating($rating) {
-    if ($rating === null || $rating === '') {
-        return '☆☆☆☆☆';
-    }
-
-    $valor = (float) $rating;
-    $llenas = (int) round($valor);
-    $llenas = max(0, min(5, $llenas));
-
-    return str_repeat('★', $llenas) . str_repeat('☆', 5 - $llenas);
-}
-
 function resolverAvatar($avatar) {
     $avatar = is_string($avatar) ? trim($avatar) : '';
 
@@ -91,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_interaccion']
     $mostrarExtras = in_array($estado, ['Completado', 'Abandonado']);
     
     $horas = $mostrarExtras && isset($_POST['horas']) ? (float) $_POST['horas'] : 0;
-    $puntuacion = $mostrarExtras && isset($_POST['puntuacion']) ? (int) $_POST['puntuacion'] : null;
+    $puntuacion = (float) $_POST['puntuacion'] * 2;
     $texto_resena = $mostrarExtras && isset($_POST['texto_resena']) ? trim($_POST['texto_resena']) : null;
 
     // 1. Guardar/Actualizar en la tabla Biblioteca (Estado y Horas)
@@ -182,7 +170,7 @@ if ($juego && $idUsuario) {
     mysqli_stmt_execute($stmtMiRes);
     $resMiRes = mysqli_stmt_get_result($stmtMiRes);
     if ($row = mysqli_fetch_assoc($resMiRes)) {
-        $miPuntuacion = (int) $row['puntuacion'];
+        $miPuntuacion = (float) $row['puntuacion'];
         $miTextoResena = $row['texto_resena'] ?? '';
     }
     mysqli_stmt_close($stmtMiRes);
@@ -290,15 +278,15 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                                         <input type="number" step="0.1" min="0" name="horas" id="horas" value="<?php echo htmlspecialchars((string)$misHoras); ?>">
                                     </div>
 
-                                    <div class="grupoFormulario">
-                                        <label>Tu puntuación:</label>
-                                        <div class="clasificacionEstrellas">
-                                            <?php for($i = 5; $i >= 1; $i--): ?>
-                                                <input type="radio" id="star<?php echo $i; ?>" name="puntuacion" value="<?php echo $i; ?>" <?php echo $miPuntuacion === $i ? 'checked' : ''; ?> />
-                                                <label for="star<?php echo $i; ?>">★</label>
-                                            <?php endfor; ?>
-                                        </div>
+                                    <div class="clasificacionEstrellas" id="rating">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <div class="estrella" data-value="<?php echo $i; ?>">
+                                                ★
+                                            </div>
+                                        <?php endfor; ?>
                                     </div>
+
+                                    <input type="hidden" name="puntuacion" id="puntuacion" value="<?php echo $miPuntuacion ? $miPuntuacion / 2 : 0; ?>">
 
                                     <div class="grupoFormulario">
                                         <label for="texto_resena">Reseña:</label>
@@ -326,12 +314,30 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                             if (!empty($juego['developer'])) $partesMeta[] = $juego['developer'];
 
                             $rating = $juego['rating_medio'];
-                            $textoRating = $rating !== null ? estrellasDesdeRating($rating) . ' ' . number_format((float) $rating, 1) : 'Sin nota global';
+
+                            if ($rating !== null) {
+                                $estrellas = $rating / 2;
+                                $porcentaje = ($estrellas / 5) * 100;
+
+                                $textoRating = '
+                                    <span class="estrellas">
+                                        <span class="relleno" style="width:' . $porcentaje . '%"></span>
+                                    </span>
+                                    ' . number_format((float)$rating, 1);
+                            } else {
+                                $textoRating = 'Sin nota global';
+                            }
+
                             $partesMeta[] = $textoRating;
 
-                            echo htmlspecialchars(implode(' • ', $partesMeta));
+                            echo 
+                                htmlspecialchars($juego['generos'] ?? '') . ' • ' .
+                                htmlspecialchars(date('Y', strtotime($juego['fecha_lanzamiento'] ?? ''))) . ' • ' .
+                                htmlspecialchars($juego['developer'] ?? '') . ' • ' .
+                                $textoRating;
                         ?>
                     </p>
+
                     <p class="descripcion"><?php echo htmlspecialchars($juego['descripcion'] ?: 'Este juego aun no tiene descripcion.'); ?></p>
 
                     <div class="bloqueProximamente">
@@ -376,7 +382,20 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                                                 </div>
                                             </a>
                                             <div class="resenaRating" aria-label="Puntuación">
-                                                <?php echo htmlspecialchars(estrellasDesdeRating($resena['puntuacion'])); ?>
+                                                <?php
+                                                    $rating = $resena['puntuacion'];
+
+                                                    if ($rating !== null) {
+                                                        $estrellas = $rating / 2;
+                                                        $porcentaje = ($estrellas / 5) * 100;
+                                                    } else {
+                                                        $porcentaje = 0;
+                                                    }
+                                                ?>
+
+                                                <div class="estrellas">
+                                                    <div class="relleno" style="width: <?php echo $porcentaje; ?>%"></div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -404,26 +423,66 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // ----------- ESTADO -----------
             const selectEstado = document.getElementById('estado');
             const camposExtra = document.getElementById('camposExtra');
 
             function toggleCampos() {
                 if (!selectEstado) return;
-                
-                if (selectEstado.value === 'Completado' || selectEstado.value === 'Abandonado') {
-                    camposExtra.style.display = 'block';
-                } else {
-                    camposExtra.style.display = 'none';
-                }
+                camposExtra.style.display =
+                    (selectEstado.value === 'Completado' || selectEstado.value === 'Abandonado')
+                    ? 'block' : 'none';
             }
 
             if (selectEstado) {
-                // Escuchar cambios en el select
                 selectEstado.addEventListener('change', toggleCampos);
-                // Ejecutar una vez al cargar la página por si ya tenía guardado "Completado"
                 toggleCampos();
             }
+
+            // ----------- ESTRELLAS -----------
+            const estrellas = document.querySelectorAll('.estrella');
+            const input = document.getElementById('puntuacion');
+
+            let valorActual = parseFloat(input.value) || 0;
+
+            function pintar(valor) {
+                estrellas.forEach((estrella, i) => {
+                    estrella.classList.remove('activa', 'media');
+
+                    const index = i + 1;
+
+                    if (valor >= index) {
+                        estrella.classList.add('activa');
+                    } else if (valor >= index - 0.5) {
+                        estrella.classList.add('media');
+                    }
+                });
+            }
+
+            estrellas.forEach((estrella, i) => {
+                estrella.addEventListener('mousemove', function (e) {
+                    const rect = estrella.getBoundingClientRect();
+                    const mitad = e.clientX - rect.left < rect.width / 2;
+                    pintar(mitad ? i + 0.5 : i + 1);
+                });
+
+                estrella.addEventListener('click', function (e) {
+                    const rect = estrella.getBoundingClientRect();
+                    const mitad = e.clientX - rect.left < rect.width / 2;
+
+                    valorActual = mitad ? i + 0.5 : i + 1;
+                    input.value = valorActual;
+                    pintar(valorActual);
+                });
+            });
+
+            document.getElementById('rating')?.addEventListener('mouseleave', function () {
+                pintar(valorActual);
+            });
+
+            pintar(valorActual);
         });
     </script>
 </body>

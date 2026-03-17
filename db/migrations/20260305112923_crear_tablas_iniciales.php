@@ -94,7 +94,11 @@ final class CrearTablasIniciales extends AbstractMigration
         $this->table('Resena', ['id' => 'id_resena'])
             ->addColumn('id_usuario', 'integer', ['signed' => false])
             ->addColumn('id_videojuego', 'integer', ['signed' => false])
-            ->addColumn('puntuacion', 'integer', ['null' => true])
+            ->addColumn('puntuacion', 'decimal', [
+                'precision' => 2,
+                'scale' => 1,
+                'null' => true
+            ])
             ->addColumn('texto_resena', 'text', ['null' => true])
             ->addColumn('fecha_publicacion', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
             ->addForeignKey('id_usuario', 'Usuario', 'id_usuario')
