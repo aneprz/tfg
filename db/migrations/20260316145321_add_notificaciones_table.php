@@ -19,12 +19,13 @@ final class AddNotificacionesTable extends AbstractMigration
      */
     public function change(): void
     {
-        $table = $this->table('notificacion', ['id' => 'id_notificacion', 'signed' => false]);
+        $table = $this->table('Notificacion', ['id' => 'id_notificacion', 'signed' => false]);
         $table->addColumn('mensaje', 'text')
-              ->addColumn('url_destino', 'string', ['limit' => 255, 'null' => true])
-              ->addColumn('leida', 'boolean', ['default' => false])
-              ->addColumn('fecha_creacion', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
-              ->addColumn('tipo', 'enum', ['values' => ['usuario', 'comunidad', 'sistema'], 'default' => 'sistema'])
-              ->create();
+          ->addColumn('url_destino', 'string', ['limit' => 255, 'null' => true])
+          ->addColumn('leida', 'boolean', ['default' => false])
+          ->addColumn('fecha_creacion', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
+          ->addColumn('tipo', 'enum', ['values' => ['usuario', 'comunidad', 'sistema'], 'default' => 'sistema'])
+          ->addColumn('id_usuario_destino', 'integer', ['signed' => false]) 
+          ->create();
     }
 }

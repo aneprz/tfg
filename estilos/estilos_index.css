@@ -302,12 +302,11 @@ main {
     animation: pulse Green 2s infinite;
 }
 
-/* notificiones */
-/* Estilos para el contenedor de la campana */
+/* NOTIFICACIONESSSSSSSSSSSSSSSSSSSSSS */
 .user-actions {
     display: flex;
     align-items: center;
-    gap: 15px; /* Espacio entre campana y perfil */
+    gap: 15px;
 }
 
 .notif-wrapper {
@@ -320,12 +319,14 @@ main {
     cursor: pointer;
     width: 24px;
     height: 24px;
-    fill: #ffcc00; /* Color amarillo SalsaBox */
+    fill: #ffcc00;
     position: relative;
     transition: transform 0.2s;
 }
 
-#bell-icon:hover { transform: scale(1.1); }
+#bell-icon:hover { 
+    transform: scale(1.1); 
+}
 
 #notif-badge {
     display: none;
@@ -335,45 +336,104 @@ main {
     background: #ffcc00;
     color: #000;
     border-radius: 50%;
-    padding: 2px 5px;
+    padding: 2px 6px;
     font-size: 10px;
     font-weight: bold;
     border: 2px solid #121212;
+    z-index: 10;
 }
 
 #notif-dropdown {
     display: none;
     position: absolute;
     right: 0;
-    top: 40px;
+    top: 45px;
     background: #1a1a1a;
     border: 1px solid #333;
-    width: 280px;
+    width: 300px;
     z-index: 9999;
     border-radius: 8px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.9);
 }
 
 .notif-header {
-    padding: 10px;
+    padding: 12px;
     border-bottom: 1px solid #333;
     color: #ffcc00;
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 13px;
     font-weight: bold;
 }
 
 .notif-header button {
-    background: none; border: none; color: #888; cursor: pointer; text-decoration: underline; font-size: 11px;
+    background: #333;
+    border: none;
+    color: #ffcc00;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
 }
 
-#notif-list { list-style: none; margin: 0; padding: 0; max-height: 250px; overflow-y: auto; }
-#notif-list li { padding: 10px; border-bottom: 1px solid #222; font-size: 12px; }
-#notif-list li a { color: #eee; text-decoration: none; display: block; }
-#notif-list li:hover { background: #252525; }
+.notif-header button:hover {
+    background: #444;
+}
 
-/*  */
+#notif-list { 
+    list-style: none; 
+    margin: 0; 
+    padding: 0; 
+    max-height: 350px; 
+    overflow-y: auto; 
+}
+
+/* Estilos para cada item de la lista */
+#notif-list li { 
+    border-bottom: 1px solid #222; 
+    transition: background 0.2s;
+}
+
+#notif-list li:last-child {
+    border-bottom: none;
+}
+
+#notif-list li:hover { 
+    background: #252525; 
+}
+
+/* Estilos para el enlace y textos internos */
+#notif-list li a { 
+    color: #ffffff !important; /* Forzamos blanco para el mensaje */
+    text-decoration: none; 
+    display: block; 
+    padding: 12px;
+}
+
+#notif-list li a div {
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    color: #ffffff; /* Asegura que el div sea blanco */
+}
+
+#notif-list li a small {
+    display: block;
+    color: #888; /* Fecha en gris suave */
+    font-size: 11px;
+}
+
+/* Personalización del scrollbar del dropdown */
+#notif-list::-webkit-scrollbar {
+    width: 6px;
+}
+#notif-list::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 10px;
+}
+/*      */
 
 @keyframes pulseGreen {
     0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }

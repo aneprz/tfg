@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function cargarNotificaciones() {
         // Usamos una ruta relativa a la raíz para evitar fallos en otras páginas
-        fetch('php/notificaciones/notificaciones_ajax.php')
+        fetch('/php/notificaciones/notificaciones_ajax.php')
             .then(res => res.json())
             .then(data => {
                 if (badge && data.total > 0) {
@@ -47,10 +47,27 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function marcarLeidas() {
+    console.log("Botón limpiar pulsado..."); // Si ves esto en la consola, el HTML está bien
+
+    // Usamos la ruta absoluta empezando desde la raíz /
     fetch('/php/notificaciones/marcar_leidas.php')
-        .then(() => {
-            const badge = document.getElementById('notif-badge');
-            if (badge) badge.style.display = 'none';
-            document.getElementById('notif-list').innerHTML = '<li style="padding: 15px; color: #666; text-align: center;">No hay notificaciones</li>';
-        });
+        .then(res => {
+            if (!res.ok) throw new Error("Error en la red: " + res.status);
+            return res.json();
+        })
+        .then(data => {
+            console.log("Respuesta del servidor:", data);
+            if (data.success) {
+                // Ocultar el numerito
+                const badge = document.getElementById('notif-badge');
+                if (badge) badge.style.display = 'none';
+
+                // Vaciar la lista
+                const list = document.getElementById('notif-list');
+                if (list) {
+                    list.innerHTML = '<li style="padding: 15px; color: #888; text-align: center;">No tienes notificaciones</li>';
+                }
+            }
+        })
+        .catch(err => console.error("Fallo al limpiar:", err));
 }
