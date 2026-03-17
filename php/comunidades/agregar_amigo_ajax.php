@@ -1,25 +1,32 @@
 <?php
 session_start();
-header('Content-Type: application/json');
 require_once __DIR__ . '/../../db/conexiones.php';
 
-if (!isset($_SESSION['id_usuario']) || !isset($_GET['id'])) {
-    echo json_encode(["status" => "error", "message" => "No autorizado"]);
-    exit;
-}
+// Limpiamos cualquier salida inesperada
+if (ob_get_length()) ob_clean();
+header('Content-Type: application/json');
 
-$miId = (int)$_SESSION['id_usuario'];
-$idAmigo = (int)$_GET['id'];
+$response = ["status" => "error"];
 
-// Insertamos con estado 'pendiente' por defecto
-$sql = "INSERT IGNORE INTO amigos (id_usuario, id_amigo, estado) VALUES ($miId, $idAmigo, 'pendiente')";
+if (isset($_SESSION['id_usuario']) && isset($_GET['id'])) {
+    $miId = (int)$_SESSION['id_usuario'];
+    $idAmigo = (int)$_GET['id'];
+    $accion = $_GET['accion'] ?? 'agregar';
 
-if (mysqli_query($conexion, $sql)) {
-    if (mysqli_affected_rows($conexion) > 0) {
-        echo json_encode(["status" => "success"]);
+    if ($accion === 'agregar') {
+        // Insertar solicitud
+        $sql = "INSERT IGNORE INTO Amigos (id_usuario, id_amigo, estado) VALUES ($miId, $idAmigo, 'pendiente')";
+        if (mysqli_query($conexion, $sql)) {
+            $response = ["status" => "success", "nuevo_estado" => "pendiente"];
+        }
     } else {
-        echo json_encode(["status" => "error", "message" => "Ya existe una solicitud"]);
+        // Cancelar solicitud
+        $sql = "DELETE FROM Amigos WHERE id_usuario = $miId AND id_amigo = $idAmigo AND estado = 'pendiente'";
+        if (mysqli_query($conexion, $sql)) {
+            $response = ["status" => "success", "nuevo_estado" => "agregar"];
+        }
     }
-} else {
-    echo json_encode(["status" => "error", "message" => mysqli_error($conexion)]);
 }
+
+echo json_encode($response);
+exit;
