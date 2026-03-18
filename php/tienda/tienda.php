@@ -3,6 +3,18 @@ session_start();
 require '../../db/conexiones.php';
 
 $admin = ($_SESSION['admin'] ?? false) === true;
+
+/* =========================
+   PUNTOS USUARIO
+   ========================= */
+
+$puntos = 0;
+
+if (isset($_SESSION['id_usuario'])) {
+    $id = $_SESSION['id_usuario'];
+    $res = mysqli_query($conexion, "SELECT puntos_actuales FROM Usuario WHERE id_usuario = $id");
+    $puntos = mysqli_fetch_assoc($res)['puntos_actuales'] ?? 0;
+}
 ?>
 
 <!DOCTYPE html>
@@ -74,6 +86,20 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         Personaliza tu perfil y desbloquea contenido exclusivo.
     </p>
 
+    <!-- 👇 AÑADIDO (no rompe diseño) -->
+    <div class="puntosUsuario">
+        Tus puntos: <strong><?php echo $puntos; ?></strong>
+    </div>
+
+    <!-- 👇 MENSAJES -->
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="error"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></div>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="success"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></div>
+    <?php endif; ?>
+
     <br>
 
     <div class="buscadorContainer">
@@ -91,11 +117,15 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     <div class="filtrosContainer">
 
         <select id="ordenTienda">
+
             <option value="precio_asc">Precio ↑</option>
             <option value="precio_desc">Precio ↓</option>
+
             <option value="nombre_asc">Nombre A → Z</option>
             <option value="nombre_desc">Nombre Z → A</option>
+
             <option value="rareza_desc">Más raros</option>
+
         </select>
 
     </div>
@@ -107,6 +137,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
     <h2>Todos los items</h2>
 
+    <!-- 👇 MISMA CLASE QUE JUEGOS -->
     <div class="juegos" id="gridTienda"></div>
 
     <p id="sinResultados" class="sinResultados" hidden>

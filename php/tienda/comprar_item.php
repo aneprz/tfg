@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../db/conexiones.php';
+require '../../db/conexiones.php';
 
 if (!isset($_SESSION['id_usuario'])) {
     header("Location: ../sesiones/login/login.php");
@@ -10,15 +10,11 @@ if (!isset($_SESSION['id_usuario'])) {
 $id_usuario = $_SESSION['id_usuario'];
 $id_item = (int) $_POST['id_item'];
 
-/* =========================
-   INICIAR TRANSACCIÓN
-   ========================= */
-
 mysqli_begin_transaction($conexion);
 
 try {
 
-    // Obtener item
+    // Item
     $res = mysqli_query($conexion, "
     SELECT precio FROM Tienda_Items WHERE id_item = $id_item FOR UPDATE
     ");
@@ -27,10 +23,9 @@ try {
         throw new Exception("Item no existe");
     }
 
-    $item = mysqli_fetch_assoc($res);
-    $precio = $item['precio'];
+    $precio = mysqli_fetch_assoc($res)['precio'];
 
-    // Obtener puntos usuario
+    // Usuario
     $res = mysqli_query($conexion, "
     SELECT puntos_actuales FROM Usuario WHERE id_usuario = $id_usuario FOR UPDATE
     ");
@@ -41,7 +36,7 @@ try {
         throw new Exception("No tienes suficientes puntos");
     }
 
-    // Insertar item (evita duplicados por índice UNIQUE)
+    // Insertar
     mysqli_query($conexion, "
     INSERT INTO Usuario_Items (id_usuario, id_item)
     VALUES ($id_usuario, $id_item)
@@ -58,7 +53,7 @@ try {
     WHERE id_usuario = $id_usuario
     ");
 
-    // Registrar movimiento
+    // Movimiento
     mysqli_query($conexion, "
     INSERT INTO Movimientos_Puntos (id_usuario, puntos, tipo, descripcion)
     VALUES ($id_usuario, -$precio, 'compra', 'Compra de item')
@@ -66,9 +61,12 @@ try {
 
     mysqli_commit($conexion);
 
+    $_SESSION['success'] = "Compra realizada correctamente";
+
 } catch (Exception $e) {
 
     mysqli_rollback($conexion);
+    $_SESSION['error'] = $e->getMessage();
 }
 
 header("Location: tienda.php");
