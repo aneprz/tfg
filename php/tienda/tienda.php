@@ -1,0 +1,192 @@
+<?php
+session_start();
+require '../../db/conexiones.php';
+
+$admin = ($_SESSION['admin'] ?? false) === true;
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SalsaBox - Tienda</title>
+
+    <link rel="stylesheet" href="../../estilos/estilos_index.css">
+    <link rel="stylesheet" href="../../estilos/estilos_juegos.css">
+    <link rel="stylesheet" href="css/tienda.css">
+
+    <link rel="icon" href="../../media/logoPlatino.png">
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="tituloWeb">
+        <img src="../../media/logoPlatino.png" width="40">
+        <a href="../../index.php" class="logo">Salsa<span>Box</span></a>
+    </div>
+
+    <nav>
+        <ul>
+
+            <li><a href="../../index.php">Inicio</a></li>
+            <li><a href="../videojuegos/juegos.php">Juegos</a></li>
+            <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
+            <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
+            <li><a href="../logros/logros.php">Logros</a></li>
+            <li><a href="tienda.php" class="activo">Tienda</a></li>
+
+            <?php if ($admin): ?>
+                <li><a href="../admin/indexAdmin.php">Admin</a></li>
+            <?php endif; ?>
+
+        </ul>
+    </nav>
+
+    <?php if (!isset($_SESSION['tag'])): ?>
+
+        <a href="../../php/sesiones/login/login.php" class="botonCrearCuenta">
+            Iniciar sesión
+        </a>
+
+    <?php else: ?>
+
+        <a class="tag" href="../../php/user/perfiles/perfilSesion.php">
+            <?php echo htmlspecialchars($_SESSION['tag']); ?>
+        </a>
+
+    <?php endif; ?>
+
+</header>
+
+
+<div class="central">
+
+    <h1>Gasta tus puntos</h1>
+
+    <p>
+        Personaliza tu perfil y desbloquea contenido exclusivo.
+    </p>
+
+    <br>
+
+    <div class="buscadorContainer">
+
+        <input
+            type="text"
+            id="buscadorTienda"
+            placeholder="Buscar item..."
+        >
+
+    </div>
+
+    <br>
+
+    <div class="filtrosContainer">
+
+        <select id="ordenTienda">
+            <option value="precio_asc">Precio ↑</option>
+            <option value="precio_desc">Precio ↓</option>
+            <option value="nombre_asc">Nombre A → Z</option>
+            <option value="nombre_desc">Nombre Z → A</option>
+            <option value="rareza_desc">Más raros</option>
+        </select>
+
+    </div>
+
+</div>
+
+
+<main>
+
+    <h2>Todos los items</h2>
+
+    <div class="juegos" id="gridTienda"></div>
+
+    <p id="sinResultados" class="sinResultados" hidden>
+        No se encontraron items.
+    </p>
+
+    <div class="paginacion" id="paginacion"></div>
+
+</main>
+
+
+<footer>
+    <p>&copy; 2026 SalsaBox. Creado para los gamers.</p>
+</footer>
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const buscador = document.getElementById("buscadorTienda");
+    const orden = document.getElementById("ordenTienda");
+
+    const grid = document.getElementById("gridTienda");
+    const paginacion = document.getElementById("paginacion");
+    const sinResultados = document.getElementById("sinResultados");
+
+    let pagina = 1;
+
+    function cargarTienda(){
+
+        const texto = buscador.value;
+        const ordenValor = orden.value;
+
+        fetch(`procesarTienda.php?buscar=${encodeURIComponent(texto)}&orden=${ordenValor}&pagina=${pagina}`)
+
+            .then(res => res.json())
+
+            .then(data => {
+
+                grid.innerHTML = data.html;
+                paginacion.innerHTML = data.paginacion;
+
+                sinResultados.hidden = data.total > 0;
+
+                document.querySelectorAll(".pag-btn").forEach(btn => {
+
+                    btn.addEventListener("click", () => {
+
+                        pagina = btn.dataset.pagina;
+                        cargarTienda();
+
+                        window.scrollTo({
+                            top: 0,
+                            behavior: "smooth"
+                        });
+
+                    });
+
+                });
+
+            });
+
+    }
+
+    buscador.addEventListener("input", () => {
+        pagina = 1;
+        cargarTienda();
+    });
+
+    orden.addEventListener("change", () => {
+        pagina = 1;
+        cargarTienda();
+    });
+
+    cargarTienda();
+
+});
+
+</script>
+
+</body>
+</html>

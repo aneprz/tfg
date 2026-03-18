@@ -65,6 +65,10 @@ $admin = true;
             <div class="card-icon">🏆</div>
             <span>Gestionar Logros</span>
         </a>
+        <a href="gestion/gestionTiendas/gestionTienda.php" class="admin-card">
+            <div class="card-icon">🛒</div>
+            <span>Gestionar Tienda</span>
+        </a>
     </div>
 </div>
 
