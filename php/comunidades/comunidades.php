@@ -69,7 +69,11 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                     <ul id="notif-list" style="list-style:none; margin:0; padding:0; max-height:250px; overflow-y:auto;"></ul>
                 </div>
             </div>
+            <?php if(!isset($_SESSION['tag'])) : ?>
+            <a href="../sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
+        <?php else: ?>
             <a class="tag" href="../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
+        <?php endif; ?>
         </div>
 
         <script src="../../js/notificaciones.js"></script>
