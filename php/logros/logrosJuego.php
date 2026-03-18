@@ -53,6 +53,7 @@ $logros = $stmt->get_result();
 
     <link rel="stylesheet" href="../../estilos/estilos_index.css">
     <link rel="stylesheet" href="../../estilos/estilos_logros.css">
+    <link rel="icon" href="../../media/logoPlatino.png">
 
 </head>
 
