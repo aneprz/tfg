@@ -6,13 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (btnVer && modal) {
         btnVer.addEventListener("click", function() {
-            const idComunidad = new URLSearchParams(window.location.search).get('id');
             modal.style.display = "flex";
-            listaDestino.innerHTML = "<li>Cargando miembros...</li>";
-            
-            fetch(`obtener_miembros.php?id=${idComunidad}`)
-                .then(res => res.text())
-                .then(html => { listaDestino.innerHTML = html; });
         });
     }
 

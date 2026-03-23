@@ -167,6 +167,34 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <span class="close">&times;</span>
             <h3>Miembros de la comunidad</h3>
             <ul class="lista-miembros-modal">
+                <?php
+                $sqlMiembros = "SELECT u.id_usuario, u.gameTag FROM miembro_comunidad mc 
+                                JOIN Usuario u ON mc.id_usuario = u.id_usuario 
+                                WHERE mc.id_comunidad = $id_comunidad";
+                
+                $resMiembros = mysqli_query($conexion, $sqlMiembros);
+
+                if (!$resMiembros) {
+                    echo '<li style="color: red;">Error en BD: ' . mysqli_error($conexion) . '</li>';
+                } elseif (mysqli_num_rows($resMiembros) > 0) {
+                    $id_sesion_actual = $_SESSION['id_usuario'] ?? 0;
+
+                    while ($miembro = mysqli_fetch_assoc($resMiembros)) {
+                        $id_miembro = $miembro['id_usuario'];
+                        $nombre_miembro = htmlspecialchars($miembro['gameTag']);
+
+                        if ($id_miembro == $id_sesion_actual) {
+                            $ruta_perfil = '../user/perfiles/perfilSesion.php'; 
+                        } else {
+                            $ruta_perfil = '../user/perfiles/perfilOtros.php?id=' . $id_miembro; 
+                        }
+
+                        echo '<li><a href="' . $ruta_perfil . '" style="color: inherit; text-decoration: none; display: block; width: 100%;">' . $nombre_miembro . '</a></li>';
+                    }
+                } else {
+                    echo '<li>Aún no hay miembros en esta comunidad.</li>';
+                }
+                ?>
             </ul>
         </div>
     </div>
