@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
     
-    // --- LÓGICA DEL MODAL (INDEPENDIENTE) ---
     const modal = document.getElementById("modalMiembros");
     const btnVer = document.getElementById("btnVerMiembros");
     const listaDestino = document.querySelector(".lista-miembros-modal");
@@ -21,17 +20,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnClose) btnClose.onclick = () => modal.style.display = "none";
     window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; };
 
-    // --- LÓGICA DE BOTONES AGREGAR / CANCELAR ---
     document.addEventListener("click", function(e) {
         const btn = e.target.closest(".btn-agregar, .btn-pendiente-cancelar");
-        if (!btn) return;
+        
+        if (!btn || !btn.hasAttribute("data-id")) return;
 
         e.preventDefault();
+        
         const idAmigo = btn.getAttribute("data-id");
         const esCancel = btn.classList.contains("btn-pendiente-cancelar");
         const accion = esCancel ? 'cancelar' : 'agregar';
 
-        // Feedback visual rápido
         const contenedor = btn.parentElement;
         btn.textContent = "...";
         btn.disabled = true;
@@ -50,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(err => {
                 console.error("Error:", err);
                 btn.textContent = "Error";
+                btn.disabled = false;
             });
     });
 });
