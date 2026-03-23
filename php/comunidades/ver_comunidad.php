@@ -3,20 +3,50 @@ session_start();
 require_once __DIR__ . '/../../db/conexiones.php';
 
 $id_comunidad = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-if ($id_comunidad <= 0) { header("Location: comunidades.php"); exit; }
+if ($id_comunidad <= 0) { 
+    header("Location: comunidades.php"); 
+    exit; 
+}
 
-$sqlComunidad = "SELECT c.*, v.titulo AS juego_nombre, v.portada 
+$sqlComunidad = "SELECT c.*, v.titulo AS juego_nombre, v.portada AS foto_juego 
                  FROM Comunidad c 
                  LEFT JOIN Videojuego v ON c.id_videojuego_principal = v.id_videojuego 
                  WHERE c.id_comunidad = $id_comunidad";
+
 $resCom = mysqli_query($conexion, $sqlComunidad);
-$comunidad = mysqli_fetch_assoc($resCom);
+
+if ($resCom && mysqli_num_rows($resCom) > 0) {
+    $comunidad = mysqli_fetch_assoc($resCom);
+} else {
+    header("Location: comunidades.php?error=no_encontrada");
+    exit;
+}
+
+$portada_db = $comunidad['foto_juego'] ?? '';
+if (empty($portada_db)) {
+    $ruta_portada = '../../media/default.png';
+} elseif (strpos($portada_db, 'http') === 0) {
+    $ruta_portada = $portada_db;
+} else {
+    $ruta_portada = '../../media/' . basename($portada_db);
+}
+
+$banner_db = $comunidad['banner_url'] ?? '';
+if (empty($banner_db)) {
+    $ruta_banner = $ruta_portada;
+} elseif (strpos($banner_db, 'http') === 0) {
+    $ruta_banner = $banner_db;
+} else {
+    $ruta_banner = '../../media/' . basename($banner_db);
+}
 
 $esMiembro = false;
 if (isset($_SESSION['id_usuario'])) {
-    $id_user = $_SESSION['id_usuario'];
+    $id_user = (int)$_SESSION['id_usuario'];
     $check = mysqli_query($conexion, "SELECT 1 FROM miembro_comunidad WHERE id_comunidad = $id_comunidad AND id_usuario = $id_user");
-    if (mysqli_num_rows($check) > 0) $esMiembro = true;
+    if ($check && mysqli_num_rows($check) > 0) {
+        $esMiembro = true;
+    }
 }
 $admin = ($_SESSION['admin'] ?? false) === true;
 ?>
@@ -35,7 +65,6 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <a href="../../index.php" class="logo">Salsa<span>Box</span></a>
         </div>
         <nav>
-            <nav>
             <ul>
                 <li><a href="../../index.php">Inicio</a></li>
                 <li><a href="../videojuegos/juegos.php">Juegos</a></li>
@@ -46,7 +75,6 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                     <li><a href="../admin/indexAdmin.php">Admin</a></li>
                 <?php endif; ?>
             </ul>
-        </nav>
         </nav>
         
         <div class="user-zone" style="display: flex; align-items: center; gap: 20px;">
@@ -80,26 +108,28 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         </aside>
 
         <main class="muro-comunidad">
-            <div class="banner-top" style="background-image: linear-gradient(to bottom, transparent, #14181c), url('../../<?php echo $comunidad['portada']; ?>')">
+            <div class="banner-top" style="background-image: linear-gradient(to bottom, transparent, #14181c), url('<?php echo htmlspecialchars($ruta_banner); ?>')">
                 <h1><?php echo htmlspecialchars($comunidad['nombre']); ?></h1>
             </div>
 
             <section class="feed" id="chat-feed">
                 <?php
-                $sqlPosts = "SELECT p.*, u.gameTag FROM post p 
-                             JOIN usuario u ON p.id_usuario = u.id_usuario 
+                $sqlPosts = "SELECT p.*, u.gameTag FROM Post p 
+                             JOIN Usuario u ON p.id_usuario = u.id_usuario 
                              WHERE p.id_comunidad = $id_comunidad 
                              ORDER BY p.fecha_publicacion ASC";
                 $resPosts = mysqli_query($conexion, $sqlPosts);
-                while ($post = mysqli_fetch_assoc($resPosts)): ?>
-                    <div class="post-card">
-                        <div class="post-header">
-                            <span class="post-autor">@<?php echo htmlspecialchars($post['gameTag']); ?></span>
-                            <span class="post-fecha"><?php echo date('H:i', strtotime($post['fecha_publicacion'])); ?></span>
+                if ($resPosts) {
+                    while ($post = mysqli_fetch_assoc($resPosts)): ?>
+                        <div class="post-card">
+                            <div class="post-header">
+                                <span class="post-autor">@<?php echo htmlspecialchars($post['gameTag']); ?></span>
+                                <span class="post-fecha"><?php echo date('H:i', strtotime($post['fecha_publicacion'])); ?></span>
+                            </div>
+                            <div class="post-contenido"><?php echo nl2br(htmlspecialchars($post['contenido'])); ?></div>
                         </div>
-                        <div class="post-contenido"><?php echo nl2br(htmlspecialchars($post['contenido'])); ?></div>
-                    </div>
-                <?php endwhile; ?>
+                    <?php endwhile; 
+                } ?>
             </section>
 
             <div class="input-post">
@@ -115,9 +145,9 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
         <aside class="sidebar-info">
             <div class="info-juego-card">
-                <img src="../../<?php echo $comunidad['portada']; ?>" width="100%" style="border-radius:8px">
+                <img src="<?php echo htmlspecialchars($ruta_portada); ?>" width="100%" style="border-radius:8px">
                 <h4>Juego vinculado</h4>
-                <p><strong><?php echo $comunidad['juego_nombre']; ?></strong></p>
+                <p><strong><?php echo htmlspecialchars($comunidad['juego_nombre'] ?? 'Sin juego'); ?></strong></p>
                 
                 <div class="botones-comunidad">
                     <?php if ($esMiembro): ?>
@@ -137,7 +167,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <span class="close">&times;</span>
             <h3>Miembros de la comunidad</h3>
             <ul class="lista-miembros-modal">
-                </ul>
+            </ul>
         </div>
     </div>
 
