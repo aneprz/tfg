@@ -22,7 +22,7 @@ final class AddSistemaTienda extends AbstractMigration
                 'null' => true
             ])
             ->addColumn('tipo', 'enum', [
-                'values' => ['avatar', 'marco', 'fondo', 'insignia'],
+                'values' => ['avatar', 'marco', 'fondo'],
                 'null' => false
             ])
             ->addColumn('precio', 'integer', [

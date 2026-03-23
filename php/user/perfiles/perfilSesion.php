@@ -7,6 +7,10 @@ if (!isset($_SESSION['tag'])) {
     exit();
 }
 
+/* =========================
+   MENSAJES
+   ========================= */
+
 if(isset($_SESSION["steam_vinculado"])){
     echo "<script>alert('Cuenta de Steam vinculada correctamente');</script>";
     unset($_SESSION["steam_vinculado"]);
@@ -26,7 +30,7 @@ $id = $_SESSION['id_usuario'];
    ========================= */
 
 $stmt = $conexion->prepare("
-    SELECT ti.tipo, ti.imagen
+    SELECT ti.tipo, ti.imagen, ti.rareza
     FROM Usuario_Items ui
     JOIN Tienda_Items ti ON ui.id_item = ti.id_item
     WHERE ui.id_usuario = ?
@@ -38,12 +42,12 @@ $result = $stmt->get_result();
 
 $marco = null;
 $fondo = null;
-$insignia = null;
+$avatar_item = null;
 
 while ($item = $result->fetch_assoc()) {
     if ($item['tipo'] === 'marco') $marco = $item['imagen'];
     if ($item['tipo'] === 'fondo') $fondo = $item['imagen'];
-    if ($item['tipo'] === 'insignia') $insignia = $item['imagen'];
+    if ($item['tipo'] === 'avatar') $avatar_item = $item['imagen'];
 }
 
 /* =========================
@@ -61,10 +65,19 @@ $user = $stmt->get_result()->fetch_assoc();
 
 $biografia = $user['biografia'] ?? '';
 $puntos_actuales = $user['puntos_actuales'] ?? 0;
-$avatar_db = trim($user['avatar'] ?? '');
-$img = empty($avatar_db) 
-    ? "../../../media/perfil_default.jpg" 
-    : "../../../media/" . $avatar_db;
+
+/* =========================
+   AVATAR FINAL
+   ========================= */
+
+if ($avatar_item) {
+    $img = "../../../media/" . $avatar_item;
+} else {
+    $avatar_db = trim($user['avatar'] ?? '');
+    $img = empty($avatar_db) 
+        ? "../../../media/perfil_default.jpg" 
+        : "../../../media/" . $avatar_db;
+}
 ?>
 
 <!DOCTYPE html>
@@ -94,19 +107,12 @@ $img = empty($avatar_db)
                 <img src="<?php echo htmlspecialchars($img); ?>" class="avatar-img">
 
                 <?php if($marco): ?>
-                    <img src="../../../media/<?php echo $marco; ?>" class="marco-img">
+                    <img src="../../../media/<?php echo htmlspecialchars($marco); ?>" class="marco-img">
                 <?php endif; ?>
 
             </div>
 
             <h1><?php echo htmlspecialchars($_SESSION['tag']); ?></h1>
-
-            <!-- INSIGNIA -->
-            <?php if($insignia): ?>
-                <div class="insignia">
-                    <img src="../../../media/<?php echo $insignia; ?>">
-                </div>
-            <?php endif; ?>
 
             <p class="status">
                 <?= ($_SESSION['admin'] == 1) ? 'Administrador de SalsaBox' : 'Miembro de SalsaBox'; ?>

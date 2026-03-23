@@ -59,35 +59,20 @@ body {
     z-index: 1;
     position: relative;
 }
-
-/* Marco encima */
-.avatar-grande img.marco-img {
+.avatar-img {
+    box-shadow: 0 0 10px rgba(0,0,0,0.6);
+}
+.marco-img {
     position: absolute;
-    top: -10%;
-    left: -10%;
-    width: 120%;
-    height: 120%;
+    top: -15%;
+    left: -12%;
+
+    width: 128%;
+    height: 128%;
+
+    object-fit: contain;
     pointer-events: none;
     z-index: 2;
-}
-
-/* Insignia */
-.insignia {
-    margin-top: 8px;
-}
-
-.insignia img {
-    width: 50px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-}
-
-.avatar-grande img:last-child {
-    z-index: 2;
-}
-
-.avatar-grande img:first-child {
-    z-index: 1;
 }
 
 .perfil-header h1 {

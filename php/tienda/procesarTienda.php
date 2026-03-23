@@ -73,26 +73,38 @@ while ($item = mysqli_fetch_assoc($res)) {
 
     $html .= "
     <div class='juego item-preview' 
-     data-tipo='".htmlspecialchars($item['tipo'])."' 
-     data-imagen='".htmlspecialchars($item['imagen'])."'>
+        data-tipo='".htmlspecialchars($item['tipo'])."' 
+        data-imagen='".htmlspecialchars($item['imagen'])."'>
 
-        <img src='../../media/".htmlspecialchars($item['imagen'])."'>
+        <div class='portadaJuego'>
+            <img src='../../media/".htmlspecialchars($item['imagen'])."'>
+        </div>
 
-        <h3>".htmlspecialchars($item['nombre'])."</h3>
-        <p>".$item['precio']." pts</p>
+        <div class='infoJuego'>
+
+            <div class='tituloJuego'>
+                ".htmlspecialchars($item['nombre'])."
+            </div>
+
+            <div class='precioItem'>
+                ".$item['precio']." pts
+            </div>
     ";
 
     if ($tiene) {
-        $html .= "<button disabled>Ya lo tienes</button>";
+        $html .= "<button class='btn-comprar' disabled>Ya lo tienes</button>";
     } else {
         $html .= "
         <form action='comprar_item.php' method='POST'>
             <input type='hidden' name='id_item' value='".$item['id_item']."'>
-            <button>Comprar</button>
+            <button class='btn-comprar'>Comprar</button>
         </form>";
     }
 
-    $html .= "</div>";
+    $html .= "
+        </div>
+    </div>
+    ";
 }
 
 /* =========================

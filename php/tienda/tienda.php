@@ -15,6 +15,19 @@ if (isset($_SESSION['id_usuario'])) {
     $res = mysqli_query($conexion, "SELECT puntos_actuales FROM Usuario WHERE id_usuario = $id");
     $puntos = mysqli_fetch_assoc($res)['puntos_actuales'] ?? 0;
 }
+
+$avatar_usuario = "../../media/perfil_default.jpg";
+
+if (isset($_SESSION['id_usuario'])) {
+    $id = $_SESSION['id_usuario'];
+    $res = mysqli_query($conexion, "SELECT avatar FROM Usuario WHERE id_usuario = $id");
+    $data = mysqli_fetch_assoc($res);
+
+    if (!empty($data['avatar'])) {
+        $avatar_usuario = "../../media/" . $data['avatar'];
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -175,7 +188,7 @@ if (isset($_SESSION['id_usuario'])) {
 
             <div class="avatar-preview" id="previewAvatar">
                 <img id="previewMarco" class="preview-marco">
-                <img id="previewAvatarImg" src="../../media/perfil_default.jpg">
+                <img id="previewAvatarImg" src="<?php echo htmlspecialchars($avatar_usuario); ?>">
             </div>
 
             <h2><?php echo htmlspecialchars($_SESSION['tag'] ?? 'Usuario'); ?></h2>
@@ -263,12 +276,12 @@ document.addEventListener("click", e => {
 
     const preview = document.getElementById("previewPerfil");
     const marco = document.getElementById("previewMarco");
-    const insignia = document.getElementById("previewInsignia");
+    const avatar = document.getElementById("previewAvatarImg");
 
-    // Reset
+    // Reset SIEMPRE
     preview.style.backgroundImage = "";
     marco.src = "";
-    insignia.src = "";
+    avatar.src = "<?php echo htmlspecialchars($avatar_usuario); ?>";
 
     if (tipo === "fondo") {
         preview.style.backgroundImage = `url('../../media/${imagen}')`;
@@ -278,8 +291,8 @@ document.addEventListener("click", e => {
         marco.src = `../../media/${imagen}`;
     }
 
-    if (tipo === "insignia") {
-        insignia.src = `../../media/${imagen}`;
+    if (tipo === "avatar") {
+        avatar.src = `../../media/${imagen}`; 
     }
 
     modal.style.display = "flex";

@@ -32,12 +32,6 @@ final class AddSistemaEquipamientoUsuarioFinal extends AbstractMigration
             'after' => 'marco_activo'
         ]);
 
-        $table->addColumn('insignia_activa', 'integer', [
-            'null' => true,
-            'signed' => false,
-            'after' => 'fondo_activo'
-        ]);
-
         /* =========================
            ÍNDICES (IMPORTANTE)
            ========================= */
@@ -45,7 +39,6 @@ final class AddSistemaEquipamientoUsuarioFinal extends AbstractMigration
         $table->addIndex(['avatar_activo']);
         $table->addIndex(['marco_activo']);
         $table->addIndex(['fondo_activo']);
-        $table->addIndex(['insignia_activa']);
 
         /* =========================
            FOREIGN KEYS
@@ -62,11 +55,6 @@ final class AddSistemaEquipamientoUsuarioFinal extends AbstractMigration
         ]);
 
         $table->addForeignKey('fondo_activo', 'Tienda_Items', 'id_item', [
-            'delete' => 'SET_NULL',
-            'update' => 'NO_ACTION'
-        ]);
-
-        $table->addForeignKey('insignia_activa', 'Tienda_Items', 'id_item', [
             'delete' => 'SET_NULL',
             'update' => 'NO_ACTION'
         ]);
