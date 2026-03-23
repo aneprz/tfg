@@ -30,12 +30,12 @@ $admin = true;
                 <li><a href="../videojuegos/juegos.php">Juegos</a></li>
                 <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
-                <li><a href="../logros/logros.php" class="activo">Logros</a></li>
+                <li><a href="../logros/logros.php">Logros</a></li>
                 <?php if ($admin): ?>
-                    <li><a href="indexAdmin.php">Admin</a></li>
+                    <li><a href="indexAdmin.php" class="activo">Admin</a></li>
                 <?php endif; ?>
             </ul>
-        </nav>
+        </nav>  
         <?php if(!isset($_SESSION['tag'])) : ?>
             <a href="../sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
         <?php else: ?>
