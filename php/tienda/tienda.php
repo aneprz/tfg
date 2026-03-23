@@ -29,7 +29,7 @@ if (isset($_SESSION['id_usuario'])) {
 
     <link rel="stylesheet" href="../../estilos/estilos_index.css">
     <link rel="stylesheet" href="../../estilos/estilos_juegos.css">
-    <link rel="stylesheet" href="css/tienda.css">
+    <link rel="stylesheet" href="../../estilos/estilos_tienda.css">
 
     <link rel="icon" href="../../media/logoPlatino.png">
 
@@ -52,7 +52,6 @@ if (isset($_SESSION['id_usuario'])) {
             <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
             <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
             <li><a href="../logros/logros.php">Logros</a></li>
-            <li><a href="tienda.php" class="activo">Tienda</a></li>
 
             <?php if ($admin): ?>
                 <li><a href="../admin/indexAdmin.php">Admin</a></li>
@@ -76,6 +75,20 @@ if (isset($_SESSION['id_usuario'])) {
     <?php endif; ?>
 
 </header>
+
+
+<!-- SUBMENU -->
+<div class="subnav">
+
+    <div class="subnav-container">
+
+        <a href="tienda.php" class="subnav-link activo">Tienda</a>
+
+        <a href="inventario.php" class="subnav-link">Inventario</a>
+
+    </div>
+
+</div>
 
 
 <div class="central">
@@ -153,7 +166,26 @@ if (isset($_SESSION['id_usuario'])) {
     <p>&copy; 2026 SalsaBox. Creado para los gamers.</p>
 </footer>
 
+<div id="modalPreview" class="modal">
+    <div class="modal-content">
 
+        <span class="cerrar">&times;</span>
+
+        <div class="perfil-preview" id="previewPerfil">
+
+            <div class="avatar-preview" id="previewAvatar">
+                <img id="previewMarco" class="preview-marco">
+                <img id="previewAvatarImg" src="../../media/perfil_default.jpg">
+            </div>
+
+            <h2><?php echo htmlspecialchars($_SESSION['tag'] ?? 'Usuario'); ?></h2>
+
+            <img id="previewInsignia" class="preview-insignia">
+
+        </div>
+
+    </div>
+</div>
 <script>
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -217,7 +249,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-</script>
+// MODAL
+const modal = document.getElementById("modalPreview");
+const cerrar = document.querySelector(".cerrar");
 
+document.addEventListener("click", e => {
+
+    const item = e.target.closest(".item-preview");
+    if (!item) return;
+
+    const tipo = item.dataset.tipo;
+    const imagen = item.dataset.imagen;
+
+    const preview = document.getElementById("previewPerfil");
+    const marco = document.getElementById("previewMarco");
+    const insignia = document.getElementById("previewInsignia");
+
+    // Reset
+    preview.style.backgroundImage = "";
+    marco.src = "";
+    insignia.src = "";
+
+    if (tipo === "fondo") {
+        preview.style.backgroundImage = `url('../../media/${imagen}')`;
+    }
+
+    if (tipo === "marco") {
+        marco.src = `../../media/${imagen}`;
+    }
+
+    if (tipo === "insignia") {
+        insignia.src = `../../media/${imagen}`;
+    }
+
+    modal.style.display = "flex";
+});
+
+// cerrar
+cerrar.onclick = () => modal.style.display = "none";
+window.onclick = e => {
+    if (e.target === modal) modal.style.display = "none";
+};
+
+</script>
 </body>
 </html>

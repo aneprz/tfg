@@ -10,11 +10,17 @@ body {
     background-color: var(--bg-color);
     color: var(--text-main);
     font-family: 'Segoe UI', sans-serif;
+
     display: flex;
     justify-content: center;
     align-items: center;
+
     min-height: 100vh;
     margin: 0;
+
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
 .perfil-container {
@@ -38,18 +44,50 @@ body {
 }
 
 .avatar-grande {
-    width: 80px;
-    height: 80px;
-    background-color: var(--accent-color);
-    color: #000;
-    font-size: 2.5rem;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
+    width: 120px;
+    height: 120px;
     margin: 0 auto 15px;
-    box-shadow: 0 0 20px #c3a600;
+    position: relative;
+}
+
+/* Avatar */
+.avatar-grande img.avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    z-index: 1;
+    position: relative;
+}
+
+/* Marco encima */
+.avatar-grande img.marco-img {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Insignia */
+.insignia {
+    margin-top: 8px;
+}
+
+.insignia img {
+    width: 50px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.avatar-grande img:last-child {
+    z-index: 2;
+}
+
+.avatar-grande img:first-child {
+    z-index: 1;
 }
 
 .perfil-header h1 {
@@ -179,4 +217,5 @@ body {
     border-color: #a4d7ff;
     transform: scale(1.04);
 }
+
 

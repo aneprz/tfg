@@ -12,25 +12,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tipo = $_POST['tipo'];
     $precio = (int)$_POST['precio'];
     $rareza = $_POST['rareza'];
+    $activo = (int)$_POST['activo']; 
 
-    echo "OK POST<br>";
-
-    // Imagen
-    if (!isset($_FILES["imagen"])) {
-        die("No llega imagen");
+    // Validar imagen
+    if (!isset($_FILES["imagen"]) || $_FILES["imagen"]["error"] !== 0) {
+        die("Error con la imagen");
     }
 
-    $nombreArchivo = time() . '_' . basename($_FILES["imagen"]["name"]);
+    // Nombre seguro
+    $nombreArchivo = uniqid() . '_' . basename($_FILES["imagen"]["name"]);
+
+    // Ruta destino
     $ruta = __DIR__ . '/../../../../../media/' . $nombreArchivo;
 
-    echo "Ruta: $ruta<br>";
+    // Crear carpeta si no existe 
+    if (!file_exists(dirname($ruta))) {
+        mkdir(dirname($ruta), 0777, true);
+    }
 
+    // Mover archivo
     if (!move_uploaded_file($_FILES["imagen"]["tmp_name"], $ruta)) {
         die("Error al subir imagen");
     }
 
-    $sql = "INSERT INTO Tienda_Items (nombre, descripcion, tipo, precio, rareza, imagen)
-            VALUES (?, ?, ?, ?, ?, ?)";
+    // Insertar en BD
+    $sql = "INSERT INTO Tienda_Items (nombre, descripcion, tipo, precio, rareza, imagen, activo)
+            VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conexion->prepare($sql);
 
@@ -38,16 +45,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Error prepare: " . $conexion->error);
     }
 
-    $stmt->bind_param("sssiss", $nombre, $descripcion, $tipo, $precio, $rareza, $nombreArchivo);
+    $stmt->bind_param("sssissi", $nombre, $descripcion, $tipo, $precio, $rareza, $nombreArchivo, $activo);
 
     if ($stmt->execute()) {
-
-        // IMPORTANTE: limpiar buffer antes de redirigir
         header("Location: ../gestionTienda.php");
         exit();
-
     } else {
         echo "Error execute: " . $stmt->error;
     }
-
 }

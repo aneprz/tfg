@@ -81,3 +81,99 @@
 .btn-comprar:hover {
     background: #fff;
 }
+
+/* =========================
+   SUBNAV TIENDA / INVENTARIO
+   ========================= */
+
+.subnav{
+    width:100%;
+    background:#1a1f24;
+    border-bottom:1px solid #2c3440;
+}
+
+.subnav-container{
+    max-width:1400px;
+    margin:auto;
+    padding:8px 5%;
+    
+    display:flex;
+    justify-content:center; /* 🔥 CLAVE */
+    align-items:center;
+    gap:30px;
+}
+
+.subnav-link{
+    color:var(--text-muted);
+    text-decoration:none;
+    font-size:0.95rem;
+    font-weight:500;
+    position:relative;
+}
+
+.subnav-link:hover{
+    color:var(--text-main);
+}
+
+.subnav-link.activo{
+    color:var(--accent-color);
+}
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #1c2228;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+}
+
+.cerrar {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* PREVIEW PERFIL */
+.perfil-preview {
+    width: 250px;
+    padding: 20px;
+    border-radius: 10px;
+    background-size: cover;
+}
+
+.avatar-preview {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: auto;
+}
+
+.avatar-preview img {
+    width: 100%;
+    border-radius: 50%;
+}
+
+.preview-marco {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.preview-insignia {
+    width: 40px;
+    margin-top: 10px;
+}

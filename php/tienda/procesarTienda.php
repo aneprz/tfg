@@ -72,7 +72,9 @@ while ($item = mysqli_fetch_assoc($res)) {
     $tiene = $item['id_usuario_item'] !== null;
 
     $html .= "
-    <div class='juego'>
+    <div class='juego item-preview' 
+     data-tipo='".htmlspecialchars($item['tipo'])."' 
+     data-imagen='".htmlspecialchars($item['imagen'])."'>
 
         <img src='../../media/".htmlspecialchars($item['imagen'])."'>
 
