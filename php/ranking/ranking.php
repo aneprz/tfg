@@ -123,7 +123,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
                             const enlacePerfil = user.id_usuario == idSesion 
                                 ? '../user/perfiles/perfilSesion.php' 
-                                : `../user/perfiles/perfilOtros.php?id=${user.id_usuario}`;
+                                : `../user/amistades/perfilOtros.php?id=${user.id_usuario}`;
 
                             const textoValor = ordenActual === 'puntos' ? `${user.valor} Puntos` : `${user.valor} Juegos`;
 
