@@ -67,7 +67,7 @@ $admin = true;
     <label>Tipo:</label>
     <select name="tipo" required>
         <?php
-        $tipos = ['avatar', 'marco', 'fondo', 'insignia'];
+        $tipos = ['avatar', 'marco', 'fondo'];
         foreach ($tipos as $t) {
             $selected = ($t === $item['tipo']) ? 'selected' : '';
             echo "<option value='$t' $selected>" . ucfirst($t) . "</option>";

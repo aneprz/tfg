@@ -129,9 +129,10 @@ ORDER BY ti.tipo, ui.equipado DESC
 
                     <?php if ($item['equipado']): ?>
 
-                        <button class="btn-comprar" disabled>
-                            Equipado
-                        </button>
+                        <form action="desequipar_item.php" method="POST">
+                            <input type="hidden" name="id_item" value="<?php echo $item['id_item']; ?>">
+                            <button class="btn-comprar">Desequipar</button>
+                        </form>
 
                     <?php else: ?>
 

@@ -9,7 +9,7 @@ mysqli_begin_transaction($conexion);
 
 try {
 
-    // Obtener tipo del item
+    // Obtener tipo
     $res = mysqli_query($conexion, "
         SELECT tipo FROM Tienda_Items WHERE id_item = $id_item
     ");
@@ -17,36 +17,35 @@ try {
     $item = mysqli_fetch_assoc($res);
     $tipo = $item['tipo'];
 
-    // Desequipar todos los del mismo tipo
-    mysqli_query($conexion, "
-        UPDATE Usuario_Items ui
-        JOIN Tienda_Items ti ON ti.id_item = ui.id_item
-        SET ui.equipado = 0
-        WHERE ui.id_usuario = $id_usuario
-        AND ti.tipo = '$tipo'
-    ");
-
-    // Equipar este
+    // Desequipar SOLO este item
     mysqli_query($conexion, "
         UPDATE Usuario_Items
-        SET equipado = 1
+        SET equipado = 0
         WHERE id_usuario = $id_usuario
         AND id_item = $id_item
     ");
 
-    // Guardar en Usuario (CONTROLADO)
+    // Limpiar en tabla Usuario
     if ($tipo === 'avatar') {
-        mysqli_query($conexion, "UPDATE Usuario SET avatar_activo = $id_item WHERE id_usuario = $id_usuario");
+        mysqli_query($conexion, "
+            UPDATE Usuario SET avatar_activo = NULL 
+            WHERE id_usuario = $id_usuario
+        ");
     }
 
     if ($tipo === 'marco') {
-        mysqli_query($conexion, "UPDATE Usuario SET marco_activo = $id_item WHERE id_usuario = $id_usuario");
+        mysqli_query($conexion, "
+            UPDATE Usuario SET marco_activo = NULL 
+            WHERE id_usuario = $id_usuario
+        ");
     }
 
     if ($tipo === 'fondo') {
-        mysqli_query($conexion, "UPDATE Usuario SET fondo_activo = $id_item WHERE id_usuario = $id_usuario");
+        mysqli_query($conexion, "
+            UPDATE Usuario SET fondo_activo = NULL 
+            WHERE id_usuario = $id_usuario
+        ");
     }
-
 
     mysqli_commit($conexion);
 

@@ -64,11 +64,11 @@ body {
 }
 .marco-img {
     position: absolute;
-    top: -15%;
-    left: -12%;
+    top: -17%;
+    left: -22%;
 
-    width: 128%;
-    height: 128%;
+    width: 140%;
+    height: 140%;
 
     object-fit: contain;
     pointer-events: none;

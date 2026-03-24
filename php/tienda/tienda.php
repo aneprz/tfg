@@ -193,8 +193,6 @@ if (isset($_SESSION['id_usuario'])) {
 
             <h2><?php echo htmlspecialchars($_SESSION['tag'] ?? 'Usuario'); ?></h2>
 
-            <img id="previewInsignia" class="preview-insignia">
-
         </div>
 
     </div>

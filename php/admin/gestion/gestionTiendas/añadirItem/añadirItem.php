@@ -60,7 +60,6 @@ $admin = true;
         <option value="avatar">Avatar</option>
         <option value="marco">Marco</option>
         <option value="fondo">Fondo</option>
-        <option value="insignia">Insignia</option>
     </select>
 
     <label>Precio:</label>
