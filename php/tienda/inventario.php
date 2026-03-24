@@ -53,8 +53,9 @@ ORDER BY ti.tipo, ui.equipado DESC
             <li><a href="../videojuegos/juegos.php">Juegos</a></li>
             <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
             <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
+            <li><a href="../tienda/tienda.php" class="activo">Tienda</a></li>
             <li><a href="../logros/logros.php">Logros</a></li>
-
+            <li><a href="../ranking/ranking.php">Ranking</a></li>
             <?php if ($admin): ?>
                 <li><a href="../admin/indexAdmin.php">Admin</a></li>
             <?php endif; ?>
