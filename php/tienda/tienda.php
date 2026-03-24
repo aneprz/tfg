@@ -114,12 +114,10 @@ if (isset($_SESSION['id_usuario'])) {
         Personaliza tu perfil y desbloquea contenido exclusivo.
     </p>
 
-    <!-- 👇 AÑADIDO (no rompe diseño) -->
     <div class="puntosUsuario">
         Tus puntos: <strong><?php echo $puntos; ?></strong>
     </div>
-
-    <!-- 👇 MENSAJES -->
+    
     <?php if (isset($_SESSION['error'])): ?>
         <div class="error"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></div>
     <?php endif; ?>

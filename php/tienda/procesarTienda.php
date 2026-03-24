@@ -8,7 +8,7 @@ $buscar = $_GET['buscar'] ?? '';
 $orden = $_GET['orden'] ?? 'precio_asc';
 $pagina = max(1, (int)($_GET['pagina'] ?? 1));
 
-$limite = 12;
+$limite = 24;
 $offset = ($pagina - 1) * $limite;
 
 /* =========================
