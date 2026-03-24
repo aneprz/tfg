@@ -1,0 +1,103 @@
+.controles-ranking {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    align-items: center;
+}
+
+.btn-filtro {
+    background: #2c3440;
+    color: #fff;
+    border: 1px solid #353f4d;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-filtro.activo, .btn-filtro:hover {
+    background: #e0be00;
+    color: #000;
+    border-color: #e0be00;
+}
+
+.select-orden {
+    background: #1b2129;
+    color: #fff;
+    border: 1px solid #353f4d;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.user-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.tarjeta-ranking {
+    background: #1b2129;
+    border: 1px solid #2c3440;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: transform 0.2s, border-color 0.2s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.tarjeta-ranking:hover {
+    transform: translateY(-5px);
+    border-color: #e0be00;
+}
+
+.posicion {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #5c6370;
+    min-width: 30px;
+    text-align: center;
+}
+
+.top-1 .posicion { color: #e0be00; } /* Oro */
+.top-2 .posicion { color: #c0c0c0; } /* Plata */
+.top-3 .posicion { color: #cd7f32; } /* Bronce */
+
+.avatar-ranking {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #353f4d;
+}
+
+.info-ranking {
+    flex: 1;
+}
+
+.info-ranking h3 {
+    margin: 0 0 5px 0;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+.info-ranking p {
+    margin: 0;
+    color: #e0be00;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.cargando { 
+    color: #9ab; 
+    text-align: center; 
+    width: 100%; 
+    padding: 40px 0; 
+}

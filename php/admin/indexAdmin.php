@@ -31,6 +31,7 @@ $admin = true;
                 <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
                 <li><a href="../logros/logros.php">Logros</a></li>
+                <li><a href="../ranking/ranking.php">Ranking</a></li>
                 <?php if ($admin): ?>
                     <li><a href="indexAdmin.php" class="activo">Admin</a></li>
                 <?php endif; ?>
