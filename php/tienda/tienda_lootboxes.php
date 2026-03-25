@@ -328,23 +328,17 @@ function abrirLootboxAnimacion(items, ganador, res){
 
     const lista = [];
 
-    // 🔁 duplicar items muchas veces
-    const duplicaciones = 25; 
+    // duplicamos items varias veces para recorrido largo
+    const duplicaciones = 15;
     for(let i=0;i<duplicaciones;i++){
         items.forEach(it => lista.push(it));
     }
 
-    // 💥 Insertar ganador unos items antes del final
-    const margenFinal = 5; // cuántos items después del ganador
-    const posicionGanador = lista.length - items.length - margenFinal + Math.floor(Math.random()*items.length);
+    // colocar el ganador en el centro de la lista
+    const posicionGanador = Math.floor(lista.length / 2);
     lista[posicionGanador] = ganador;
 
-    // 🔹 Relleno extra para que siempre parezca que sigue
-    for(let i=0;i<margenFinal;i++){
-        lista.push(items[Math.floor(Math.random()*items.length)]);
-    }
-
-    // 🖼 pintar items
+    // pintar items
     lista.forEach(it => {
         const div = document.createElement('div');
         div.classList.add('carrusel-item', it.rareza || 'comun');
@@ -355,22 +349,27 @@ function abrirLootboxAnimacion(items, ganador, res){
     carrusel.appendChild(track);
     modal.style.display = "flex";
 
-    const itemWidth = 115;
-    const destino = posicionGanador * itemWidth - (carrusel.offsetWidth/2 - itemWidth/2);
+    const itemWidth = 100;
+    const gap = 15;
+    const itemWidthTotal = itemWidth + gap;
+    const centroCarrusel = carrusel.offsetWidth / 2 - itemWidth / 2;
+
+    // destino final para centrar el ganador
+    const destinoFinal = posicionGanador * itemWidthTotal - centroCarrusel;
 
     const duracion = 5000;
     const inicio = performance.now();
 
-    function easeOutCubic(t){
-        return 1 - Math.pow(1 - t, 3);
-    }
+    function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
 
     function animar(now){
         let tiempo = (now - inicio) / duracion;
         if(tiempo > 1) tiempo = 1;
 
-        const progreso = easeOutCubic(tiempo);
-        const pos = destino * progreso;
+        // simulamos que recorre más items al inicio
+        // usando un factor que disminuye con el tiempo
+        const recorridoExtra = 5 * itemWidthTotal; // recorre 5 items extra al inicio
+        const pos = destinoFinal * easeOutCubic(tiempo) + recorridoExtra * (1 - easeOutCubic(tiempo));
 
         track.style.transform = `translateX(-${pos}px)`;
 
@@ -381,11 +380,9 @@ function abrirLootboxAnimacion(items, ganador, res){
             itemsDOM[posicionGanador].classList.add('ganador');
 
             nombreItemGanado.textContent = ganador.nombre;
-
             if(res && res.duplicado){
                 nombreItemGanado.textContent += ` (Duplicado → +${res.valorDevuelto} pts)`;
             }
-
             imgItemGanado.src = `../../media/${ganador.imagen}`;
             itemGanadoDiv.hidden = false;
         }
