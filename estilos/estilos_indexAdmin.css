@@ -172,3 +172,126 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 input:checked + .slider { background-color: var(--accent-color); }
 input:checked + .slider:before { transform: translateX(26px); }
+
+#addLootboxPage {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    text-align: center;
+}
+
+#addLootboxPage h1 {
+    color: #00d4ff;
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+#addLootboxPage form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#addLootboxPage label {
+    color: #00d4ff;
+    font-weight: bold;
+}
+
+#addLootboxPage input[type="text"],
+#addLootboxPage input[type="number"],
+#addLootboxPage select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 212, 255, 0.5);
+    background: rgba(0,0,0,0.3);
+    color: white;
+}
+
+#addLootboxPage button[type="submit"] {
+    padding: 15px;
+    background-color: #00d4ff;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+#addLootboxPage button[type="submit"]:hover {
+    background-color: #00aacc;
+    transform: scale(1.02);
+}
+
+/* Contenedor drag & drop */
+#addLootboxPage .container {
+    display: flex;
+    gap: 40px;
+    margin: 20px 0;
+}
+
+#addLootboxPage .items-disponibles,
+#addLootboxPage .lootbox {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #00d4ff;
+    border-radius: 10px;
+    background: rgba(0, 212, 255, 0.05);
+}
+
+#addLootboxPage ul {
+    list-style: none;
+    padding: 0;
+}
+
+#addLootboxPage li {
+    padding: 8px;
+    margin: 5px 0;
+    background: #00d4ff; /* mismo azul que el botón */
+    cursor: grab;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #1a1a1a;
+}
+
+#addLootboxPage input.prob {
+    width: 60px;
+    margin-left: 10px;
+    border-radius: 5px;
+    border: 1px solid #00d4ff;
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+#addLootboxPage .remove {
+    background: red;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 2px 5px;
+    margin-left: 10px;
+}
+
+#addLootboxPage #totalProb {
+    font-weight: bold;
+    margin-top: 10px;
+    display: inline-block;
+}
+/* Lootbox drop area */
+#lootboxItems {
+    min-height: 200px;                  /* Altura mínima para permitir drop */
+    border: 2px dashed rgba(0,212,255,0.5); /* Borde visible */
+    padding: 10px;                      /* Espaciado interno */
+    border-radius: 5px;
+    list-style: none;                   /* Sin bullets */
+}
+#lootboxItems:empty::before {
+    content: "Arrastra aquí los items";
+    display: block;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 60px 0;
+}
