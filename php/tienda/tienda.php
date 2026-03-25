@@ -119,6 +119,8 @@ if (isset($_SESSION['id_usuario'])) {
 
         <a href="inventario.php" class="subnav-link">Inventario</a>
 
+        <a href="tienda_lootboxes.php" class="subnav-link">Cajas</a>
+
     </div>
 
 </div>
@@ -135,7 +137,7 @@ if (isset($_SESSION['id_usuario'])) {
     <div class="puntosUsuario">
         Tus puntos: <strong><?php echo $puntos; ?></strong>
     </div>
-    
+
     <?php if (isset($_SESSION['error'])): ?>
         <div class="error"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></div>
     <?php endif; ?>
