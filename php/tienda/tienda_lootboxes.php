@@ -329,13 +329,13 @@ function abrirLootboxAnimacion(items, ganador, res){
     const lista = [];
 
     // duplicamos items varias veces para recorrido largo
-    const duplicaciones = 15;
+    const duplicaciones = 30; // más recorrido para efecto slot
     for(let i=0;i<duplicaciones;i++){
         items.forEach(it => lista.push(it));
     }
 
-    // colocar el ganador en el centro de la lista
-    const posicionGanador = Math.floor(lista.length / 2);
+    // colocar el ganador hacia el final de la lista
+    const posicionGanador = Math.floor(lista.length * 0.7);
     lista[posicionGanador] = ganador;
 
     // pintar items
@@ -357,27 +357,36 @@ function abrirLootboxAnimacion(items, ganador, res){
     // destino final para centrar el ganador
     const destinoFinal = posicionGanador * itemWidthTotal - centroCarrusel;
 
-    const duracion = 5000;
+    const duracion = 5000; // duración total animación
     const inicio = performance.now();
 
-    function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+    // Easing tipo slot machine (suave)
+    function easeOutQuint(t){ return 1 - Math.pow(1 - t, 5); }
 
     function animar(now){
         let tiempo = (now - inicio) / duracion;
         if(tiempo > 1) tiempo = 1;
 
-        // simulamos que recorre más items al inicio
-        // usando un factor que disminuye con el tiempo
-        const recorridoExtra = 5 * itemWidthTotal; // recorre 5 items extra al inicio
-        const pos = destinoFinal * easeOutCubic(tiempo) + recorridoExtra * (1 - easeOutCubic(tiempo));
+        // posición actual (desaceleración suave)
+        const pos = destinoFinal * easeOutQuint(tiempo);
 
         track.style.transform = `translateX(-${pos}px)`;
+
+        // efecto zoom dinámico para items cercanos al centro
+        const itemsDOM = track.querySelectorAll('.carrusel-item');
+        itemsDOM.forEach((item, idx) => {
+            const itemCenter = idx * itemWidthTotal + itemWidthTotal/2;
+            const distancia = Math.abs(itemCenter - (pos + carrusel.offsetWidth/2));
+            const scale = Math.max(1, 1.3 - distancia / 300); // items cercanos al centro + grande
+            item.style.transform = `scale(${scale})`;
+        });
 
         if(tiempo < 1){
             requestAnimationFrame(animar);
         } else {
-            const itemsDOM = track.querySelectorAll('.carrusel-item');
+            // marcar ganador
             itemsDOM[posicionGanador].classList.add('ganador');
+            itemsDOM[posicionGanador].style.transform = 'scale(1.3)'; // zoom final
 
             nombreItemGanado.textContent = ganador.nombre;
             if(res && res.duplicado){
