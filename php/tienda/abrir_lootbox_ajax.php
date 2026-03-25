@@ -28,10 +28,10 @@ try {
     }
 
     $lootbox = mysqli_fetch_assoc($res);
-    $precio = (int)$lootbox['precio'];
+    $precio = (float)$lootbox['precio'];
 
     /* =========================
-       2. BLOQUEAR USUARIO (ANTI BUG)
+       2. BLOQUEAR USUARIO
     ========================= */
     $resUser = mysqli_query($conexion, "
         SELECT puntos_actuales 
@@ -77,7 +77,8 @@ try {
     $totalProb = 0;
 
     while ($row = mysqli_fetch_assoc($resItems)) {
-        $prob = max(0, (int)$row['probabilidad']);
+
+        $prob = max(0, (float)$row['probabilidad']); // ✅ DECIMALES
         $row['probabilidad'] = $prob;
 
         $totalProb += $prob;
@@ -89,9 +90,10 @@ try {
     }
 
     /* =========================
-       5. RNG REAL
+       5. RNG REAL (DECIMALES)
     ========================= */
-    $rand = random_int(1, $totalProb);
+    $rand = (mt_rand() / mt_getrandmax()) * $totalProb;
+
     $acumulado = 0;
     $ganado = null;
 
@@ -104,29 +106,67 @@ try {
         }
     }
 
-    // fallback seguridad
     if (!$ganado) {
         $ganado = $items[array_rand($items)];
     }
 
     /* =========================
-       6. GUARDAR ITEM (SIN DUPLICAR)
+       6. DUPLICADOS
     ========================= */
-    mysqli_query($conexion, "
-        INSERT IGNORE INTO Usuario_Items (id_usuario, id_item)
-        VALUES ($id_usuario, {$ganado['id_item']})
+    $resCheck = mysqli_query($conexion, "
+        SELECT 1 FROM Usuario_Items 
+        WHERE id_usuario = $id_usuario 
+        AND id_item = {$ganado['id_item']}
     ");
 
-    mysqli_commit($conexion);
+    $esDuplicado = mysqli_num_rows($resCheck) > 0;
+    $valorItem = 0;
+
+    if ($esDuplicado) {
+
+        $resValor = mysqli_query($conexion, "
+            SELECT precio FROM Tienda_Items 
+            WHERE id_item = {$ganado['id_item']}
+        ");
+
+        $valorItem = (float)(mysqli_fetch_assoc($resValor)['precio'] ?? 0);
+
+        mysqli_query($conexion, "
+            UPDATE Usuario 
+            SET puntos_actuales = puntos_actuales + $valorItem
+            WHERE id_usuario = $id_usuario
+        ");
+
+    } else {
+
+        mysqli_query($conexion, "
+            INSERT INTO Usuario_Items (id_usuario, id_item)
+            VALUES ($id_usuario, {$ganado['id_item']})
+        ");
+    }
 
     /* =========================
-       7. RESPUESTA
+       7. OBTENER PUNTOS REALES
+    ========================= */
+    $resFinal = mysqli_query($conexion, "
+        SELECT puntos_actuales FROM Usuario 
+        WHERE id_usuario = $id_usuario
+    ");
+
+    $puntosFinales = (float)mysqli_fetch_assoc($resFinal)['puntos_actuales'];
+
+    mysqli_commit($conexion); // ✅ CRÍTICO
+
+    /* =========================
+       8. RESPUESTA
     ========================= */
     echo json_encode([
         "ok" => true,
         "items" => $items,
         "ganado" => $ganado,
-        "nuevosPuntos" => $user['puntos_actuales'] - $precio
+        "nuevosPuntos" => $puntosFinales,
+        "duplicado" => $esDuplicado,
+        "valorDevuelto" => $valorItem
     ]);
 
 } catch (Exception $e) {

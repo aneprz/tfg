@@ -40,15 +40,86 @@ if (isset($_SESSION['id_usuario'])) {
 <link rel="stylesheet" href="../../estilos/estilos_tienda.css">
 <link rel="icon" href="../../media/logoPlatino.png">
 <style>
-/* Modal y animación de lootbox */
-.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
-         background: rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
-.modal-content { background:#fff; padding:20px; border-radius:10px; text-align:center; position:relative; width:80%; max-width:500px; }
-.cerrarLootbox { position:absolute; top:10px; right:10px; cursor:pointer; font-size:20px; }
-.carruselLootbox { display:flex; overflow:hidden; margin:20px 0; justify-content:center; }
-.carruselLootbox img { width:80px; margin:0 5px; border:2px solid transparent; border-radius:5px; }
-.carruselLootbox img.seleccionado { border-color:gold; transform: scale(1.2); transition: all 0.3s; }
-.itemGanado img { width:100px; margin-top:10px; }
+/* ===== MODAL LOOTBOX PRO ===== */
+
+.modal-content {
+    background: var(--card-bg);
+    border: 1px solid #2c3440;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+}
+
+/* CONTENEDOR */
+.carruselLootbox {
+    width: 100%;
+    overflow: hidden;
+    border: 2px solid #2c3440;
+    border-radius: 10px;
+    background: #1f252c;
+    padding: 15px 0;
+    position: relative;
+}
+
+/* EFECTO SOMBRA LATERAL */
+.carruselLootbox::before,
+.carruselLootbox::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 80px;
+    height: 100%;
+    z-index: 2;
+}
+
+.carruselLootbox::before {
+    left: 0;
+    background: linear-gradient(to right, #1f252c, transparent);
+}
+
+.carruselLootbox::after {
+    right: 0;
+    background: linear-gradient(to left, #1f252c, transparent);
+}
+
+/* TRACK (LO QUE SE MUEVE) */
+.carrusel-track {
+    display: flex;
+    gap: 15px;
+    transition: transform 2s cubic-bezier(0.25, 0.1, 0.25, 1); /* transición inicial */
+}
+
+/* ITEM */
+.carrusel-item {
+    min-width: 100px;
+    text-align: center;
+}
+
+.carrusel-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background: #2c3440;
+}
+
+/* RAREZA */
+.carrusel-item.legendario img { border-color: gold; }
+.carrusel-item.epico img { border-color: #9b59b6; }
+.carrusel-item.raro img { border-color: #3498db; }
+.carrusel-item.comun img { border-color: #555; }
+
+/* GANADOR */
+.carrusel-item.ganador img {
+    transform: scale(1.2);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px var(--accent-color);
+}
+
+/* TEXTO GANADO */
+.itemGanado {
+    margin-top: 15px;
+    animation: fadeInUp 0.5s ease;
+}
 </style>
 </head>
 <body>
@@ -210,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             puntosUsuario.textContent = res.nuevosPuntos;
 
                             // animación
-                            abrirLootboxAnimacion(res.items, res.ganado);
+                            abrirLootboxAnimacion(res.items, res.ganado, res);
 
                         } catch (err) {
                             console.error(err);
@@ -248,65 +319,80 @@ document.addEventListener("DOMContentLoaded", () => {
     window.onclick = e => {
         if(e.target === modal) modal.style.display = "none";
     };
+function abrirLootboxAnimacion(items, ganador, res){
+    carrusel.innerHTML = '';
+    itemGanadoDiv.hidden = true;
 
-    function abrirLootboxAnimacion(items, ganador){
+    const track = document.createElement('div');
+    track.classList.add('carrusel-track');
 
-        if(!items || items.length === 0){
-            alert("Error: lootbox sin items");
-            return;
-        }
+    const lista = [];
 
-        carrusel.innerHTML = '';
-        itemGanadoDiv.hidden = true;
-
-        const carruselItems = [];
-
-        // generar carrusel
-        for(let i=0; i<15; i++){
-            items.forEach(it=>{
-                const img = document.createElement('img');
-                img.src = `../../media/${it.imagen}`;
-                img.dataset.id = it.id_item;
-
-                carrusel.appendChild(img);
-                carruselItems.push(img);
-            });
-        }
-
-        modal.style.display = "flex";
-
-        let index = 0;
-
-        const interval = setInterval(() => {
-
-            carruselItems.forEach(img => img.classList.remove('seleccionado'));
-
-            carruselItems[index].classList.add('seleccionado');
-
-            index = (index + 1) % carruselItems.length;
-
-        }, 100);
-
-        setTimeout(() => {
-
-            clearInterval(interval);
-
-            carruselItems.forEach(img => img.classList.remove('seleccionado'));
-
-            const ganadorImg = carruselItems.find(img => img.dataset.id == ganador.id_item);
-
-            if(ganadorImg){
-                ganadorImg.classList.add('seleccionado');
-            }
-
-            nombreItemGanado.textContent = ganador.nombre;
-            imgItemGanado.src = `../../media/${ganador.imagen}`;
-
-            itemGanadoDiv.hidden = false;
-
-        }, 3000);
+    // 🔁 duplicar items muchas veces
+    const duplicaciones = 25; 
+    for(let i=0;i<duplicaciones;i++){
+        items.forEach(it => lista.push(it));
     }
 
+    // 💥 Insertar ganador unos items antes del final
+    const margenFinal = 5; // cuántos items después del ganador
+    const posicionGanador = lista.length - items.length - margenFinal + Math.floor(Math.random()*items.length);
+    lista[posicionGanador] = ganador;
+
+    // 🔹 Relleno extra para que siempre parezca que sigue
+    for(let i=0;i<margenFinal;i++){
+        lista.push(items[Math.floor(Math.random()*items.length)]);
+    }
+
+    // 🖼 pintar items
+    lista.forEach(it => {
+        const div = document.createElement('div');
+        div.classList.add('carrusel-item', it.rareza || 'comun');
+        div.innerHTML = `<img src='../../media/${it.imagen}'>`;
+        track.appendChild(div);
+    });
+
+    carrusel.appendChild(track);
+    modal.style.display = "flex";
+
+    const itemWidth = 115;
+    const destino = posicionGanador * itemWidth - (carrusel.offsetWidth/2 - itemWidth/2);
+
+    const duracion = 5000;
+    const inicio = performance.now();
+
+    function easeOutCubic(t){
+        return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animar(now){
+        let tiempo = (now - inicio) / duracion;
+        if(tiempo > 1) tiempo = 1;
+
+        const progreso = easeOutCubic(tiempo);
+        const pos = destino * progreso;
+
+        track.style.transform = `translateX(-${pos}px)`;
+
+        if(tiempo < 1){
+            requestAnimationFrame(animar);
+        } else {
+            const itemsDOM = track.querySelectorAll('.carrusel-item');
+            itemsDOM[posicionGanador].classList.add('ganador');
+
+            nombreItemGanado.textContent = ganador.nombre;
+
+            if(res && res.duplicado){
+                nombreItemGanado.textContent += ` (Duplicado → +${res.valorDevuelto} pts)`;
+            }
+
+            imgItemGanado.src = `../../media/${ganador.imagen}`;
+            itemGanadoDiv.hidden = false;
+        }
+    }
+
+    requestAnimationFrame(animar);
+}
 });
 </script>
 </body>
