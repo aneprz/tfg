@@ -1,0 +1,137 @@
+/* Contenedor Principal */
+.contenedor-chat {
+    display: flex;
+    max-width: 1200px;
+    margin: 20px auto;
+    background: #121212;
+    border: 1px solid #333;
+    border-radius: 8px;
+    height: 85vh;
+    overflow: hidden;
+}
+
+/* Columna Izquierda: Lista de Chats */
+.lista-conversaciones {
+    width: 320px;
+    border-right: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    background: #181818;
+}
+
+.seccion-titulo {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #888;
+    padding: 20px 15px 10px;
+    letter-spacing: 1.5px;
+    font-weight: bold;
+}
+
+.chat-item {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.chat-item:hover { background: #222; }
+.chat-item.activo { 
+    background: #2a2a2a; 
+    border-left-color: #f0c330; /* Color platino/dorado de tu logo */
+}
+
+.chat-info h4 { margin: 0; font-size: 14px; color: #fff; }
+.chat-info p { margin: 4px 0 0; font-size: 12px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Columna Derecha: Ventana de Mensajes */
+.ventana-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #0f0f0f;
+}
+
+#mensajes-scroll {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Burbujas de Mensaje */
+.mensaje {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.mensaje.yo {
+    align-self: flex-end;
+    background: #f0c330;
+    color: #000;
+    border-bottom-right-radius: 2px;
+}
+
+.mensaje.otro {
+    align-self: flex-start;
+    background: #2a2a2a;
+    color: #eee;
+    border-bottom-left-radius: 2px;
+}
+
+/* Área de Input */
+.input-area {
+    padding: 20px;
+    background: #181818;
+    display: flex;
+    gap: 10px;
+}
+
+.input-area input {
+    flex: 1;
+    background: #252525;
+    border: 1px solid #333;
+    padding: 12px;
+    border-radius: 5px;
+    color: white;
+    outline: none;
+}
+
+.input-area button {
+    background: #f0c330;
+    border: none;
+    padding: 0 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    gap: 15px; /* Espacio entre avatar y texto */
+    border-bottom: 1px solid #222;
+}
+
+.chat-item img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #333;
+}
+
+.chat-info h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #f0c330; /* El color dorado de SalsaBox */
+}
