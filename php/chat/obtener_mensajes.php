@@ -2,34 +2,39 @@
 session_start();
 require_once __DIR__ . '/../../db/conexiones.php';
 
-if (!isset($_SESSION['id_usuario']) || !isset($_GET['id'])) {
-    exit('No autorizado');
-}
-
 $id_yo = (int)$_SESSION['id_usuario'];
-$id_conversacion = (int)$_GET['id'];
+$id_conv = (int)$_GET['id'];
 
-// Seguridad: Verificar que el usuario pertenece a esta conversación
-$sqlCheck = "SELECT 1 FROM chat_participante WHERE id_conversacion = $id_conversacion AND id_usuario = $id_yo";
-$resCheck = mysqli_query($conexion, $sqlCheck);
+if (!$id_conv) exit;
 
-if (mysqli_num_rows($resCheck) === 0) {
-    exit('Acceso denegado');
-}
+// 1. Marcar que YO he leído la conversación ahora mismo
+mysqli_query($conexion, "UPDATE chat_participante SET ultima_lectura = NOW() WHERE id_conversacion = $id_conv AND id_usuario = $id_yo");
 
-// Obtener mensajes
-$sql = "SELECT * FROM chat_mensaje WHERE id_conversacion = $id_conversacion ORDER BY fecha_envio ASC";
+// 2. Obtener la última lectura del OTRO
+$resL = mysqli_query($conexion, "SELECT ultima_lectura FROM chat_participante WHERE id_conversacion = $id_conv AND id_usuario != $id_yo LIMIT 1");
+$otra_lectura = mysqli_fetch_assoc($resL)['ultima_lectura'];
+
+// 3. Obtener mensajes
+$sql = "SELECT * FROM chat_mensaje WHERE id_conversacion = $id_conv ORDER BY fecha_envio ASC";
 $res = mysqli_query($conexion, $sql);
 
-if (mysqli_num_rows($res) === 0) {
-    echo '<p style="text-align:center; color:#555; margin-top:20px;">No hay mensajes en esta conversación. ¡Dile hola!</p>';
+$html = "";
+$ultimo_msg_mio_fecha = null;
+
+while ($m = mysqli_fetch_assoc($res)) {
+    $clase = ($m['id_emisor'] == $id_yo) ? 'yo' : 'otro';
+    if($clase == 'yo') $ultimo_msg_mio_fecha = $m['fecha_envio'];
+    
+    $html .= '<div class="mensaje ' . $clase . '">';
+    $html .= htmlspecialchars($m['contenido']);
+    $html .= '<span style="display:block; font-size:9px; opacity:0.5; margin-top:4px; text-align:right;">' . date('H:i', strtotime($m['fecha_envio'])) . '</span>';
+    $html .= '</div>';
 }
 
-while ($msg = mysqli_fetch_assoc($res)) {
-    $clase = ($msg['id_emisor'] == $id_yo) ? 'yo' : 'otro';
-    echo '<div class="mensaje ' . $clase . '">';
-    echo htmlspecialchars($msg['contenido']);
-    echo '<span style="display:block; font-size:10px; opacity:0.6; margin-top:5px;">' . date('H:i', strtotime($msg['fecha_envio'])) . '</span>';
-    echo '</div>';
+// 4. Determinar texto de "Visto"
+$visto_txt = "";
+if ($ultimo_msg_mio_fecha && $otra_lectura && $otra_lectura >= $ultimo_msg_mio_fecha) {
+    $visto_txt = "Visto a las " . date('H:i', strtotime($otra_lectura));
 }
-?>
+
+echo json_encode(['html' => $html, 'visto' => $visto_txt]);
