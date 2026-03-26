@@ -176,12 +176,12 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
                     <input type="text" id="edit-nombre-grupo" name="nuevo_nombre" style="flex:1; padding:8px; background:transparent; border:none; border-bottom:1px solid #333; color:white; font-size:16px;">
                 </div>
 
-                <h4 style="color:#888; font-size:12px; text-transform:uppercase;">Miembros actuales</h4>
+                <h4 style="color:#888; font-size:12px; margin-bottom:10px;">MIEMBROS ACTUALES</h4>
                 <div id="lista-gestion-miembros" style="margin-bottom:20px; background:#0e0e0e; border-radius:8px; padding:5px;">
                     </div>
 
-                <h4 style="color:#888; font-size:12px; text-transform:uppercase;">Añadir nuevos</h4>
-                <div id="lista-añadir-miembros" style="margin-bottom:20px; background:#0e0e0e; border-radius:8px; padding:5px; max-height:150px; overflow-y:auto;">
+                <h4 style="color:#888; font-size:12px; margin-bottom:10px;">AÑADIR NUEVOS</h4>
+                <div id="lista-añadir-miembros" style="background:#0e0e0e; border-radius:8px; padding:5px; max-height:150px; overflow-y:auto;">
                     </div>
 
                 <div style="display:flex; gap:10px;">

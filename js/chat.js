@@ -159,24 +159,38 @@ function actualizarListasMiembros(idConv) {
             const listaActual = document.getElementById('lista-gestion-miembros');
             const listaNuevos = document.getElementById('lista-añadir-miembros');
             
-            // Miembros actuales
-            listaActual.innerHTML = data.miembros.map(m => `
-                <div style="display:flex; align-items:center; justify-content:space-between; padding:8px; border-bottom:1px solid #222;">
-                    <span style="color:white; font-size:13px;">${m.gameTag} ${m.es_creador ? '👑' : ''}</span>
-                    ${(!m.es_creador && data.soy_creador) ? 
-                        `<button type="button" onclick="gestionarMiembro(${idConv}, ${m.id_usuario}, 'quitar')" style="color:#ff4444; background:none; border:none; cursor:pointer;">Eliminar</button>` 
-                        : ''}
-                </div>
-            `).join('');
+            // 1. MIEMBROS ACTUALES
+            if (data.miembros.length > 0) {
+                listaActual.innerHTML = data.miembros.map(m => `
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #222;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="color:white; font-size:14px;">${m.gameTag}</span>
+                            ${m.es_creador ? '<span title="Creador" style="font-size:12px;">👑</span>' : ''}
+                        </div>
+                        ${(!m.es_creador && data.soy_creador) ? 
+                            `<button type="button" onclick="gestionarMiembro(${idConv}, ${m.id_usuario}, 'quitar')" 
+                             style="background:#ff4444; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Eliminar</button>` 
+                            : ''}
+                    </div>
+                `).join('');
+            } else {
+                listaActual.innerHTML = '<div style="padding:10px; color:#666;">No hay miembros</div>';
+            }
 
-            // Amigos para añadir
-            listaNuevos.innerHTML = data.amigos_fuera.map(a => `
-                <div style="display:flex; align-items:center; justify-content:space-between; padding:8px; border-bottom:1px solid #222;">
-                    <span style="color:#ccc; font-size:13px;">${a.gameTag}</span>
-                    <button type="button" onclick="gestionarMiembro(${idConv}, ${a.id_usuario}, 'añadir')" style="color:#f0c330; background:none; border:none; cursor:pointer;">+ Añadir</button>
-                </div>
-            `).join('');
-        });
+            // 2. AÑADIR NUEVOS (AMIGOS)
+            if (data.amigos_fuera.length > 0) {
+                listaNuevos.innerHTML = data.amigos_fuera.map(a => `
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #222;">
+                        <span style="color:#ccc; font-size:13px;">${a.gameTag}</span>
+                        <button type="button" onclick="gestionarMiembro(${idConv}, ${a.id_usuario}, 'añadir')" 
+                         style="background:#f0c330; color:black; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:10px; font-weight:bold;">+ Añadir</button>
+                    </div>
+                `).join('');
+            } else {
+                listaNuevos.innerHTML = '<div style="padding:10px; color:#666; font-size:12px;">No hay amigos para añadir</div>';
+            }
+        })
+        .catch(err => console.error("Error cargando miembros:", err));
 }
 
 function gestionarMiembro(idConv, idUser, accion) {
