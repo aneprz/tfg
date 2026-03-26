@@ -60,10 +60,10 @@ try {
     ");
 
     /* =========================
-       4. OBTENER ITEMS
+       4. OBTENER ITEMS (INCLUYENDO RAREZA)
     ========================= */
     $resItems = mysqli_query($conexion, "
-        SELECT ti.id_item, ti.nombre, ti.imagen, lr.probabilidad
+        SELECT ti.id_item, ti.nombre, ti.imagen, ti.rareza, lr.probabilidad
         FROM lootbox_recompensas lr
         JOIN Tienda_Items ti ON ti.id_item = lr.id_item
         WHERE lr.id_lootbox = $id_lootbox
@@ -77,10 +77,8 @@ try {
     $totalProb = 0;
 
     while ($row = mysqli_fetch_assoc($resItems)) {
-
         $prob = max(0, (float)$row['probabilidad']); // ✅ DECIMALES
         $row['probabilidad'] = $prob;
-
         $totalProb += $prob;
         $items[] = $row;
     }
@@ -123,7 +121,6 @@ try {
     $valorItem = 0;
 
     if ($esDuplicado) {
-
         $resValor = mysqli_query($conexion, "
             SELECT precio FROM Tienda_Items 
             WHERE id_item = {$ganado['id_item']}
@@ -136,9 +133,7 @@ try {
             SET puntos_actuales = puntos_actuales + $valorItem
             WHERE id_usuario = $id_usuario
         ");
-
     } else {
-
         mysqli_query($conexion, "
             INSERT INTO Usuario_Items (id_usuario, id_item)
             VALUES ($id_usuario, {$ganado['id_item']})
@@ -170,9 +165,7 @@ try {
     ]);
 
 } catch (Exception $e) {
-
     mysqli_rollback($conexion);
-
     echo json_encode([
         "ok" => false,
         "error" => $e->getMessage()
