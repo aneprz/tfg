@@ -135,3 +135,27 @@
     font-size: 0.95rem;
     color: #f0c330; /* El color dorado de SalsaBox */
 }
+
+.mensaje {
+    max-width: 70%;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    position: relative;
+    word-wrap: break-word;
+    min-width: 80px; /* Asegura espacio para la hora y el estado */
+}
+
+.mensaje.yo {
+    align-self: flex-end;
+    background-color: #333; /* O el color que uses para tus mensajes */
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+.mensaje.otro {
+    align-self: flex-start;
+    background-color: #222;
+    color: #eee;
+    border-bottom-left-radius: 2px;
+}

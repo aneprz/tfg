@@ -4,6 +4,7 @@ let receptorNuevoID = null;
 function seleccionarContacto(idUsuario, idConv, elemento) {
     document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('activo'));
     elemento.classList.add('activo');
+
     if (chatInterval) clearInterval(chatInterval);
     document.getElementById('form-mensaje').style.display = 'flex';
     document.getElementById('input-texto').value = '';
@@ -16,25 +17,20 @@ function seleccionarContacto(idUsuario, idConv, elemento) {
         receptorNuevoID = idUsuario;
         document.getElementById('id_conversacion_activa').value = '';
         document.getElementById('mensajes-scroll').innerHTML = '<p style="text-align:center; color:#888; margin-top:100px;">Di hola para empezar.</p>';
-        document.getElementById('estado-visto').innerText = '';
     }
 }
 
 function iniciarBucle(id) {
     const refrescar = () => {
+        // Dentro de la función refrescar en chat.js
         fetch(`obtener_mensajes.php?id=${id}`)
-            .then(res => res.json())
-            .then(data => {
+            .then(res => res.text()) // Importante que sea .text()
+            .then(html => {
                 const box = document.getElementById('mensajes-scroll');
-                const vistoDiv = document.getElementById('estado-visto');
-                // Dentro del .then(data => { ... }) del fetch de obtener_mensajes:
-                document.getElementById('estado-visto').innerText = data.visto;         
-                
-                if (box.innerHTML !== data.html) {
-                    box.innerHTML = data.html;
+                if (box.innerHTML !== html) {
+                    box.innerHTML = html;
                     box.scrollTop = box.scrollHeight;
                 }
-                vistoDiv.innerText = data.visto;
             });
     };
     refrescar();
@@ -55,7 +51,6 @@ document.getElementById('form-mensaje').addEventListener('submit', function(e) {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: params
-        
     })
     .then(res => res.json())
     .then(data => {
