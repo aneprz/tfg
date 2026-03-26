@@ -15,7 +15,7 @@ $url = $_GET["openid_identity"] ?? $_GET["openid.identity"];
 
 /* EXTRAER STEAMID */
 
-preg_match("/\/id\/([0-9]+)/", $url, $matches);
+preg_match("~/(?:openid/)?id/([0-9]+)~", $url, $matches);
 
 if(!isset($matches[1])){
     die("SteamID no encontrado");

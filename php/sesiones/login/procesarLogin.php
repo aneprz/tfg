@@ -1,6 +1,7 @@
 <?php
 session_start();
 require '../../../db/conexiones.php';
+require_once __DIR__ . '/../remember_me.php';
 
 $tag=$_POST['gameTag']??'';
 $pass=$_POST['password']??'';
@@ -26,9 +27,18 @@ if($usuario && password_verify($pass,$usuario['password'])){
 		exit();
 	}
 
+	session_regenerate_id(true);
 	$_SESSION['tag']=$tag;
 	$_SESSION['id_usuario']=$usuario['id_usuario'];
 	$_SESSION['admin']=(bool)$usuario['admin'];
+
+	if(!empty($_POST['remember'])){
+		salsabox_issue_remember_token($conexion,(int)$usuario['id_usuario']);
+	}else{
+		// Si el usuario no marca "recordarme", limpia cookie antigua si existía.
+		salsabox_forget_current_remember_token($conexion);
+		salsabox_clear_remember_cookie();
+	}
 
 	header("Location: ../../../index.php");
 	exit();
