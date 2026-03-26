@@ -129,20 +129,44 @@ function guardarAjustes() {
 }
 
 function abandonarGrupo() {
+    // 1. Obtenemos el ID del grupo del campo oculto del modal
     const idConv = document.getElementById('ajuste_id_conv').value;
-    if (!idConv || !confirm("¿Quieres salir del grupo?")) return;
+    
+    console.log("Intentando abandonar el grupo ID:", idConv);
 
+    if (!idConv || idConv == 0) {
+        alert("Error: No se ha detectado el ID del grupo.");
+        return;
+    }
+
+    // 2. Confirmación de seguridad
+    if (!confirm("¿Estás seguro de que quieres abandonar este grupo? Esta acción no se puede deshacer.")) {
+        return;
+    }
+
+    // 3. Preparamos los datos para enviar al PHP
     const fd = new FormData();
     fd.append('id_conv', idConv);
-    fd.append('accion', 'abandonar');
+    fd.append('accion', 'abandonar'); // Esta es la clave que lee tu gestionar_miembro.php
 
-    fetch('gestionar_miembro.php', { method: 'POST', body: fd })
+    // 4. Petición al servidor
+    fetch('gestionar_miembro.php', {
+        method: 'POST',
+        body: fd
+    })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            alert("Has salido");
-            location.href = 'bandeja.php';
+            alert("Has salido del grupo correctamente.");
+            // Redirigir a la bandeja para limpiar la vista del chat actual
+            window.location.href = 'bandeja.php';
+        } else {
+            alert("Error al intentar salir: " + (data.error || "Error desconocido"));
         }
+    })
+    .catch(err => {
+        console.error("Error en la petición:", err);
+        alert("Hubo un error de conexión con el servidor.");
     });
 }
 
@@ -183,3 +207,55 @@ document.getElementById('form-mensaje').addEventListener('submit', function(e) {
     else p.append('id_receptor', receptorNuevoID);
     fetch('enviar_mensaje.php', { method: 'POST', body: p }).then(() => { input.value = ''; });
 });
+
+function abrirModalGrupo() {
+    console.log("Abriendo modal de creación de grupo...");
+    const modal = document.getElementById('modal-grupo');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        console.error("No se encontró el elemento con ID 'modal-grupo'");
+    }
+}
+
+function cerrarModalGrupo() {
+    const modal = document.getElementById('modal-grupo');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * PROCESAR CREACIÓN DE GRUPO
+ */
+function crearGrupoProcesar() {
+    const nombreInput = document.getElementById('nombre-grupo');
+    const nombre = nombreInput ? nombreInput.value.trim() : "";
+    
+    // Capturamos los ids de los amigos seleccionados
+    const seleccionados = Array.from(document.querySelectorAll('.check-amigo:checked'))
+                               .map(cb => cb.value);
+
+    if (!nombre) return alert("Por favor, escribe un nombre para el grupo.");
+    if (seleccionados.length === 0) return alert("Selecciona al menos a un amigo.");
+
+    const fd = new FormData();
+    fd.append('nombre', nombre);
+    fd.append('usuarios', JSON.stringify(seleccionados));
+
+    fetch('crear_grupo.php', {
+        method: 'POST',
+        body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("¡Grupo creado con éxito!");
+            location.reload(); 
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(err => console.error("Error grave en la petición:", err));
+}
+

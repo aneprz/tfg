@@ -22,9 +22,15 @@ if ($accion === 'quitar') {
     }
 } 
 elseif ($accion === 'abandonar') {
-    // Cualquiera puede irse, PERO si el creador se va, deberías decidir si el grupo se borra o se queda sin jefe
-    mysqli_query($conexion, "DELETE FROM chat_participante WHERE id_conversacion = $id_conv AND id_usuario = $id_yo");
-    echo json_encode(['success' => true]);
+    // Eliminamos al usuario de la tabla de participantes
+    $sql = "DELETE FROM chat_participante WHERE id_conversacion = $id_conv AND id_usuario = $id_yo";
+    
+    if (mysqli_query($conexion, $sql)) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'error' => mysqli_error($conexion)]);
+    }
+    exit;
 }
 elseif ($accion === 'añadir') {
     $id_target = (int)$_POST['id_user'];
