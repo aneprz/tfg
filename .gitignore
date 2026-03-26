@@ -1,4 +1,6 @@
 /vendor/
+.composer-home/
+.composer-cache/
 
 # claves API
 API/credenciales.php

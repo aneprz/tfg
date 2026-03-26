@@ -23,6 +23,13 @@
                 <input type="password" id="password" name="password" required placeholder="••••••••">
             </div>
 
+            <div class="input-group">
+                <label style="display:flex; align-items:center; gap:10px; font-weight:normal;">
+                    <input type="checkbox" name="remember" value="1" style="width:auto; margin:0;">
+                    Recordarme en este dispositivo
+                </label>
+            </div>
+
             <button type="submit" class="btn-submit">Entrar al Sistema</button>
 
             <p class="form-footer">

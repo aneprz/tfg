@@ -1,10 +1,20 @@
 <?php
 
-require __DIR__ . '/../../../../vendor/autoload.php';
+$autoload = __DIR__ . '/../../../../vendor/autoload.php';
+if (!file_exists($autoload)) {
+    http_response_code(500);
+    die("Falta vendor/autoload.php. Ejecuta 'composer install' en la raíz del proyecto.");
+}
+require $autoload;
 require __DIR__ . '/../../../../API/credenciales.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+
+if (!class_exists(PHPMailer::class)) {
+    http_response_code(500);
+    die("PHPMailer no está instalado. Ejecuta 'composer install' (o 'composer require phpmailer/phpmailer') en la raíz del proyecto.");
+}
 function enviarCorreoReset($email,$link){
 
     global $gmail_email;
