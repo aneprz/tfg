@@ -183,6 +183,13 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
                 <h4 style="color:#888; font-size:12px; margin-bottom:10px;">AÑADIR NUEVOS</h4>
                 <div id="lista-añadir-miembros" style="background:#0e0e0e; border-radius:8px; padding:5px; max-height:150px; overflow-y:auto; margin-bottom:20px;">
                     </div>
+                
+                <div style="padding: 15px 0;">
+                    <button type="button" onclick="abandonarGrupo()" 
+                            style="width:100%; padding:10px; background:transparent; color:#ff4d4d; border:1px solid #ff4d4d; border-radius:8px; cursor:pointer; font-weight:bold;">
+                        ABANDONAR GRUPO
+                    </button>
+                </div>
 
                 <div style="display:flex; gap:10px;">
                     <button type="button" onclick="cerrarModalAjustes()" style="flex:1; padding:12px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
@@ -193,5 +200,9 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
     </div>
 
     <script src="../../js/chat.js"></script>
+    <script>
+        // Declaramos esto en el HTML para que chat.js lo pueda usar
+        const MI_ID_USUARIO = <?php echo $_SESSION['id_usuario']; ?>;
+    </script>
 </body>
 </html>

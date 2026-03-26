@@ -2,33 +2,31 @@
 session_start();
 require_once __DIR__ . '/../../db/conexiones.php';
 
-header('Content-Type: application/json');
+// 1. Capturamos quién crea el grupo y el nombre
+$id_yo = $_SESSION['id_usuario'];
+$nombre_grupo = mysqli_real_escape_string($conexion, $_POST['nombre_grupo']);
+$amigos_ids = $_POST['amigos'] ?? []; // Array de IDs de los checks seleccionados
 
-$id_yo = (int)$_SESSION['id_usuario'];
-$nombre = mysqli_real_escape_string($conexion, $_POST['nombre']);
-// Recibimos los usuarios y los limpiamos
-$usuarios = isset($_POST['usuarios']) ? json_decode($_POST['usuarios']) : [];
+// 2. INSERTAR LA CONVERSACIÓN (Aquí es donde pones el código que te pasé)
+// IMPORTANTE: id_usuario_creador es lo que te faltaba para que salgan los botones
+$sql = "INSERT INTO chat_conversacion (tipo, nombre, id_usuario_creador) 
+        VALUES ('grupal', '$nombre_grupo', $id_yo)";
 
-if (empty($nombre) || empty($usuarios)) {
-    echo json_encode(['success' => false, 'error' => 'Datos incompletos']);
-    exit;
-}
+if (mysqli_query($conexion, $sql)) {
+    // 3. Obtenemos el ID del grupo recién creado
+    $id_nueva_conv = mysqli_insert_id($conexion);
 
-// 1. Crear Conversación
-$sqlC = "INSERT INTO chat_conversacion (tipo, nombre_grupo) VALUES ('grupal', '$nombre')";
-if(mysqli_query($conexion, $sqlC)){
-    $id_conv = mysqli_insert_id($conexion);
+    // 4. METEMOS A LOS PARTICIPANTES
+    // Primero te metes a ti mismo como creador
+    mysqli_query($conexion, "INSERT INTO chat_participante (id_conversacion, id_usuario) VALUES ($id_nueva_conv, $id_yo)");
 
-    // 2. Añadirte a ti
-    mysqli_query($conexion, "INSERT INTO chat_participante (id_conversacion, id_usuario, estado_solicitud) VALUES ($id_conv, $id_yo, 'aceptada')");
-
-    // 3. Añadir a los elegidos
-    foreach ($usuarios as $u_id) {
-        $u_id = (int)$u_id;
-        mysqli_query($conexion, "INSERT INTO chat_participante (id_conversacion, id_usuario, estado_solicitud) VALUES ($id_conv, $u_id, 'aceptada')");
+    // Luego metemos a todos los amigos seleccionados
+    foreach ($amigos_ids as $id_amigo) {
+        $id_amigo = (int)$id_amigo;
+        mysqli_query($conexion, "INSERT INTO chat_participante (id_conversacion, id_usuario) VALUES ($id_nueva_conv, $id_amigo)");
     }
 
-    echo json_encode(['success' => true]);
+    echo json_encode(['success' => true, 'id_conv' => $id_nueva_conv]);
 } else {
     echo json_encode(['success' => false, 'error' => mysqli_error($conexion)]);
 }

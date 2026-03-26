@@ -153,44 +153,75 @@ function abrirAjustesGrupo(idConv) {
 }
 
 function actualizarListasMiembros(idConv) {
+    console.log("Cargando miembros para conv:", idConv); // Para debugear en F12
+    
     fetch(`obtener_info_grupo.php?id_conv=${idConv}`)
         .then(res => res.json())
         .then(data => {
+            console.log("Datos recibidos:", data); // Mira esto en la consola F12
+            
             const listaActual = document.getElementById('lista-gestion-miembros');
             const listaNuevos = document.getElementById('lista-añadir-miembros');
             
             // 1. MIEMBROS ACTUALES
-            if (data.miembros.length > 0) {
-                listaActual.innerHTML = data.miembros.map(m => `
-                    <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #222;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="color:white; font-size:14px;">${m.gameTag}</span>
-                            ${m.es_creador ? '<span title="Creador" style="font-size:12px;">👑</span>' : ''}
-                        </div>
-                        ${(!m.es_creador && data.soy_creador) ? 
-                            `<button type="button" onclick="gestionarMiembro(${idConv}, ${m.id_usuario}, 'quitar')" 
-                             style="background:#ff4444; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:10px;">Eliminar</button>` 
-                            : ''}
+            listaActual.innerHTML = data.miembros.map(m => {
+                // Si data.soy_creador es false, los botones no salen. 
+                // Asegúrate de que en la DB tú seas el 'id_usuario_creador'
+                const esCreadorDeLaFila = m.es_creador === true || m.es_creador === "true" || m.es_creador == 1;
+                const puedoEliminar = data.soy_creador && !esCreadorDeLaFila;
+
+                return `
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-bottom:1px solid #222;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="color:white; font-size:14px;">${m.gameTag}</span>
+                        ${esCreadorDeLaFila ? '<span title="Creador" style="font-size:16px;">👑</span>' : ''}
                     </div>
-                `).join('');
-            } else {
-                listaActual.innerHTML = '<div style="padding:10px; color:#666;">No hay miembros</div>';
-            }
+                    
+                    ${puedoEliminar ? `
+                        <button type="button" 
+                                onclick="gestionarMiembro(${idConv}, ${m.id_usuario}, 'quitar')" 
+                                style="background:#ff4d4d; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold;">
+                            Eliminar
+                        </button>
+                    ` : ''}
+                </div>`;
+            }).join('');
 
             // 2. AÑADIR NUEVOS (AMIGOS)
-            if (data.amigos_fuera.length > 0) {
+            if (data.amigos_fuera && data.amigos_fuera.length > 0) {
                 listaNuevos.innerHTML = data.amigos_fuera.map(a => `
                     <div style="display:flex; align-items:center; justify-content:space-between; padding:10px; border-bottom:1px solid #222;">
                         <span style="color:#ccc; font-size:13px;">${a.gameTag}</span>
                         <button type="button" onclick="gestionarMiembro(${idConv}, ${a.id_usuario}, 'añadir')" 
-                         style="background:#f0c330; color:black; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:10px; font-weight:bold;">+ Añadir</button>
+                                style="background:#f0c330; color:black; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold;">
+                            + Añadir
+                        </button>
                     </div>
                 `).join('');
             } else {
-                listaNuevos.innerHTML = '<div style="padding:10px; color:#666; font-size:12px;">No hay amigos para añadir</div>';
+                listaNuevos.innerHTML = '<div style="padding:15px; color:#555; font-size:12px; text-align:center;">No hay amigos para invitar</div>';
             }
-        })
-        .catch(err => console.error("Error cargando miembros:", err));
+        });
+}
+
+function abandonarGrupo() {
+    const idConv = document.getElementById('ajuste_id_conv').value;
+    if (!idConv || !confirm("¿Estás seguro de que quieres abandonar este grupo?")) return;
+
+    const fd = new FormData();
+    fd.append('id_conv', idConv);
+    fd.append('accion', 'abandonar');
+
+    fetch('gestionar_miembro.php', { method: 'POST', body: fd })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("Has salido del grupo");
+                location.reload();
+            } else {
+                alert("Error: " + data.error);
+            }
+        });
 }
 
 function gestionarMiembro(idConv, idUser, accion) {
