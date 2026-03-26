@@ -1,23 +1,23 @@
 let chatInterval = null;
 let receptorNuevoID = null;
 
-function seleccionarContacto(idUsuario, idConv, elemento) {
+function seleccionarContacto(idReceptor, idConv, elemento) {
+    // 1. Marcar el chat como activo visualmente
     document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('activo'));
     elemento.classList.add('activo');
 
+    // 2. Limpiar bucles anteriores
     if (chatInterval) clearInterval(chatInterval);
-    document.getElementById('form-mensaje').style.display = 'flex';
-    document.getElementById('input-texto').value = '';
 
-    if (idConv && idConv !== 'null') {
-        receptorNuevoID = null;
-        document.getElementById('id_conversacion_activa').value = idConv;
-        iniciarBucle(idConv);
-    } else {
-        receptorNuevoID = idUsuario;
-        document.getElementById('id_conversacion_activa').value = '';
-        document.getElementById('mensajes-scroll').innerHTML = '<p style="text-align:center; color:#888; margin-top:100px;">Di hola para empezar.</p>';
-    }
+    // 3. Configurar IDs
+    document.getElementById('id_conversacion_activa').value = idConv;
+    document.getElementById('form-mensaje').style.display = 'flex';
+    
+    // Si idReceptor es null, es un grupo. Si no, es individual.
+    receptorNuevoID = idReceptor; 
+
+    // 4. Iniciar carga de mensajes
+    iniciarBucle(idConv);
 }
 
 function iniciarBucle(id) {
@@ -58,3 +58,37 @@ document.getElementById('form-mensaje').addEventListener('submit', function(e) {
         if (data.nueva_id_conversacion) location.reload();
     });
 });
+
+function abrirModalGrupo() {
+    document.getElementById('modal-grupo').style.display = 'flex';
+}
+
+function cerrarModalGrupo() {
+    document.getElementById('modal-grupo').style.display = 'none';
+    document.getElementById('nombre-grupo').value = '';
+}
+
+function crearGrupoProcesar() {
+    const nombre = document.getElementById('nombre-grupo').value.trim();
+    const seleccionados = Array.from(document.querySelectorAll('.check-amigo:checked')).map(cb => cb.value);
+
+    if (!nombre) { alert("Ponle un nombre al grupo"); return; }
+    if (seleccionados.length < 1) { alert("Selecciona al menos a un amigo"); return; }
+
+    const fd = new FormData();
+    fd.append('nombre', nombre);
+    fd.append('usuarios', JSON.stringify(seleccionados));
+
+    fetch('crear_grupo.php', {
+        method: 'POST',
+        body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload(); // Recargamos para que aparezca el nuevo grupo en la lista
+        } else {
+            alert("Error al crear el grupo");
+        }
+    });
+}
