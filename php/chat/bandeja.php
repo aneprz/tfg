@@ -163,7 +163,7 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
 
     <div id="modal-ajustes-grupo" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center;">
         <div style="background:#1a1a1a; padding:25px; border-radius:15px; width:450px; border:1px solid #f0c330; max-height: 90vh; overflow-y: auto;">
-            <h3 style="color:#f0c330; text-align:center; margin-top:0;">Ajustes de "Salsa Lovers"</h3>
+            <h3 style="color:#f0c330; text-align:center; margin-top:0; margin-bottom:20px;">Ajustes de "Salsa Lovers"</h3>
             
             <form id="form-editar-grupo" enctype="multipart/form-data">
                 <input type="hidden" id="ajuste_id_conv" name="id_conv">
@@ -181,7 +181,7 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
                     </div>
 
                 <h4 style="color:#888; font-size:12px; margin-bottom:10px;">AÑADIR NUEVOS</h4>
-                <div id="lista-añadir-miembros" style="background:#0e0e0e; border-radius:8px; padding:5px; max-height:150px; overflow-y:auto;">
+                <div id="lista-añadir-miembros" style="background:#0e0e0e; border-radius:8px; padding:5px; max-height:150px; overflow-y:auto; margin-bottom:20px;">
                     </div>
 
                 <div style="display:flex; gap:10px;">
