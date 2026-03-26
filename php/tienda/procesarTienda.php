@@ -13,9 +13,10 @@ $offset = ($pagina - 1) * $limite;
 
 /* =========================
    FILTRO
-   ========================= */
-
-$where = "WHERE ti.activo = 1";
+   =========================
+   Solo traer items que no sean lootboxes
+*/
+$where = "WHERE ti.activo = 1 AND ti.tipo IN ('avatar','marco','fondo')";
 
 if ($buscar !== '') {
     $buscar = mysqli_real_escape_string($conexion, $buscar);
@@ -24,8 +25,7 @@ if ($buscar !== '') {
 
 /* =========================
    ORDEN
-   ========================= */
-
+*/
 $orderBy = "ti.precio ASC";
 
 switch ($orden) {
@@ -37,34 +37,31 @@ switch ($orden) {
 
 /* =========================
    TOTAL
-   ========================= */
-
+*/
 $resTotal = mysqli_query($conexion, "
-SELECT COUNT(*) as total
-FROM Tienda_Items ti
-$where
+    SELECT COUNT(*) as total
+    FROM Tienda_Items ti
+    $where
 ");
 
 $total = mysqli_fetch_assoc($resTotal)['total'];
 
 /* =========================
    QUERY PRINCIPAL
-   ========================= */
-
+*/
 $res = mysqli_query($conexion, "
-SELECT ti.*, ui.id_usuario_item
-FROM Tienda_Items ti
-LEFT JOIN Usuario_Items ui 
-ON ui.id_item = ti.id_item AND ui.id_usuario = $id_usuario
-$where
-ORDER BY $orderBy
-LIMIT $limite OFFSET $offset
+    SELECT ti.*, ui.id_usuario_item
+    FROM Tienda_Items ti
+    LEFT JOIN Usuario_Items ui 
+    ON ui.id_item = ti.id_item AND ui.id_usuario = $id_usuario
+    $where
+    ORDER BY $orderBy
+    LIMIT $limite OFFSET $offset
 ");
 
 /* =========================
    HTML
-   ========================= */
-
+*/
 $html = '';
 
 while ($item = mysqli_fetch_assoc($res)) {
@@ -81,7 +78,6 @@ while ($item = mysqli_fetch_assoc($res)) {
         </div>
 
         <div class='infoJuego'>
-
             <div class='tituloJuego'>
                 ".htmlspecialchars($item['nombre'])."
             </div>
@@ -109,8 +105,7 @@ while ($item = mysqli_fetch_assoc($res)) {
 
 /* =========================
    PAGINACIÓN
-   ========================= */
-
+*/
 $totalPaginas = ceil($total / $limite);
 $paginacion = '';
 

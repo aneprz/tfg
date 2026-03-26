@@ -56,6 +56,11 @@ $admin = true;
                 <span>Editar Item</span>
             </a>
 
+            <a href="añadirLootbox/añadirLootbox.php" class="admin-card">
+                <div class="card-icon">➕🎁</div>
+                <span>Añadir lootbox</span>
+            </a>
+
         </div>
     </div>
 </div>
