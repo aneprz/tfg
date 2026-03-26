@@ -79,8 +79,6 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
                 <p style="text-align:center; color:#666; margin-top:100px;">Selecciona un amigo para chatear</p>
             </div>
             
-            <div id="estado-visto"></div>
-            
             <form class="input-area" id="form-mensaje" style="display:none;">
                 <input type="hidden" id="id_conversacion_activa" value="">
                 <input type="text" id="input-texto" placeholder="Escribe un mensaje..." autocomplete="off">
