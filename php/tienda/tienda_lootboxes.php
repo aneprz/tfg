@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const puntosUsuario = document.getElementById("puntosUsuario");
 
     let pagina = 1;
-    let cargando = false; // anti-spam
+    let cargando = false;
 
     function cargarLootboxes() {
         fetch(`procesarLootboxes.php?pagina=${pagina}`)
@@ -255,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         e.preventDefault();
 
-                        if (cargando) return; // 🚀 evita spam
+                        if (cargando) return;
                         cargando = true;
 
                         btn.disabled = true;
@@ -276,11 +276,11 @@ document.addEventListener("DOMContentLoaded", () => {
                                 return;
                             }
 
-                            // actualizar puntos
-                            puntosUsuario.textContent = res.nuevosPuntos;
+                            // Guardar nuevos puntos pero NO actualizarlos aún
+                            const nuevosPuntos = res.nuevosPuntos;
 
-                            // animación
-                            abrirLootboxAnimacion(res.items, res.ganado, res);
+                            // Llamar a la animación pasando también los nuevos puntos
+                            abrirLootboxAnimacion(res.items, res.ganado, res, nuevosPuntos);
 
                         } catch (err) {
                             console.error(err);
@@ -319,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if(e.target === modal) modal.style.display = "none";
     };
 
-    function abrirLootboxAnimacion(items, ganador, res) {
+    function abrirLootboxAnimacion(items, ganador, res, nuevosPuntos) {
         carrusel.innerHTML = '';
         itemGanadoDiv.hidden = true;
 
@@ -390,15 +390,20 @@ document.addEventListener("DOMContentLoaded", () => {
                         item.style.filter = '';
                     });
 
-                    // 🔥 SOLO AQUÍ se aplica la clase ganador (borde dorado y escala)
+                    // Aplicar clase ganador
                     itemGanadorDOM.classList.add('ganador');
 
+                    // Mostrar información del premio
                     nombreItemGanado.textContent = ganador.nombre;
                     if (res && res.duplicado) {
                         nombreItemGanado.textContent += ` (Duplicado → +${res.valorDevuelto} pts)`;
                     }
                     imgItemGanado.src = `../../media/${ganador.imagen}`;
                     itemGanadoDiv.hidden = false;
+
+                    // ACTUALIZAR PUNTOS SÓLO AL FINAL
+                    puntosUsuario.textContent = nuevosPuntos;
+
                     return;
                 }
 
@@ -409,12 +414,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 const posActual = desplazamiento;
                 const centroVisual = desplazamientoCentro;
 
-                // 🔥 TODOS los ítems tienen el mismo comportamiento de zoom por distancia
+                // Efecto de zoom por distancia (todos los ítems igual)
                 itemsDOM.forEach((item, idx) => {
                     const itemCenter = idx * itemWidthTotal + centroItem;
                     const distancia = Math.abs(itemCenter - (posActual + centroVisual));
-                    let escala = Math.max(1, 1.25 - distancia / 350);
-                    // Ya no hay tratamiento especial para el ganador
+                    const escala = Math.max(1, 1.25 - distancia / 350);
                     item.style.transform = `scale(${escala})`;
                 });
 

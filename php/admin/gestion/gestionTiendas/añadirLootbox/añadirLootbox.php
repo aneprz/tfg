@@ -53,6 +53,15 @@ $items = mysqli_fetch_all($resItems, MYSQLI_ASSOC);
         <label>Precio:</label>
         <input type="number" name="precio" min="0" required>
 
+        <label>Imagen de la lootbox:</label>
+        <select name="imagen" required>
+            <option value="">Selecciona una imagen</option>
+            <option value="lootbox_default.png">Caja clásica</option>
+            <option value="lootbox_plata.png">Caja plateada</option>
+            <option value="lootbox_oro.png">Caja dorada</option>
+            <option value="lootbox_legendaria.png">Caja legendaria</option>
+        </select>
+
         <div class="container">
             <div class="items-disponibles">
                 <h3>Items disponibles</h3>
