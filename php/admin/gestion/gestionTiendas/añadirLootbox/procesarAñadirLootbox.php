@@ -10,21 +10,28 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = $_POST['nombre'];
     $precio = (int)$_POST['precio'];
+    $imagen = $_POST['imagen']; // ✅ nuevo campo
     $items = $_POST['items'] ?? [];
 
-    if (empty($nombre) || $precio < 0 || empty($items)) {
+    if (empty($nombre) || $precio < 0 || empty($items) || empty($imagen)) {
         die("Datos incompletos");
+    }
+
+    // Validar que la imagen sea una de las permitidas (seguridad)
+    $imagenesPermitidas = ['lootbox_default.png', 'lootbox_oro.png', 'lootbox_plata.png', 'lootbox_legendaria.png'];
+    if (!in_array($imagen, $imagenesPermitidas)) {
+        die("Imagen no válida");
     }
 
     mysqli_begin_transaction($conexion);
 
     try {
-        // 1️⃣ Insertar lootbox como item de tienda
+        // 1️⃣ Insertar lootbox como item de tienda (con imagen)
         $stmtItem = $conexion->prepare("
-            INSERT INTO Tienda_Items (nombre, tipo, precio, activo, fecha_creacion)
-            VALUES (?, 'lootbox', ?, 1, NOW())
+            INSERT INTO Tienda_Items (nombre, tipo, precio, imagen, activo, fecha_creacion)
+            VALUES (?, 'lootbox', ?, ?, 1, NOW())
         ");
-        $stmtItem->bind_param("si", $nombre, $precio);
+        $stmtItem->bind_param("sis", $nombre, $precio, $imagen);
         $stmtItem->execute();
         $id_tienda_item = $stmtItem->insert_id;
 
@@ -46,4 +53,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Error al crear lootbox: " . $e->getMessage());
     }
 }
-?>

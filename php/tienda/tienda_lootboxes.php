@@ -84,7 +84,6 @@ if (isset($_SESSION['id_usuario'])) {
 .carrusel-track {
     display: flex;
     gap: 15px;
-    transition: transform 2s cubic-bezier(0.25, 0.1, 0.25, 1); /* transición inicial */
 }
 
 /* ITEM */
@@ -224,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const puntosUsuario = document.getElementById("puntosUsuario");
 
     let pagina = 1;
-    let cargando = false; // 🚀 anti-spam
+    let cargando = false;
 
     function cargarLootboxes() {
         fetch(`procesarLootboxes.php?pagina=${pagina}`)
@@ -256,7 +255,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         e.preventDefault();
 
-                        if (cargando) return; // 🚀 evita spam
+                        if (cargando) return;
                         cargando = true;
 
                         btn.disabled = true;
@@ -277,11 +276,11 @@ document.addEventListener("DOMContentLoaded", () => {
                                 return;
                             }
 
-                            // actualizar puntos
-                            puntosUsuario.textContent = res.nuevosPuntos;
+                            // Guardar nuevos puntos pero NO actualizarlos aún
+                            const nuevosPuntos = res.nuevosPuntos;
 
-                            // animación
-                            abrirLootboxAnimacion(res.items, res.ganado, res);
+                            // Llamar a la animación pasando también los nuevos puntos
+                            abrirLootboxAnimacion(res.items, res.ganado, res, nuevosPuntos);
 
                         } catch (err) {
                             console.error(err);
@@ -319,88 +318,116 @@ document.addEventListener("DOMContentLoaded", () => {
     window.onclick = e => {
         if(e.target === modal) modal.style.display = "none";
     };
-function abrirLootboxAnimacion(items, ganador, res){
-    carrusel.innerHTML = '';
-    itemGanadoDiv.hidden = true;
 
-    const track = document.createElement('div');
-    track.classList.add('carrusel-track');
+    function abrirLootboxAnimacion(items, ganador, res, nuevosPuntos) {
+        carrusel.innerHTML = '';
+        itemGanadoDiv.hidden = true;
 
-    const lista = [];
-    const totalItems = 120; // menos = más limpio
+        const track = document.createElement('div');
+        track.classList.add('carrusel-track');
+        track.style.willChange = "transform";
+        track.style.transition = "none";
 
-    // 🎯 GENERACIÓN VISUAL RANDOM (NO PROBABILIDAD REAL)
-    for(let i = 0; i < totalItems; i++){
-        const randomItem = items[Math.floor(Math.random() * items.length)];
-        lista.push(randomItem);
-    }
+        const lista = [];
+        const totalItems = 120;
+        const posicionGanador = Math.floor(totalItems * 0.7);
 
-    // 🎯 POSICIÓN DONDE PARARÁ (70%)
-    const posicionGanador = Math.floor(totalItems * 0.7);
+        // Generar lista visual
+        for (let i = 0; i < totalItems; i++) {
+            const randomItem = items[Math.floor(Math.random() * items.length)];
+            lista.push(randomItem);
+        }
+        lista[posicionGanador] = ganador;
 
-    // 🔥 Meter ganador EXACTO
-    lista[posicionGanador] = ganador;
-
-    // pintar
-    lista.forEach(it => {
-        const div = document.createElement('div');
-        div.classList.add('carrusel-item', it.rareza || 'comun');
-        div.innerHTML = `<img src='../../media/${it.imagen}'>`;
-        track.appendChild(div);
-    });
-
-    carrusel.appendChild(track);
-    modal.style.display = "flex";
-
-    const itemWidth = 100;
-    const gap = 15;
-    const itemWidthTotal = itemWidth + gap;
-    const centroCarrusel = carrusel.offsetWidth / 2 - itemWidth / 2;
-
-    const destinoFinal = posicionGanador * itemWidthTotal - centroCarrusel;
-
-    const duracion = 4500;
-    const inicio = performance.now();
-
-    function easeOutQuint(t){ return 1 - Math.pow(1 - t, 5); }
-
-    function animar(now){
-        let tiempo = (now - inicio) / duracion;
-        if(tiempo > 1) tiempo = 1;
-
-        const pos = destinoFinal * easeOutQuint(tiempo);
-        track.style.transform = `translateX(-${pos}px)`;
-
-        // zoom visual
-        const itemsDOM = track.querySelectorAll('.carrusel-item');
-        itemsDOM.forEach((item, idx) => {
-            const itemCenter = idx * itemWidthTotal + itemWidthTotal/2;
-            const distancia = Math.abs(itemCenter - (pos + carrusel.offsetWidth/2));
-            const scale = Math.max(1, 1.25 - distancia / 350);
-            item.style.transform = `scale(${scale})`; 
+        // Crear elementos
+        lista.forEach(it => {
+            const div = document.createElement('div');
+            div.classList.add('carrusel-item', it.rareza || 'comun');
+            div.innerHTML = `<img src='../../media/${it.imagen}'>`;
+            track.appendChild(div);
         });
 
-        if(tiempo < 1){
-            requestAnimationFrame(animar);
-        } else {
-            const itemsDOM = track.querySelectorAll('.carrusel-item');
+        carrusel.appendChild(track);
+        modal.style.display = "flex";
 
-            itemsDOM[posicionGanador].classList.add('ganador');
-            itemsDOM[posicionGanador].style.transform = 'scale(1.3)';
+        setTimeout(() => {
+            const primerItem = track.querySelector('.carrusel-item');
+            const segundoItem = track.children[1];
+            if (!primerItem || !segundoItem) return;
 
-            nombreItemGanado.textContent = ganador.nombre;
+            const itemRect = primerItem.getBoundingClientRect();
+            const segundoRect = segundoItem.getBoundingClientRect();
+            const itemWidthTotal = segundoRect.left - itemRect.left;
 
-            if(res && res.duplicado){
-                nombreItemGanado.textContent += ` (Duplicado → +${res.valorDevuelto} pts)`;
+            const carruselRect = carrusel.getBoundingClientRect();
+            const centroCarrusel = carruselRect.width / 2;
+            const centroItem = itemRect.width / 2;
+            const desplazamientoCentro = centroCarrusel - centroItem;
+
+            const destinoFinal = (posicionGanador * itemWidthTotal) - desplazamientoCentro;
+
+            const duracion = 6500;
+            const inicio = performance.now();
+
+            function easeOutQuint(t) {
+                return 1 - Math.pow(1 - t, 5);
             }
 
-            imgItemGanado.src = `../../media/${ganador.imagen}`;
-            itemGanadoDiv.hidden = false;
-        }
-    }
+            let animFrameId = null;
+            const itemsDOM = track.querySelectorAll('.carrusel-item');
+            const itemGanadorDOM = itemsDOM[posicionGanador];
 
-    requestAnimationFrame(animar);
-}
+            function animar(now) {
+                let tiempo = (now - inicio) / duracion;
+                if (tiempo >= 1) {
+                    cancelAnimationFrame(animFrameId);
+
+                    track.style.transform = `translate3d(-${destinoFinal}px, 0, 0)`;
+
+                    // Limpiar transformaciones dinámicas
+                    itemsDOM.forEach(item => {
+                        item.style.transform = '';
+                        item.style.filter = '';
+                    });
+
+                    // Aplicar clase ganador
+                    itemGanadorDOM.classList.add('ganador');
+
+                    // Mostrar información del premio
+                    nombreItemGanado.textContent = ganador.nombre;
+                    if (res && res.duplicado) {
+                        nombreItemGanado.textContent += ` (Duplicado → +${res.valorDevuelto} pts)`;
+                    }
+                    imgItemGanado.src = `../../media/${ganador.imagen}`;
+                    itemGanadoDiv.hidden = false;
+
+                    // ACTUALIZAR PUNTOS SÓLO AL FINAL
+                    puntosUsuario.textContent = nuevosPuntos;
+
+                    return;
+                }
+
+                const t = easeOutQuint(tiempo);
+                const desplazamiento = destinoFinal * t;
+                track.style.transform = `translate3d(-${desplazamiento}px, 0, 0)`;
+
+                const posActual = desplazamiento;
+                const centroVisual = desplazamientoCentro;
+
+                // Efecto de zoom por distancia (todos los ítems igual)
+                itemsDOM.forEach((item, idx) => {
+                    const itemCenter = idx * itemWidthTotal + centroItem;
+                    const distancia = Math.abs(itemCenter - (posActual + centroVisual));
+                    const escala = Math.max(1, 1.25 - distancia / 350);
+                    item.style.transform = `scale(${escala})`;
+                });
+
+                animFrameId = requestAnimationFrame(animar);
+            }
+
+            animFrameId = requestAnimationFrame(animar);
+        }, 50);
+    }
 });
 </script>
 </body>
