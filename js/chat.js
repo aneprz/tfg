@@ -26,7 +26,7 @@ function seleccionarContacto(idReceptor, idConv, elemento) {
     // Configurar clicks del Header
     document.getElementById('header-info').onclick = () => {
         if (!esGrupo) {
-            window.location.href = `../user/perfiles/perfilOtros.php?id=${idReceptor}`;
+            window.location.href = `../user/amistades/perfilOtros.php?id=${idReceptor}`;
         } else {
             abrirAjustesGrupo(idConv);
         }
@@ -256,3 +256,41 @@ document.getElementById('form-editar-grupo').onsubmit = function(e) {
         }
     });
 };
+
+function guardarAjustes() {
+    const form = document.getElementById('form-ajustes-grupo'); // Asegúrate que el <form> tenga este ID
+    const formData = new FormData(form); 
+    
+    // Añadimos manualmente el ID de la conversación si no está en el form
+    const idConv = document.getElementById('ajuste_id_conv').value;
+    formData.append('id_conv', idConv);
+
+    fetch('actualizar_grupo.php', {
+        method: 'POST',
+        body: formData // Enviamos el objeto FormData directamente
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            location.reload(); // Recargamos para ver la nueva foto en la lista
+        } else {
+            alert("Error al guardar: " + data.error);
+        }
+    })
+    .catch(err => console.error("Error en el fetch:", err));
+}
+
+// Detectar cuando el usuario elige una foto
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'input_foto_grupo') {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                // Cambiamos la imagen del círculo en el modal
+                document.getElementById('img_previsualizacion').src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+});

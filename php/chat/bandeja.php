@@ -161,7 +161,7 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
         </div>
     </div>
 
-    <div id="modal-ajustes-grupo" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center;">
+    <div id="modal-ajustes-grupo" enctype="multipart/form-data" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center;">
         <div style="background:#1a1a1a; padding:25px; border-radius:15px; width:450px; border:1px solid #f0c330; max-height: 90vh; overflow-y: auto;">
             <h3 style="color:#f0c330; text-align:center; margin-top:0; margin-bottom:20px;">Ajustes de "Salsa Lovers"</h3>
             
@@ -169,11 +169,15 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
                 <input type="hidden" id="ajuste_id_conv" name="id_conv">
                 
                 <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; background:#000; padding:10px; border-radius:10px;">
-                    <input type="file" name="foto_grupo" id="input-foto-ajuste" style="display:none;">
-                    <label for="input-foto-ajuste" style="cursor:pointer;">
-                        <img id="preview-foto-ajuste" src="../../img/avatares/grupo_default.png" style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #f0c330;">
+                    <input type="file" name="foto_grupo" id="input-foto-ajuste" style="display:none;" accept="image/*">
+                    
+                    <label for="input-foto-ajuste" style="cursor:pointer;" title="Haz clic para cambiar la foto">
+                        <img id="preview-foto-ajuste" src="../../img/avatares/grupo_default.png" 
+                            style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #f0c330;">
                     </label>
-                    <input type="text" id="edit-nombre-grupo" name="nuevo_nombre" style="flex:1; padding:8px; background:transparent; border:none; border-bottom:1px solid #333; color:white; font-size:16px;">
+
+                    <input type="text" id="edit-nombre-grupo" name="nuevo_nombre" placeholder="Nombre del grupo"
+                        style="flex:1; padding:8px; background:transparent; border:none; border-bottom:1px solid #333; color:white; font-size:16px;">
                 </div>
 
                 <h4 style="color:#888; font-size:12px; margin-bottom:10px;">MIEMBROS ACTUALES</h4>
