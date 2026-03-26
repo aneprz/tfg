@@ -165,7 +165,7 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
         <div style="background:#1a1a1a; padding:25px; border-radius:15px; width:450px; border:1px solid #f0c330; max-height: 90vh; overflow-y: auto;">
             <h3 style="color:#f0c330; text-align:center; margin-top:0; margin-bottom:20px;">Ajustes de "Salsa Lovers"</h3>
             
-            <form id="form-editar-grupo" enctype="multipart/form-data">
+            <form id="form-editar-grupo" enctype="multipart/form-data" onsubmit="event.preventDefault(); guardarAjustes();>
                 <input type="hidden" id="ajuste_id_conv" name="id_conv">
                 
                 <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; background:#000; padding:10px; border-radius:10px;">

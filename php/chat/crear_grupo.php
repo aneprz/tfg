@@ -1,32 +1,55 @@
 <?php
+// 1. Iniciamos un búfer para atrapar cualquier Warning que quiera salir como texto
+ob_start();
 session_start();
+header('Content-Type: application/json');
+
+// Reporte de errores pero sin mostrarlos como HTML
+error_reporting(E_ALL);
+ini_set('display_errors', 0); 
+
 require_once __DIR__ . '/../../db/conexiones.php';
 
-// 1. Capturamos quién crea el grupo y el nombre
-$id_yo = $_SESSION['id_usuario'];
-$nombre_grupo = mysqli_real_escape_string($conexion, $_POST['nombre_grupo']);
-$amigos_ids = $_POST['amigos'] ?? []; // Array de IDs de los checks seleccionados
+$id_yo = $_SESSION['id_usuario'] ?? 0;
+// Recogemos el nombre
+$nombre = isset($_POST['nombre']) ? mysqli_real_escape_string($conexion, $_POST['nombre']) : '';
+// Recogemos los usuarios (vienen como JSON string desde el JS)
+$usuarios_json = $_POST['usuarios'] ?? '[]';
+$usuarios_ids = json_decode($usuarios_json, true);
 
-// 2. INSERTAR LA CONVERSACIÓN (Aquí es donde pones el código que te pasé)
-// IMPORTANTE: id_usuario_creador es lo que te faltaba para que salgan los botones
-$sql = "INSERT INTO chat_conversacion (tipo, nombre, id_usuario_creador) 
-        VALUES ('grupal', '$nombre_grupo', $id_yo)";
+$res = ['success' => false, 'error' => ''];
 
-if (mysqli_query($conexion, $sql)) {
-    // 3. Obtenemos el ID del grupo recién creado
-    $id_nueva_conv = mysqli_insert_id($conexion);
-
-    // 4. METEMOS A LOS PARTICIPANTES
-    // Primero te metes a ti mismo como creador
-    mysqli_query($conexion, "INSERT INTO chat_participante (id_conversacion, id_usuario) VALUES ($id_nueva_conv, $id_yo)");
-
-    // Luego metemos a todos los amigos seleccionados
-    foreach ($amigos_ids as $id_amigo) {
-        $id_amigo = (int)$id_amigo;
-        mysqli_query($conexion, "INSERT INTO chat_participante (id_conversacion, id_usuario) VALUES ($id_nueva_conv, $id_amigo)");
-    }
-
-    echo json_encode(['success' => true, 'id_conv' => $id_nueva_conv]);
+if (!$id_yo || empty($nombre)) {
+    $res['error'] = 'Faltan datos o sesión expirada';
 } else {
-    echo json_encode(['success' => false, 'error' => mysqli_error($conexion)]);
+    // IMPORTANTE: He cambiado 'nombre' por 'nombre_grupo' que es como parece que lo tienes
+    $sql = "INSERT INTO chat_conversacion (tipo, nombre_grupo, id_usuario_creador) 
+            VALUES ('grupal', '$nombre', $id_yo)";
+
+    if (mysqli_query($conexion, $sql)) {
+        $id_conv = mysqli_insert_id($conexion);
+
+        // 2. INSERTAR AL CREADOR (TÚ)
+        mysqli_query($conexion, "INSERT INTO chat_participante (id_conversacion, id_usuario) VALUES ($id_conv, $id_yo)");
+
+        // 3. INSERTAR A LOS INVITADOS
+        if (is_array($usuarios_ids)) {
+            foreach ($usuarios_ids as $id_invitado) {
+                $id_invitado = (int)$id_invitado;
+                if($id_invitado > 0) {
+                    mysqli_query($conexion, "INSERT INTO chat_participante (id_conversacion, id_usuario) VALUES ($id_conv, $id_invitado)");
+                }
+            }
+        }
+        $res['success'] = true;
+    } else {
+        $res['error'] = "Error SQL: " . mysqli_error($conexion);
+    }
 }
+
+// 4. Limpiamos el búfer por si hubo algún "Notice" o "Warning" de PHP
+ob_end_clean();
+
+// 5. Enviamos SOLO el JSON
+echo json_encode($res);
+exit;
