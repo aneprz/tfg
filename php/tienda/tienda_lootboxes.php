@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const puntosUsuario = document.getElementById("puntosUsuario");
 
     let pagina = 1;
-    let cargando = false; // 🚀 anti-spam
+    let cargando = false; // anti-spam
 
     function cargarLootboxes() {
         fetch(`procesarLootboxes.php?pagina=${pagina}`)
@@ -318,6 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.onclick = e => {
         if(e.target === modal) modal.style.display = "none";
     };
+
     function abrirLootboxAnimacion(items, ganador, res) {
         carrusel.innerHTML = '';
         itemGanadoDiv.hidden = true;
@@ -325,7 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const track = document.createElement('div');
         track.classList.add('carrusel-track');
         track.style.willChange = "transform";
-        track.style.transition = "none"; // 🔥 Desactiva cualquier transición CSS heredada
+        track.style.transition = "none";
 
         const lista = [];
         const totalItems = 120;
@@ -349,27 +350,22 @@ document.addEventListener("DOMContentLoaded", () => {
         carrusel.appendChild(track);
         modal.style.display = "flex";
 
-        // Esperar a que el DOM esté listo para medir correctamente
         setTimeout(() => {
             const primerItem = track.querySelector('.carrusel-item');
             const segundoItem = track.children[1];
             if (!primerItem || !segundoItem) return;
 
-            // Calcular ancho real de cada ítem + gap
             const itemRect = primerItem.getBoundingClientRect();
             const segundoRect = segundoItem.getBoundingClientRect();
             const itemWidthTotal = segundoRect.left - itemRect.left;
 
-            // Dimensiones del carrusel
             const carruselRect = carrusel.getBoundingClientRect();
             const centroCarrusel = carruselRect.width / 2;
             const centroItem = itemRect.width / 2;
             const desplazamientoCentro = centroCarrusel - centroItem;
 
-            // Destino final: centro del ítem ganador alineado con centro del carrusel
             const destinoFinal = (posicionGanador * itemWidthTotal) - desplazamientoCentro;
 
-            // 🔥 AUMENTADA DE 4500 A 6500 ms
             const duracion = 6500;
             const inicio = performance.now();
 
@@ -386,19 +382,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (tiempo >= 1) {
                     cancelAnimationFrame(animFrameId);
 
-                    // 🔥 Posición final exacta (sin redondeos extra)
                     track.style.transform = `translate3d(-${destinoFinal}px, 0, 0)`;
 
-                    // Limpiar transformaciones dinámicas de todos los ítems
+                    // Limpiar transformaciones dinámicas
                     itemsDOM.forEach(item => {
                         item.style.transform = '';
                         item.style.filter = '';
                     });
 
-                    // Aplicar solo la clase CSS para destacar (sin scale extra en el contenedor)
+                    // 🔥 SOLO AQUÍ se aplica la clase ganador (borde dorado y escala)
                     itemGanadorDOM.classList.add('ganador');
 
-                    // Mostrar información del premio
                     nombreItemGanado.textContent = ganador.nombre;
                     if (res && res.duplicado) {
                         nombreItemGanado.textContent += ` (Duplicado → +${res.valorDevuelto} pts)`;
@@ -415,18 +409,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 const posActual = desplazamiento;
                 const centroVisual = desplazamientoCentro;
 
-                // Efecto de zoom y pulso
+                // 🔥 TODOS los ítems tienen el mismo comportamiento de zoom por distancia
                 itemsDOM.forEach((item, idx) => {
                     const itemCenter = idx * itemWidthTotal + centroItem;
                     const distancia = Math.abs(itemCenter - (posActual + centroVisual));
                     let escala = Math.max(1, 1.25 - distancia / 350);
-
-                    if (item === itemGanadorDOM) {
-                        const pulso = 0.2 * t; // aumenta con el tiempo
-                        escala = Math.min(1.45, escala + pulso);
-                        item.style.filter = `drop-shadow(0 0 ${8 * t}px gold)`;
-                    }
-
+                    // Ya no hay tratamiento especial para el ganador
                     item.style.transform = `scale(${escala})`;
                 });
 
