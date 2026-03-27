@@ -186,7 +186,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                         if ($id_miembro == $id_sesion_actual) {
                             $ruta_perfil = '../user/perfiles/perfilSesion.php'; 
                         } else {
-                            $ruta_perfil = '../user/perfiles/perfilOtros.php?id=' . $id_miembro; 
+                            $ruta_perfil = '../user/amistades/perfilOtros.php?id=' . $id_miembro; 
                         }
 
                         echo '<li><a href="' . $ruta_perfil . '" style="color: inherit; text-decoration: none; display: block; width: 100%;">' . $nombre_miembro . '</a></li>';
