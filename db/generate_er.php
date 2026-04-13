@@ -15,24 +15,33 @@ foreach ($files as $file) {
     foreach ($lines as $line) {
 
         // =========================
-        // 🔥 DETECTAR TABLA REAL
+        // 🔥 DETECTAR TABLA + PK PHINX REAL
         // =========================
-        if (preg_match("/->table\\(['\"]([^'\"]+)['\"]/", $line, $m)) {
+        if (preg_match(
+            "/->table\\(['\"]([^'\"]+)['\"](?:,\\s*\\[.*?'id'\\s*=>\\s*'([^'\"]+)'\\s*.*?\\])?/",
+            $line,
+            $m
+        )) {
 
-            $currentTable = trim($m[1]);
+            $currentTable = $m[1];
+            $pkFromConfig = $m[2] ?? null;
 
             if (!isset($schema["tables"][$currentTable])) {
                 $schema["tables"][$currentTable] = [
                     "columns" => [],
-                    "pk" => null
+                    "pk" => $pkFromConfig
                 ];
+            } else {
+                if ($pkFromConfig) {
+                    $schema["tables"][$currentTable]["pk"] = $pkFromConfig;
+                }
             }
 
             continue;
         }
 
         // =========================
-        // 🔥 SALIR DE CONTEXTO (FIN DE FLUJO)
+        // 🔥 SALIR DE CONTEXTO
         // =========================
         if (strpos($line, "->create(") !== false) {
             $currentTable = null;
@@ -50,8 +59,10 @@ foreach ($files as $file) {
             $colName = $m[1];
             $colType = strtoupper($m[2]);
 
-            // evitar duplicados
-            $exists = array_column($schema["tables"][$currentTable]["columns"], "name");
+            $exists = array_column(
+                $schema["tables"][$currentTable]["columns"],
+                "name"
+            );
 
             if (!in_array($colName, $exists, true)) {
                 $schema["tables"][$currentTable]["columns"][] = [
@@ -62,7 +73,7 @@ foreach ($files as $file) {
         }
 
         // =========================
-        // 🔥 PRIMARY KEY (Phinx real)
+        // 🔥 PRIMARY KEY EXPLICIT
         // =========================
         if ($currentTable && strpos($line, "primary_key") !== false) {
 
@@ -72,15 +83,18 @@ foreach ($files as $file) {
             }
         }
 
-        // fallback PK id
-        if ($currentTable && preg_match("/addColumn\\(['\"]id['\"]/", $line)) {
+        // =========================
+        // 🔥 FALLBACK PK id_usuario / id_xxx
+        // =========================
+        if ($currentTable && preg_match("/addColumn\\(['\"]id[_a-zA-Z0-9]*['\"]/", $line)) {
             if (!$schema["tables"][$currentTable]["pk"]) {
-                $schema["tables"][$currentTable]["pk"] = "id";
+                preg_match("/addColumn\\(['\"]([^'\"]+)['\"]/", $line, $m2);
+                $schema["tables"][$currentTable]["pk"] = $m2[1] ?? "id";
             }
         }
 
         // =========================
-        // 🔥 FOREIGN KEYS (FIX REAL FINAL)
+        // 🔥 FOREIGN KEYS (ULTRA FIX FINAL)
         // =========================
         if ($currentTable && preg_match(
             "/addForeignKey\\(['\"]([^'\"]+)['\"],\\s*['\"]([^'\"]+)['\"],\\s*['\"]([^'\"]+)['\"]/",
@@ -92,8 +106,15 @@ foreach ($files as $file) {
             $refTable   = $m[2];
             $refField   = $m[3];
 
-            // ❌ anti basura
+            // ❌ validaciones anti basura
             if (!$localField || !$refTable || !$refField) continue;
+            if (!isset($schema["tables"][$refTable])) continue;
+
+            $refCols = array_column($schema["tables"][$refTable]["columns"], "name");
+            if (!in_array($refField, $refCols, true)) {
+                // si no existe columna en tabla destino, ignorar
+                continue;
+            }
 
             $key = $currentTable . "." . $localField . "->" . $refTable . "." . $refField;
 
@@ -109,7 +130,7 @@ foreach ($files as $file) {
 
 /**
  * =========================
- * 🔥 DBML LIMPIO FINAL
+ * 🔥 DBML GENERATOR CLEAN
  * =========================
  */
 function toDBML($schema) {
@@ -132,7 +153,6 @@ function toDBML($schema) {
     }
 
     foreach ($schema["relations"] as $r) {
-
         $out .= "Ref: {$r['local_table']}.{$r['local_field']} > {$r['ref_table']}.{$r['ref_field']}\n";
     }
 
