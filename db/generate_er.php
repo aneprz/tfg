@@ -7,6 +7,85 @@ $schema = [
     "relations" => []
 ];
 
+function ensureTable(&$schema, $table, $pk = null) {
+
+    if (!isset($schema["tables"][$table])) {
+        $schema["tables"][$table] = [
+            "columns" => [],
+            "pk" => $pk
+        ];
+    }
+
+    if ($pk) {
+        $schema["tables"][$table]["pk"] = $pk;
+
+        // asegurar PK como columna real
+        $exists = array_column($schema["tables"][$table]["columns"], "name");
+
+        if (!in_array($pk, $exists, true)) {
+            $schema["tables"][$table]["columns"][] = [
+                "name" => $pk,
+                "type" => "INTEGER"
+            ];
+        }
+    }
+}
+
+function addColumn(&$schema, $table, $name, $type) {
+
+    ensureTable($schema, $table);
+
+    $exists = array_column($schema["tables"][$table]["columns"], "name");
+
+    if (!in_array($name, $exists, true)) {
+        $schema["tables"][$table]["columns"][] = [
+            "name" => $name,
+            "type" => strtoupper($type)
+        ];
+    }
+}
+
+/**
+ * 🔥 FIX CRÍTICO: separa columnas tipo "id_usuario,id_amigo"
+ */
+function normalizeSchema(&$schema) {
+
+    foreach ($schema["tables"] as $tableName => &$table) {
+
+        $fixed = [];
+        $seen = [];
+
+        foreach ($table["columns"] as $col) {
+
+            if (strpos($col["name"], ",") !== false) {
+
+                $parts = explode(",", $col["name"]);
+
+                foreach ($parts as $p) {
+                    $p = trim($p);
+                    if ($p === "" || in_array($p, $seen, true)) continue;
+
+                    $fixed[] = [
+                        "name" => $p,
+                        "type" => $col["type"]
+                    ];
+
+                    $seen[] = $p;
+                }
+
+                continue;
+            }
+
+            if (in_array($col["name"], $seen, true)) continue;
+
+            $fixed[] = $col;
+            $seen[] = $col["name"];
+        }
+
+        $table["columns"] = $fixed;
+    }
+}
+
 foreach ($files as $file) {
 
     $lines = file($file);
@@ -15,7 +94,7 @@ foreach ($files as $file) {
     foreach ($lines as $line) {
 
         // =========================
-        // 🔥 DETECTAR TABLA + PK PHINX REAL
+        // TABLE + PK
         // =========================
         if (preg_match(
             "/->table\\(['\"]([^'\"]+)['\"](?:,\\s*\\[.*?'id'\\s*=>\\s*'([^'\"]+)'\\s*.*?\\])?/",
@@ -24,79 +103,42 @@ foreach ($files as $file) {
         )) {
 
             $currentTable = $m[1];
-            $pkFromConfig = $m[2] ?? null;
+            $pk = $m[2] ?? null;
 
-            if (!isset($schema["tables"][$currentTable])) {
-                $schema["tables"][$currentTable] = [
-                    "columns" => [],
-                    "pk" => $pkFromConfig
-                ];
-            } else {
-                if ($pkFromConfig) {
-                    $schema["tables"][$currentTable]["pk"] = $pkFromConfig;
-                }
-            }
-
+            ensureTable($schema, $currentTable, $pk);
             continue;
         }
 
-        // =========================
-        // 🔥 SALIR DE CONTEXTO
-        // =========================
         if (strpos($line, "->create(") !== false) {
             $currentTable = null;
         }
 
         // =========================
-        // 🔥 COLUMNAS
+        // COLUMNAS
         // =========================
         if ($currentTable && preg_match(
             "/addColumn\\(['\"]([^'\"]+)['\"],\\s*['\"]([^'\"]+)['\"]/",
             $line,
             $m
         )) {
-
-            $colName = $m[1];
-            $colType = strtoupper($m[2]);
-
-            $exists = array_column(
-                $schema["tables"][$currentTable]["columns"],
-                "name"
-            );
-
-            if (!in_array($colName, $exists, true)) {
-                $schema["tables"][$currentTable]["columns"][] = [
-                    "name" => $colName,
-                    "type" => $colType
-                ];
-            }
+            addColumn($schema, $currentTable, $m[1], $m[2]);
         }
 
         // =========================
-        // 🔥 PRIMARY KEY EXPLICIT
+        // PRIMARY KEY EXPLICIT
         // =========================
         if ($currentTable && strpos($line, "primary_key") !== false) {
 
             if (preg_match("/\\[([^\\]]+)\\]/", $line, $m)) {
                 $pk = str_replace(["'", " "], "", $m[1]);
-                $schema["tables"][$currentTable]["pk"] = $pk;
+                ensureTable($schema, $currentTable, $pk);
             }
         }
 
         // =========================
-        // 🔥 FALLBACK PK id_usuario / id_xxx
+        // FOREIGN KEYS
         // =========================
-        if ($currentTable && preg_match("/addColumn\\(['\"]id[_a-zA-Z0-9]*['\"]/", $line)) {
-            if (!$schema["tables"][$currentTable]["pk"]) {
-                preg_match("/addColumn\\(['\"]([^'\"]+)['\"]/", $line, $m2);
-                $schema["tables"][$currentTable]["pk"] = $m2[1] ?? "id";
-            }
-        }
-
-        // =========================
-        // 🔥 FOREIGN KEYS (ULTRA FIX FINAL)
-        // =========================
-        if ($currentTable && preg_match(
+        if (preg_match(
             "/addForeignKey\\(['\"]([^'\"]+)['\"],\\s*['\"]([^'\"]+)['\"],\\s*['\"]([^'\"]+)['\"]/",
             $line,
             $m
@@ -106,15 +148,16 @@ foreach ($files as $file) {
             $refTable   = $m[2];
             $refField   = $m[3];
 
-            // ❌ validaciones anti basura
-            if (!$localField || !$refTable || !$refField) continue;
-            if (!isset($schema["tables"][$refTable])) continue;
+            if (!$currentTable) continue;
 
-            $refCols = array_column($schema["tables"][$refTable]["columns"], "name");
-            if (!in_array($refField, $refCols, true)) {
-                // si no existe columna en tabla destino, ignorar
-                continue;
-            }
+            ensureTable($schema, $currentTable);
+            ensureTable($schema, $refTable);
+
+            $localCols = array_column($schema["tables"][$currentTable]["columns"], "name");
+            $refCols   = array_column($schema["tables"][$refTable]["columns"], "name");
+
+            if (!in_array($localField, $localCols, true)) continue;
+            if (!in_array($refField, $refCols, true)) continue;
 
             $key = $currentTable . "." . $localField . "->" . $refTable . "." . $refField;
 
@@ -128,11 +171,12 @@ foreach ($files as $file) {
     }
 }
 
-/**
- * =========================
- * 🔥 DBML GENERATOR CLEAN
- * =========================
- */
+// 🔥 APPLY FIX FINAL
+normalizeSchema($schema);
+
+// =========================
+// DBML GENERATOR
+// =========================
 function toDBML($schema) {
 
     $out = "";
