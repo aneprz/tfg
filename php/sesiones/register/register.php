@@ -8,13 +8,13 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="../../../media/logoplatino.png">
     <link rel="stylesheet" href="../../../estilos/estilos_register.css">
-    <title>Registro de usuario</title>
+    <title>Registro de Usuario</title>
 </head>
 <body>
     <form action="procesarRegister.php" method="POST">
         <div>
             <h2>Crear Cuenta</h2>
-            <label for="gameTag">Nombre de usuario: </label><br>
+            <label for="gameTag">Nombre de Usuario: </label><br>
             <input type="text" id="gameTag" name="gameTag" required placeholder="GameTag">
         </div>
 

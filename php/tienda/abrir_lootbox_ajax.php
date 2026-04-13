@@ -41,7 +41,7 @@ try {
     ");
 
     if (!$resUser) {
-        throw new Exception("Error usuario");
+        throw new Exception("Error Usuario");
     }
 
     $user = mysqli_fetch_assoc($resUser);

@@ -9,7 +9,7 @@ if (!isset($_SESSION['id_usuario'])) {
 
 $id_sesion = $_SESSION['id_usuario'];
 
-// Solo notificaciones no leídas para el usuario en sesión
+// Solo notificaciones no leídas para el Usuario en sesión
 $sql = "SELECT * FROM Notificacion WHERE id_usuario_destino = ? AND leida = 0 ORDER BY fecha_creacion DESC";
 $stmt = $conexion->prepare($sql);
 $stmt->bind_param("i", $id_sesion);

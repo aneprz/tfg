@@ -28,7 +28,7 @@ $otra_lectura = $rowL['ultima'];
 // 4. Cargar los mensajes con el GameTag del emisor (JOIN)
 $sql = "SELECT m.*, u.gameTag 
         FROM chat_mensaje m 
-        JOIN usuario u ON m.id_emisor = u.id_usuario 
+        JOIN Usuario u ON m.id_emisor = u.id_usuario 
         WHERE m.id_conversacion = $id_conv 
         ORDER BY m.fecha_envio ASC";
 $res = mysqli_query($conexion, $sql);

@@ -18,10 +18,10 @@ if ($id_sesion == $id_objetivo) {
 $query = $conexion->prepare("SELECT gameTag, biografia, avatar FROM Usuario WHERE id_usuario = ?");
 $query->bind_param("i", $id_objetivo);
 $query->execute();
-$usuario = $query->get_result()->fetch_assoc();
+$Usuario = $query->get_result()->fetch_assoc();
 $query->close();
 
-if (!$usuario) { die("Usuario no encontrado."); }
+if (!$Usuario) { die("Usuario no encontrado."); }
 
 $q_amigos = $conexion->prepare("
     SELECT COUNT(*) as total 
@@ -63,7 +63,7 @@ $q_relacion->close();
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Perfil de <?php echo htmlspecialchars($usuario['gameTag']); ?> - SalsaBox</title>
+    <title>Perfil de <?php echo htmlspecialchars($Usuario['gameTag']); ?> - SalsaBox</title>
     <link rel="icon" href="../../../media/logoPlatino.png">
     <link rel="stylesheet" href="../../../estilos/estilos_perfilOtros.css">
 </head>
@@ -72,11 +72,11 @@ $q_relacion->close();
         <div class="perfil-card">
             <section class="perfil-header">
                 <?php 
-                    $avatar_db = trim((string)$usuario['avatar']);
+                    $avatar_db = trim((string)$Usuario['avatar']);
                     $img = (empty($avatar_db)) ? "../../../media/perfil_default.jpg" : "../../../media/" . $avatar_db;
                 ?>
                 <img src="<?php echo htmlspecialchars($img); ?>" class="avatar-grande" style="object-fit: cover;">
-                <h1><?php echo htmlspecialchars($usuario['gameTag']); ?></h1>
+                <h1><?php echo htmlspecialchars($Usuario['gameTag']); ?></h1>
                 <div class="status">Jugador de SalsaBox</div>
                 <form action="gestionarAmistades.php" method="POST" style="margin-top: 20px;">
                     <input type="hidden" name="id_objetivo" value="<?php echo $id_objetivo; ?>">
@@ -120,7 +120,7 @@ $q_relacion->close();
                 <h3>Sobre este gamer</h3>
                 <p class="bio-text">
                     <?php 
-                    $bio = trim((string)$usuario['biografia']);
+                    $bio = trim((string)$Usuario['biografia']);
                     echo $bio !== "" ? nl2br(htmlspecialchars($bio)) : "Este gamer prefiere mantener el misterio.";
                     ?>
                 </p>

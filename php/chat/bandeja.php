@@ -28,7 +28,7 @@ $sqlContactos = "
     FROM chat_participante cp1
     JOIN chat_conversacion c ON cp1.id_conversacion = c.id_conversacion
     JOIN chat_participante cp2 ON (cp2.id_conversacion = c.id_conversacion AND cp2.id_usuario != $id_yo)
-    JOIN usuario u ON cp2.id_usuario = u.id_usuario
+    JOIN Usuario u ON cp2.id_usuario = u.id_usuario
     WHERE cp1.id_usuario = $id_yo AND c.tipo = 'individual')
     
     ORDER BY id_conversacion DESC";
@@ -121,10 +121,10 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
             <input type="text" id="nombre-grupo" placeholder="Nombre del grupo..." style="width:100%; padding:12px; background:#0e0e0e; border:1px solid #333; color:white; border-radius:8px; margin-bottom:15px;">
             <div id="lista-amigos-grupo" style="max-height:280px; overflow-y:auto; margin-bottom:25px; background:#0e0e0e; border:1px solid #333; border-radius:8px;">
                 <?php 
-                // Consulta corregida: Seleccionamos al usuario que NO es el usuario actual (id_yo)
+                // Consulta corregida: Seleccionamos al Usuario que NO es el Usuario actual (id_yo)
                 $sqlAmigos = "SELECT u.id_usuario, u.gameTag, u.avatar 
                             FROM amigos a 
-                            JOIN usuario u ON (CASE 
+                            JOIN Usuario u ON (CASE 
                                                     WHEN a.id_usuario = $id_yo THEN a.id_amigo = u.id_usuario 
                                                     ELSE a.id_usuario = u.id_usuario 
                                                 END)

@@ -12,9 +12,9 @@ $id_objetivo = $_GET['id'];
 $queryUser = $conexion->prepare("SELECT gameTag FROM Usuario WHERE id_usuario = ?");
 $queryUser->bind_param("i", $id_objetivo);
 $queryUser->execute();
-$usuario = $queryUser->get_result()->fetch_assoc();
+$Usuario = $queryUser->get_result()->fetch_assoc();
 
-if (!$usuario) { die("Usuario no encontrado."); }
+if (!$Usuario) { die("Usuario no encontrado."); }
 
 $sql = "SELECT u.id_usuario, u.gameTag, u.avatar 
         FROM Usuario u 
@@ -34,7 +34,7 @@ $resultado = $query->get_result();
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Amigos de <?php echo htmlspecialchars($usuario['gameTag']); ?> - SalsaBox</title>
+    <title>Amigos de <?php echo htmlspecialchars($Usuario['gameTag']); ?> - SalsaBox</title>
     <link rel="stylesheet" href="../../../estilos/estilos_statsPerfil.css">
     <link rel="icon" href="../../../media/logoPlatino.png">
     <style>
@@ -75,7 +75,7 @@ $resultado = $query->get_result();
         <a href="perfilOtros.php?id=<?php echo $id_objetivo; ?>" class="btn-volver">← Volver al Perfil</a>
         
         <h1 style="color: white; margin-bottom: 30px;">
-            Amigos de <span style="color: #e0be00;"><?php echo htmlspecialchars($usuario['gameTag']); ?></span>
+            Amigos de <span style="color: #e0be00;"><?php echo htmlspecialchars($Usuario['gameTag']); ?></span>
         </h1>
 
         <?php if ($resultado->num_rows > 0): ?>
@@ -96,7 +96,7 @@ $resultado = $query->get_result();
             <?php endwhile; ?>
         <?php else: ?>
             <p class="empty-msg" style="color: #9ab3bc; text-align: center; margin-top: 50px;">
-                Este usuario no tiene amigos aún.
+                Este Usuario no tiene amigos aún.
             </p>
         <?php endif; ?>
     </div>

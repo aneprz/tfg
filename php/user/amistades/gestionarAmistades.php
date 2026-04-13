@@ -12,7 +12,7 @@ $id_objetivo = $_POST['id_objetivo'];
 $accion = $_POST['accion'];
 
 // Nombre de quien realiza la acción
-$nombre_usuario = isset($_SESSION['gameTag']) ? $_SESSION['gameTag'] : (isset($_SESSION['tag']) ? $_SESSION['tag'] : 'Un usuario');
+$nombre_usuario = isset($_SESSION['gameTag']) ? $_SESSION['gameTag'] : (isset($_SESSION['tag']) ? $_SESSION['tag'] : 'Un Usuario');
 
 if ($accion == 'enviar') {
     // 1. Insertar la amistad pendiente
@@ -25,7 +25,7 @@ if ($accion == 'enviar') {
     $mensajeNotif = "👋 @$nombre_usuario te ha enviado una solicitud de amistad.";
     $urlNotif = "/php/user/amistades/perfilOtros.php?id=" . $id_sesion; 
     
-    $insNotif = $conexion->prepare("INSERT INTO Notificacion (mensaje, url_destino, tipo, id_usuario_destino) VALUES (?, ?, 'usuario', ?)");
+    $insNotif = $conexion->prepare("INSERT INTO Notificacion (mensaje, url_destino, tipo, id_usuario_destino) VALUES (?, ?, 'Usuario', ?)");
     $insNotif->bind_param("ssi", $mensajeNotif, $urlNotif, $id_objetivo);
     $insNotif->execute();
 
@@ -47,7 +47,7 @@ elseif ($accion == 'aceptar') {
     $mensajeNotif = "✅ @$nombre_usuario ha aceptado tu solicitud de amistad.";
     $urlNotif = "/php/user/perfiles/mis_amigos.php"; 
     
-    $insNotif = $conexion->prepare("INSERT INTO Notificacion (mensaje, url_destino, tipo, id_usuario_destino) VALUES (?, ?, 'usuario', ?)");
+    $insNotif = $conexion->prepare("INSERT INTO Notificacion (mensaje, url_destino, tipo, id_usuario_destino) VALUES (?, ?, 'Usuario', ?)");
     $insNotif->bind_param("ssi", $mensajeNotif, $urlNotif, $id_objetivo);
     $insNotif->execute();
 } 

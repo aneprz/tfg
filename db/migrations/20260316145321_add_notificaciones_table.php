@@ -24,7 +24,7 @@ final class AddNotificacionesTable extends AbstractMigration
           ->addColumn('url_destino', 'string', ['limit' => 255, 'null' => true])
           ->addColumn('leida', 'boolean', ['default' => false])
           ->addColumn('fecha_creacion', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
-          ->addColumn('tipo', 'enum', ['values' => ['usuario', 'comunidad', 'sistema'], 'default' => 'sistema'])
+          ->addColumn('tipo', 'enum', ['values' => ['Usuario', 'comunidad', 'sistema'], 'default' => 'sistema'])
           ->addColumn('id_usuario_destino', 'integer', ['signed' => false]) 
           ->create();
     }

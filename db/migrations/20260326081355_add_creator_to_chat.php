@@ -25,7 +25,7 @@ final class AddCreatorToChat extends AbstractMigration
         'null' => true, 
         'after' => 'nombre_grupo'
     ])
-    ->addForeignKey('id_usuario_creador', 'usuario', 'id_usuario', ['delete'=> 'SET_NULL'])
+    ->addForeignKey('id_usuario_creador', 'Usuario', 'id_usuario', ['delete'=> 'SET_NULL'])
     ->update();
 }
 }

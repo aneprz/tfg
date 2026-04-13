@@ -33,7 +33,7 @@ final class CrearSistemaDeChat extends AbstractMigration
                           ->addColumn('estado_solicitud', 'enum', ['values' => ['aceptada', 'pendiente'], 'default' => 'aceptada'])
                           ->addColumn('ultima_lectura', 'timestamp', ['null' => true])
                           ->addForeignKey('id_conversacion', 'chat_conversacion', 'id_conversacion', ['delete'=> 'CASCADE'])
-                          ->addForeignKey('id_usuario', 'usuario', 'id_usuario', ['delete'=> 'CASCADE'])
+                          ->addForeignKey('id_usuario', 'Usuario', 'id_usuario', ['delete'=> 'CASCADE'])
                           ->create();
 
         // 3. Tabla de Mensajes
@@ -43,7 +43,7 @@ final class CrearSistemaDeChat extends AbstractMigration
                      ->addColumn('contenido', 'text')
                      ->addColumn('fecha_envio', 'timestamp', ['default' => 'CURRENT_TIMESTAMP'])
                      ->addForeignKey('id_conversacion', 'chat_conversacion', 'id_conversacion', ['delete'=> 'CASCADE'])
-                     ->addForeignKey('id_emisor', 'usuario', 'id_usuario', ['delete'=> 'CASCADE'])
+                     ->addForeignKey('id_emisor', 'Usuario', 'id_usuario', ['delete'=> 'CASCADE'])
                      ->create();
     }
 }

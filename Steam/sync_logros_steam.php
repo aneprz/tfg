@@ -247,7 +247,7 @@ foreach($achievements_data as $appid => $data){
         // 🔥 SOLO SI ES NUEVO → DAR PUNTOS
         if(mysqli_affected_rows($conexion) > 0){
 
-            // sumar puntos al usuario
+            // sumar puntos al Usuario
             mysqli_query($conexion,"
             UPDATE Usuario
             SET puntos_actuales = puntos_actuales + $puntos

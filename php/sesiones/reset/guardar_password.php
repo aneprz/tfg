@@ -33,7 +33,7 @@ if($result->num_rows == 0){
     die("Token inválido o expirado");
 }
 
-$usuario = $result->fetch_assoc();
+$Usuario = $result->fetch_assoc();
 
 $hash = password_hash($password, PASSWORD_DEFAULT);
 
@@ -45,7 +45,7 @@ token_reset_expira=NULL
 WHERE id_usuario=?
 ");
 
-$stmt->bind_param("si",$hash,$usuario['id_usuario']);
+$stmt->bind_param("si",$hash,$Usuario['id_usuario']);
 $stmt->execute();
 
 echo "<script>

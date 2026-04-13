@@ -80,7 +80,7 @@ final class AddSistemaTienda extends AbstractMigration
 
         /* =========================
            OPCIONAL → EVITAR DUPLICADOS
-           (un usuario no puede comprar
+           (un Usuario no puede comprar
             el mismo item 2 veces)
            ========================= */
 

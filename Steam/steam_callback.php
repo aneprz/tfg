@@ -23,7 +23,7 @@ if(!isset($matches[1])){
 
 $steamid = $matches[1];
 
-/* comprobar que usuario esté logueado */
+/* comprobar que Usuario esté logueado */
 
 if(!isset($_SESSION["id_usuario"])){
     die("Usuario no logueado");

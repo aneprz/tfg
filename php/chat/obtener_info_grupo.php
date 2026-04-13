@@ -29,7 +29,7 @@ if ($resC && $rowC = mysqli_fetch_assoc($resC)) {
 // 3. Miembros (Consulta simplificada sin fotos para evitar errores de columnas)
 $sqlM = "SELECT u.id_usuario, u.gameTag 
          FROM chat_participante p 
-         JOIN usuario u ON p.id_usuario = u.id_usuario 
+         JOIN Usuario u ON p.id_usuario = u.id_usuario 
          WHERE p.id_conversacion = $id_conv";
 $resM = mysqli_query($conexion, $sqlM);
 
@@ -44,7 +44,7 @@ if ($resM) {
 
 // 4. Amigos fuera
 $sqlA = "SELECT u.id_usuario, u.gameTag FROM amigos a 
-         JOIN usuario u ON (CASE WHEN a.id_usuario = $id_yo THEN a.id_amigo = u.id_usuario ELSE a.id_usuario = u.id_usuario END)
+         JOIN Usuario u ON (CASE WHEN a.id_usuario = $id_yo THEN a.id_amigo = u.id_usuario ELSE a.id_usuario = u.id_usuario END)
          WHERE (a.id_usuario = $id_yo OR a.id_amigo = $id_yo) 
          AND u.id_usuario NOT IN (SELECT id_usuario FROM chat_participante WHERE id_conversacion = $id_conv)
          AND a.estado = 'aceptada' AND u.id_usuario != $id_yo";

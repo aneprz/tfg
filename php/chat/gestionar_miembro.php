@@ -22,7 +22,7 @@ if ($accion === 'quitar') {
     }
 } 
 elseif ($accion === 'abandonar') {
-    // Eliminamos al usuario de la tabla de participantes
+    // Eliminamos al Usuario de la tabla de participantes
     $sql = "DELETE FROM chat_participante WHERE id_conversacion = $id_conv AND id_usuario = $id_yo";
     
     if (mysqli_query($conexion, $sql)) {
