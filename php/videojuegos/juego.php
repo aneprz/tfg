@@ -4,6 +4,10 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 require '../../db/conexiones.php';
 
+if (!isset($conexion) || !$conexion) {
+    die('Error: No se pudo establecer la conexión a la base de datos.');
+}
+
 // --- FUNCIONES DE RESOLUCIÓN DE RUTAS ---
 function resolverAvatar($avatar) {
     $avatar = is_string($avatar) ? trim($avatar) : '';
