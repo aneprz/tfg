@@ -19,7 +19,7 @@ $result = $stmt->get_result();
 
 if($result->num_rows > 0){
 
-    $usuario = $result->fetch_assoc();
+    $Usuario = $result->fetch_assoc();
 
     $token = bin2hex(random_bytes(32));
 
@@ -30,7 +30,7 @@ if($result->num_rows > 0){
     WHERE id_usuario=?
     ");
 
-    $stmt->bind_param("si",$token,$usuario['id_usuario']);
+    $stmt->bind_param("si",$token,$Usuario['id_usuario']);
     $stmt->execute();
 
     $link = "http://localhost:3000/php/sesiones/reset/cambiar_password.php?token=".$token;

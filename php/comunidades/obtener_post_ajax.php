@@ -11,7 +11,7 @@ $id_com = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id_com > 0) {
 
     $sql = "SELECT p.*, u.gameTag FROM post p 
-            JOIN usuario u ON p.id_usuario = u.id_usuario 
+            JOIN Usuario u ON p.id_usuario = u.id_usuario 
             WHERE p.id_comunidad = $id_com 
             ORDER BY p.fecha_publicacion ASC"; 
 

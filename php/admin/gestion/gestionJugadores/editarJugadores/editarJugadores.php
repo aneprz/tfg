@@ -8,9 +8,9 @@
     }
     
     $id = (int)($_GET['id'] ?? 0);
-    $usuario = $conexion->query("SELECT * FROM Usuario WHERE id_usuario = $id")->fetch_assoc();
+    $Usuario = $conexion->query("SELECT * FROM Usuario WHERE id_usuario = $id")->fetch_assoc();
     
-    if (!$usuario) { header("Location: listaEditarJugadores.php"); exit(); }
+    if (!$Usuario) { header("Location: listaEditarJugadores.php"); exit(); }
     $admin = true;
 ?>
 <!DOCTYPE html>
@@ -38,26 +38,26 @@
             <a class="tag" href="../../../../user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
         <?php endif; ?>
     </header>
-    <div class="central"><h1>Editar Perfil de <?php echo htmlspecialchars($usuario['gameTag']); ?></h1></div>
+    <div class="central"><h1>Editar Perfil de <?php echo htmlspecialchars($Usuario['gameTag']); ?></h1></div>
     <div class="admin-container">
         <form action="procesarEditarJugadores.php" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="id" value="<?php echo $id; ?>">
             
             <label>GameTag:</label> 
-            <input type="text" name="gameTag" value="<?php echo htmlspecialchars($usuario['gameTag']); ?>" required>
+            <input type="text" name="gameTag" value="<?php echo htmlspecialchars($Usuario['gameTag']); ?>" required>
             
             <label>Nombre y Apellidos:</label> 
-            <input type="text" name="nombre_apellido" value="<?php echo htmlspecialchars($usuario['nombre_apellido']); ?>">
+            <input type="text" name="nombre_apellido" value="<?php echo htmlspecialchars($Usuario['nombre_apellido']); ?>">
             
             <label>Email:</label> 
-            <input type="email" name="email" value="<?php echo htmlspecialchars($usuario['email']); ?>" required>
+            <input type="email" name="email" value="<?php echo htmlspecialchars($Usuario['email']); ?>" required>
             
             <label>Biografía:</label> 
-            <textarea name="biografia" rows="4"><?php echo htmlspecialchars($usuario['biografia']); ?></textarea>
+            <textarea name="biografia" rows="4"><?php echo htmlspecialchars($Usuario['biografia']); ?></textarea>
             
             <label>Avatar actual:</label><br>
             <?php 
-                $rutaAvatar = !empty($usuario['avatar']) ? $usuario['avatar'] : '../../../../../media/perfil_default.png';
+                $rutaAvatar = !empty($Usuario['avatar']) ? $Usuario['avatar'] : '../../../../../media/perfil_default.png';
             ?>
             <img src="../../../../../media/<?php echo htmlspecialchars($rutaAvatar); ?>" width="100" style="border-radius: 50%; margin: 10px 0;"><br>
             

@@ -12,9 +12,9 @@ $id_objetivo = $_GET['id'];
 $queryUser = $conexion->prepare("SELECT gameTag FROM Usuario WHERE id_usuario = ?");
 $queryUser->bind_param("i", $id_objetivo);
 $queryUser->execute();
-$usuario = $queryUser->get_result()->fetch_assoc();
+$Usuario = $queryUser->get_result()->fetch_assoc();
 
-if (!$usuario) die("Usuario no encontrado");
+if (!$Usuario) die("Usuario no encontrado");
 
 $sql = "SELECT l.nombre_logro, l.descripcion, l.puntos_logro 
         FROM Logros_Usuario lu 
@@ -30,7 +30,7 @@ $resultado = $query->get_result();
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Logros de <?php echo $usuario['gameTag']; ?></title>
+    <title>Logros de <?php echo $Usuario['gameTag']; ?></title>
     <link rel="stylesheet" href="../../../estilos/estilos_statsPerfil.css">
     <link rel="icon" href="../../../media/logoPlatino.png">
 </head>
@@ -38,7 +38,7 @@ $resultado = $query->get_result();
     <div class="container-lista" style="width: 100%; max-width: 900px; margin: 0 auto; padding: 20px;">
         <a href="perfilOtros.php?id=<?php echo $id_objetivo; ?>" class="btn-volver" style="color: #9ab3bc; text-decoration: none;">← Volver al Perfil</a>
         <h1 class="section-title" style="color: #e0be00; border-bottom: 2px solid #e0be00; padding-bottom: 10px; margin-top: 20px;">
-            Logros de <?php echo htmlspecialchars($usuario['gameTag']); ?>
+            Logros de <?php echo htmlspecialchars($Usuario['gameTag']); ?>
         </h1>
 
         <?php if ($resultado->num_rows > 0): ?>
@@ -59,7 +59,7 @@ $resultado = $query->get_result();
             <?php endwhile; ?>
         <?php else: ?>
             <p class="empty-msg" style="color: #9ab3bc; font-style: italic; margin-top: 20px;">
-                Este usuario no ha desbloqueado logros todavía.
+                Este Usuario no ha desbloqueado logros todavía.
             </p>
         <?php endif; ?>
     </div>

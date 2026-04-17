@@ -4,87 +4,49 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 require '../../db/conexiones.php';
 
+if (!isset($conexion) || !$conexion) {
+    die('Error: No se pudo establecer la conexión a la base de datos.');
+}
+
+// --- FUNCIONES DE RESOLUCIÓN DE RUTAS ---
 function resolverAvatar($avatar) {
     $avatar = is_string($avatar) ? trim($avatar) : '';
-
-    if ($avatar === '') {
-        return '../../media/perfil_default.jpg';
-    }
-
-    if (preg_match('~^https?://~i', $avatar) === 1 || strpos($avatar, 'data:') === 0 || strpos($avatar, '/') === 0) {
-        return $avatar;
-    }
-
+    if ($avatar === '') return '../../media/perfil_default.jpg';
+    if (preg_match('~^https?://~i', $avatar) === 1 || strpos($avatar, 'data:') === 0 || strpos($avatar, '/') === 0) return $avatar;
     $avatar = str_replace('\\', '/', $avatar);
-
-    // Normalizamos algunos formatos históricos tipo ../../../media/...
-    if (preg_match('~^(?:\\.\\./)+media/(.+)$~', $avatar, $m) === 1) {
-        $avatar = 'media/' . $m[1];
-    }
-
+    if (preg_match('~^(?:\\.\\./)+media/(.+)$~', $avatar, $m) === 1) $avatar = 'media/' . $m[1];
     $avatar = ltrim($avatar, '/');
-
-    // Evitamos rutas con traversal.
-    if (preg_match('~(^|/)\\.\\.(?:/|$)~', $avatar) === 1) {
-        return '../../media/perfil_default.jpg';
-    }
-
-    if (strpos($avatar, '/') === false) {
-        $avatar = 'media/' . $avatar;
-    }
-
+    if (preg_match('~(^|/)\\.\\.(?:/|$)~', $avatar) === 1) return '../../media/perfil_default.jpg';
+    if (strpos($avatar, '/') === false) $avatar = 'media/' . $avatar;
     $rutaWeb = '../../' . $avatar;
     $rutaFs = __DIR__ . '/../../' . $avatar;
-
     return is_file($rutaFs) ? $rutaWeb : '../../media/perfil_default.jpg';
 }
 
 function resolverPortada($portada) {
     $portada = is_string($portada) ? trim($portada) : '';
-
-    if ($portada === '') {
-        return '../../media/logoPlatino.png';
-    }
-
-    if (preg_match('~^https?://~i', $portada) === 1 || strpos($portada, 'data:') === 0) {
-        return $portada;
-    }
-
-    // Normalizamos a ruta relativa al root del proyecto (este archivo está en /php/videojuegos/).
+    if ($portada === '') return '../../media/logoPlatino.png';
+    if (preg_match('~^https?://~i', $portada) === 1 || strpos($portada, 'data:') === 0) return $portada;
     $portada = str_replace('\\', '/', ltrim($portada, '/'));
-
-    // Evitamos rutas con traversal.
-    if (preg_match('~(^|/)\\.\\.(?:/|$)~', $portada) === 1) {
-        return '../../media/logoPlatino.png';
-    }
-
-    // Si en BBDD viene solo el nombre del fichero, asumimos que está en /media/.
-    if (strpos($portada, '/') === false) {
-        $portada = 'media/' . $portada;
-    }
-
+    if (preg_match('~(^|/)\\.\\.(?:/|$)~', $portada) === 1) return '../../media/logoPlatino.png';
+    if (strpos($portada, '/') === false) $portada = 'media/' . $portada;
     $rutaWeb = '../../' . $portada;
     $rutaFs = __DIR__ . '/../../' . $portada;
-
     return is_file($rutaFs) ? $rutaWeb : '../../media/logoPlatino.png';
 }
 
 $idJuego = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-$juego = null;
 $idUsuario = $_SESSION['id_usuario'] ?? null;
+$admin = ($_SESSION['admin'] ?? false) === true;
 
 // --- PROCESAR FORMULARIO DE USUARIO ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_interaccion']) && $idUsuario && $idJuego > 0) {
     $estado = $_POST['estado'] ?? null;
-    
-    // Verificamos si debemos procesar horas, puntuación y reseña
     $mostrarExtras = in_array($estado, ['Completado', 'Abandonado']);
-    
     $horas = $mostrarExtras && isset($_POST['horas']) ? (float) $_POST['horas'] : 0;
     $puntuacion = (float) $_POST['puntuacion'] * 2;
     $texto_resena = $mostrarExtras && isset($_POST['texto_resena']) ? trim($_POST['texto_resena']) : null;
 
-    // 1. Guardar/Actualizar en la tabla Biblioteca (Estado y Horas)
     $sqlBiblioteca = "INSERT INTO Biblioteca (id_usuario, id_videojuego, estado, horas_totales) 
                       VALUES (?, ?, ?, ?) 
                       ON DUPLICATE KEY UPDATE estado = VALUES(estado), horas_totales = VALUES(horas_totales)";
@@ -93,9 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_interaccion']
     mysqli_stmt_execute($stmtBib);
     mysqli_stmt_close($stmtBib);
 
-    // 2. Guardar/Actualizar en la tabla Resena (Solo si el estado es Completado/Abandonado)
     if ($mostrarExtras && ($puntuacion !== null || !empty($texto_resena))) {
-        // Primero comprobamos si ya existe una reseña de este usuario para este juego
         $sqlCheck = "SELECT id_resena FROM Resena WHERE id_usuario = ? AND id_videojuego = ?";
         $stmtCheck = mysqli_prepare($conexion, $sqlCheck);
         mysqli_stmt_bind_param($stmtCheck, "ii", $idUsuario, $idJuego);
@@ -105,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_interaccion']
         mysqli_stmt_close($stmtCheck);
 
         if ($rowCheck) {
-            // Actualizamos la reseña existente
             $idResena = $rowCheck['id_resena'];
             $sqlUpdate = "UPDATE Resena SET puntuacion = ?, texto_resena = ?, fecha_publicacion = CURRENT_TIMESTAMP WHERE id_resena = ?";
             $stmtUpdate = mysqli_prepare($conexion, $sqlUpdate);
@@ -113,7 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_interaccion']
             mysqli_stmt_execute($stmtUpdate);
             mysqli_stmt_close($stmtUpdate);
         } else {
-            // Insertamos una nueva reseña
             $sqlInsert = "INSERT INTO Resena (id_usuario, id_videojuego, puntuacion, texto_resena) VALUES (?, ?, ?, ?)";
             $stmtInsert = mysqli_prepare($conexion, $sqlInsert);
             mysqli_stmt_bind_param($stmtInsert, "iiis", $idUsuario, $idJuego, $puntuacion, $texto_resena);
@@ -121,107 +79,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_interaccion']
             mysqli_stmt_close($stmtInsert);
         }
     }
-    
     header("Location: juego.php?id=" . $idJuego);
     exit;
 }
 
 // --- CARGAR DATOS DEL JUEGO ---
-if (isset($conexion) && $conexion && $idJuego > 0) {
-    $sql = "SELECT v.id_videojuego, v.titulo, v.descripcion, v.fecha_lanzamiento, v.developer, v.rating_medio, v.portada, v.genero AS generos
-            FROM Videojuego v WHERE v.id_videojuego = ? LIMIT 1";
-    try {
-        $stmt = mysqli_prepare($conexion, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $idJuego);
-        mysqli_stmt_execute($stmt);
-        $resultado = mysqli_stmt_get_result($stmt);
-        if ($resultado) {
-            $juego = mysqli_fetch_assoc($resultado) ?: null;
-            mysqli_free_result($resultado);
-        }
-        mysqli_stmt_close($stmt);
-    } catch (mysqli_sql_exception $e) {
-        $juego = null;
-        error_log('Error al cargar juego.php: ' . $e->getMessage());
-    }
+$juego = null;
+if ($idJuego > 0) {
+    $sql = "SELECT v.* FROM Videojuego v WHERE v.id_videojuego = ? LIMIT 1";
+    $stmt = mysqli_prepare($conexion, $sql);
+    mysqli_stmt_bind_param($stmt, "i", $idJuego);
+    mysqli_stmt_execute($stmt);
+    $juego = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    mysqli_stmt_close($stmt);
 }
 
 // --- CARGAR DATOS DEL USUARIO ---
-$miEstado = '';
-$misHoras = 0;
-$miPuntuacion = 0;
-$miTextoResena = '';
-
+$miEstado = ''; $misHoras = 0; $miPuntuacion = 0; $miTextoResena = '';
 if ($juego && $idUsuario) {
-    // Biblioteca
     $sqlMiBib = "SELECT estado, horas_totales FROM Biblioteca WHERE id_usuario = ? AND id_videojuego = ?";
     $stmtMiBib = mysqli_prepare($conexion, $sqlMiBib);
     mysqli_stmt_bind_param($stmtMiBib, "ii", $idUsuario, $idJuego);
     mysqli_stmt_execute($stmtMiBib);
-    $resMiBib = mysqli_stmt_get_result($stmtMiBib);
-    if ($row = mysqli_fetch_assoc($resMiBib)) {
-        $miEstado = $row['estado'];
-        $misHoras = $row['horas_totales'];
+    if ($row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtMiBib))) {
+        $miEstado = $row['estado']; $misHoras = $row['horas_totales'];
     }
     mysqli_stmt_close($stmtMiBib);
 
-    // Resena
     $sqlMiRes = "SELECT puntuacion, texto_resena FROM Resena WHERE id_usuario = ? AND id_videojuego = ?";
     $stmtMiRes = mysqli_prepare($conexion, $sqlMiRes);
     mysqli_stmt_bind_param($stmtMiRes, "ii", $idUsuario, $idJuego);
     mysqli_stmt_execute($stmtMiRes);
-    $resMiRes = mysqli_stmt_get_result($stmtMiRes);
-    if ($row = mysqli_fetch_assoc($resMiRes)) {
-        $miPuntuacion = (float) $row['puntuacion'];
-        $miTextoResena = $row['texto_resena'] ?? '';
+    if ($row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtMiRes))) {
+        $miPuntuacion = (float) $row['puntuacion']; $miTextoResena = $row['texto_resena'] ?? '';
     }
     mysqli_stmt_close($stmtMiRes);
 }
 
 $resenas = [];
-if ($juego && isset($conexion) && $conexion) {
-    $sqlResenas = "
-        SELECT
-            r.id_usuario,
-            u.gameTag,
-            u.avatar,
-            r.puntuacion,
-            r.texto_resena,
-            r.fecha_publicacion,
-            b.estado,
-            b.horas_totales
-        FROM Resena r
-        JOIN Usuario u ON u.id_usuario = r.id_usuario
-        LEFT JOIN Biblioteca b ON b.id_usuario = r.id_usuario AND b.id_videojuego = r.id_videojuego
-        WHERE r.id_videojuego = ?
-          AND ((r.texto_resena IS NOT NULL AND r.texto_resena <> '') OR r.puntuacion IS NOT NULL)
-        ORDER BY r.fecha_publicacion DESC
-        LIMIT 50
-    ";
-    $stmtResenas = mysqli_prepare($conexion, $sqlResenas);
-    if ($stmtResenas) {
-        mysqli_stmt_bind_param($stmtResenas, "i", $idJuego);
-        mysqli_stmt_execute($stmtResenas);
-        $res = mysqli_stmt_get_result($stmtResenas);
-        if ($res) {
-            while ($fila = mysqli_fetch_assoc($res)) {
-                $resenas[] = $fila;
-            }
-            mysqli_free_result($res);
-        }
-        mysqli_stmt_close($stmtResenas);
-    }
+if ($juego) {
+    $sqlResenas = "SELECT r.*, u.gameTag, u.avatar, b.estado, b.horas_totales FROM Resena r 
+                   JOIN Usuario u ON u.id_usuario = r.id_usuario 
+                   LEFT JOIN Biblioteca b ON b.id_usuario = r.id_usuario AND b.id_videojuego = r.id_videojuego 
+                   WHERE r.id_videojuego = ? ORDER BY r.fecha_publicacion DESC LIMIT 50";
+    $stmtRes = mysqli_prepare($conexion, $sqlResenas);
+    mysqli_stmt_bind_param($stmtRes, "i", $idJuego);
+    mysqli_stmt_execute($stmtRes);
+    $res = mysqli_stmt_get_result($stmtRes);
+    while ($f = mysqli_fetch_assoc($res)) $resenas[] = $f;
+    mysqli_stmt_close($stmtRes);
 }
-
-$admin = ($_SESSION['admin'] ?? false) === true;
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SalsaBox - Ficha de Juego</title>
-    <link rel="stylesheet" href="../../estilos/estilos_juego.css">
+    <title>SalsaBox - <?php echo $juego ? htmlspecialchars($juego['titulo']) : 'Ficha'; ?></title>
+    <link rel="stylesheet" href="../../estilos/estilos_index.css"> <link rel="stylesheet" href="../../estilos/estilos_juego.css">
     <link rel="icon" href="../../media/logoPlatino.png">
 </head>
 <body>
@@ -234,18 +149,50 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <ul>
                 <li><a href="../../index.php">Inicio</a></li>
                 <li><a href="juegos.php" class="activo">Juegos</a></li>
-                <li><a href="../../php/jugadores/jugadores.php">Jugadores</a></li>
+                <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
                 <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
+                <li><a href="../tienda/tienda.php">Tienda</a></li>
                 <li><a href="../logros/logros.php">Logros</a></li>
+                <li><a href="../ranking/ranking.php">Ranking</a></li>
                 <?php if ($admin): ?>
                     <li><a href="../admin/indexAdmin.php">Admin</a></li>
                 <?php endif; ?>
             </ul>
         </nav>
+
         <?php if(!isset($_SESSION['tag'])) : ?>
-            <a href="../../php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesion</a>
+            <a href="../../php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
         <?php else: ?>
-            <a class="tag" href="../../php/user/perfiles/perfilSesion.php"><?php echo htmlspecialchars($_SESSION['tag']); ?></a>
+            <div class="user-actions">
+                <div class="chat-wrapper" style="margin-right: 15px; display: inline-block; vertical-align: middle;">
+                    <a href="../chat/bandeja.php" id="chat-icon" style="color: inherit; text-decoration: none; position: relative; display: flex; align-items: center;">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="26" height="26">
+                            <path d="M12 2C6.477 2 2 6.14 2 11.25c0 2.457 1.047 4.675 2.75 6.275L4 21l3.75-1.5c1.33.4 2.76.625 4.25.625 5.523 0 10-4.14 10-9.25S17.523 2 12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span id="chat-badge" style="position: absolute; top: -5px; right: -5px; background: #ff4444; color: white; font-size: 10px; padding: 2px 5px; border-radius: 10px; display: none;">0</span>
+                    </a>
+                </div>
+
+                <div class="notif-wrapper">
+                    <div id="bell-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z" fill="currentColor"/>
+                        </svg>
+                        <span id="notif-badge">0</span>
+                    </div>
+                    <div id="notif-dropdown">
+                        <div class="notif-header">
+                            <span>Notificaciones</span>
+                            <button onclick="marcarLeidas()">Limpiar</button>
+                        </div>
+                        <ul id="notif-list"></ul>
+                    </div>
+                </div>
+
+                <a class="tag" href="../../php/user/perfiles/perfilSesion.php">
+                    <?php echo htmlspecialchars($_SESSION['tag']); ?>
+                </a>
+            </div>
         <?php endif; ?>
     </header>
 
@@ -254,15 +201,14 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <section class="fichaJuego">
                 <div class="columnaIzquierda">
                     <div class="imagenJuego">
-                        <img src="<?php echo htmlspecialchars(resolverPortada($juego['portada'])); ?>" alt="Portada de <?php echo htmlspecialchars($juego['titulo']); ?>">
+                        <img src="<?php echo htmlspecialchars(resolverPortada($juego['portada'])); ?>" alt="Portada">
                     </div>
 
                     <?php if ($idUsuario): ?>
                         <div class="panelInteraccion">
-                            <h3>Añadir a mi lista</h3>
+                            <h3>Mi Lista</h3>
                             <form action="" method="POST">
                                 <input type="hidden" name="guardar_interaccion" value="1">
-                                
                                 <div class="grupoFormulario">
                                     <label for="estado">Estado:</label>
                                     <select name="estado" id="estado">
@@ -273,35 +219,21 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                                         <option value="Abandonado" <?php echo $miEstado === 'Abandonado' ? 'selected' : ''; ?>>Abandonado</option>
                                     </select>
                                 </div>
-
                                 <div id="camposExtra" style="display: none;">
                                     <div class="grupoFormulario">
-                                        <label for="horas">Horas jugadas:</label>
-                                        <input type="number" step="0.1" min="0" name="horas" id="horas" value="<?php echo htmlspecialchars((string)$misHoras); ?>">
+                                        <label for="horas">Horas:</label>
+                                        <input type="number" step="0.1" name="horas" id="horas" value="<?php echo $misHoras; ?>">
                                     </div>
-
                                     <div class="clasificacionEstrellas" id="rating">
                                         <?php for ($i = 1; $i <= 5; $i++): ?>
-                                            <div class="estrella" data-value="<?php echo $i; ?>">
-                                                ★
-                                            </div>
+                                            <div class="estrella" data-value="<?php echo $i; ?>">★</div>
                                         <?php endfor; ?>
                                     </div>
-
-                                    <input type="hidden" name="puntuacion" id="puntuacion" value="<?php echo $miPuntuacion ? $miPuntuacion / 2 : 0; ?>">
-
-                                    <div class="grupoFormulario">
-                                        <label for="texto_resena">Reseña:</label>
-                                        <textarea name="texto_resena" id="texto_resena" rows="3" placeholder="¿Qué te pareció el juego?"><?php echo htmlspecialchars($miTextoResena); ?></textarea>
-                                    </div>
+                                    <input type="hidden" name="puntuacion" id="puntuacion" value="<?php echo $miPuntuacion/2; ?>">
+                                    <textarea name="texto_resena" placeholder="Reseña..."><?php echo htmlspecialchars($miTextoResena); ?></textarea>
                                 </div>
-
-                                <button type="submit" class="botonGuardar">Guardar cambios</button>
+                                <button type="submit" class="botonGuardar">Guardar</button>
                             </form>
-                        </div>
-                    <?php else: ?>
-                        <div class="panelInteraccion avisoLogin">
-                            <p><a href="../../php/sesiones/login/login.php">Inicia sesión</a> para puntuar y guardar este juego en tu biblioteca.</p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -309,182 +241,48 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                 <div class="contenidoJuego">
                     <h1><?php echo htmlspecialchars($juego['titulo']); ?></h1>
                     <p class="meta">
-                        <?php
-                            $partesMeta = [];
-                            if (!empty($juego['generos'])) $partesMeta[] = $juego['generos'];
-                            if (!empty($juego['fecha_lanzamiento'])) $partesMeta[] = date('Y', strtotime($juego['fecha_lanzamiento']));
-                            if (!empty($juego['developer'])) $partesMeta[] = $juego['developer'];
-
-                            $rating = $juego['rating_medio'];
-
-                            if ($rating !== null) {
-                                $estrellas = $rating / 2;
-                                $porcentaje = ($estrellas / 5) * 100;
-
-                                $textoRating = '
-                                    <span class="estrellas">
-                                        <span class="relleno" style="width:' . $porcentaje . '%"></span>
-                                    </span>
-                                    ' . number_format((float)$rating, 1);
-                            } else {
-                                $textoRating = 'Sin nota global';
-                            }
-
-                            $partesMeta[] = $textoRating;
-
-                            echo 
-                                htmlspecialchars($juego['generos'] ?? '') . ' • ' .
-                                htmlspecialchars(date('Y', strtotime($juego['fecha_lanzamiento'] ?? ''))) . ' • ' .
-                                htmlspecialchars($juego['developer'] ?? '') . ' • ' .
-                                $textoRating;
+                        <?php 
+                        $rating = $juego['rating_medio'];
+                        if ($rating !== null) {
+                            echo '<span class="estrellas"><span class="relleno" style="width:'.(($rating/10)*100).'%"></span></span> ' . number_format($rating, 1);
+                        } else { echo 'Sin nota'; }
                         ?>
                     </p>
+                    <p class="descripcion"><?php echo htmlspecialchars($juego['descripcion'] ?: 'Sin descripción.'); ?></p>
+                    <a href="juegos.php" class="botonVolver">Volver</a>
 
-                    <p class="descripcion"><?php echo htmlspecialchars($juego['descripcion'] ?: 'Este juego aun no tiene descripcion.'); ?></p>
-
-                    <div class="bloqueProximamente">
-                        <h2>Detalles del juego</h2>
-                        <p><strong>Fecha de lanzamiento:</strong> <?php echo !empty($juego['fecha_lanzamiento']) ? htmlspecialchars($juego['fecha_lanzamiento']) : 'Sin fecha'; ?></p>
-                        <p><strong>Desarrollador:</strong> <?php echo !empty($juego['developer']) ? htmlspecialchars($juego['developer']) : 'Sin developer'; ?></p>
-                    </div>
-
-                    <a href="juegos.php" class="botonVolver">Volver al catalogo</a>
-
-                    <section class="seccionResenas" aria-label="Reseñas del juego">
-                        <h2>Reseñas de usuarios</h2>
-                        <?php if (count($resenas) === 0): ?>
-                            <p class="resenasVacias">Todavía no hay reseñas para este juego.</p>
-                        <?php else: ?>
-                            <div class="listaResenas">
-                                <?php foreach ($resenas as $resena): ?>
-                                    <?php
-                                        $fechaRaw = (string)($resena['fecha_publicacion'] ?? '');
-                                        $fechaBonita = $fechaRaw !== '' ? date('d/m/Y H:i', strtotime($fechaRaw)) : '';
-                                    ?>
-                                    <article class="resena">
-                                        <div class="resenaHeader">
-                                            <?php $urlPerfil = "../user/amistades/perfilOtros.php?id=" . (int)$resena['id_usuario']; ?>
-                                            <a class="resenaUsuario resenaUsuarioLink" href="<?php echo htmlspecialchars($urlPerfil); ?>">
-                                                <img class="resenaAvatar" src="<?php echo htmlspecialchars(resolverAvatar($resena['avatar'] ?? '')); ?>" alt="Avatar de <?php echo htmlspecialchars($resena['gameTag']); ?>">
-                                                <div class="resenaMeta">
-                                                    <div class="resenaTag"><?php echo htmlspecialchars($resena['gameTag']); ?></div>
-                                                    <div class="resenaSubmeta">
-                                                        <?php if ($fechaBonita !== ''): ?>
-                                                            <span class="resenaFecha"><?php echo htmlspecialchars($fechaBonita); ?></span>
-                                                        <?php endif; ?>
-                                                        <?php if (!empty($resena['estado'])): ?>
-                                                            <span class="resenaPunto">•</span>
-                                                            <span class="resenaEstado"><?php echo htmlspecialchars($resena['estado']); ?></span>
-                                                        <?php endif; ?>
-                                                        <?php if (isset($resena['horas_totales']) && (float)$resena['horas_totales'] > 0): ?>
-                                                            <span class="resenaPunto">•</span>
-                                                            <span class="resenaHoras"><?php echo htmlspecialchars(number_format((float)$resena['horas_totales'], 1)); ?> h</span>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                            <div class="resenaRating" aria-label="Puntuación">
-                                                <?php
-                                                    $rating = $resena['puntuacion'];
-
-                                                    if ($rating !== null) {
-                                                        $estrellas = $rating / 2;
-                                                        $porcentaje = ($estrellas / 5) * 100;
-                                                    } else {
-                                                        $porcentaje = 0;
-                                                    }
-                                                ?>
-
-                                                <div class="estrellas">
-                                                    <div class="relleno" style="width: <?php echo $porcentaje; ?>%"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <?php if (!empty($resena['texto_resena'])): ?>
-                                            <p class="resenaTexto"><?php echo nl2br(htmlspecialchars($resena['texto_resena'])); ?></p>
-                                        <?php endif; ?>
-                                    </article>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
+                    <section class="seccionResenas">
+                        <h2>Reseñas</h2>
+                        <?php foreach ($resenas as $r): ?>
+                            <article class="resena">
+                                <a href="../user/amistades/perfilOtros.php?id=<?php echo $r['id_usuario']; ?>" class="resenaUsuario">
+                                    <img src="<?php echo htmlspecialchars(resolverAvatar($r['avatar'])); ?>" class="resenaAvatar">
+                                    <span><?php echo htmlspecialchars($r['gameTag']); ?></span>
+                                </a>
+                                <p><?php echo nl2br(htmlspecialchars($r['texto_resena'])); ?></p>
+                            </article>
+                        <?php endforeach; ?>
                     </section>
                 </div>
-            </section>
-        <?php else: ?>
-            <section class="fichaJuego vacio">
-                <h1>Juego no encontrado</h1>
-                <p>La ficha solicitada no existe en la base de datos actual.</p>
-                <a href="juegos.php" class="botonVolver">Ir a juegos</a>
             </section>
         <?php endif; ?>
     </main>
 
-    <footer>
-        <p>&copy; 2026 SalsaBox. Creado para los gamers.</p>
-    </footer>
-
-    <script>
+    <script src="../../js/notificaciones.js"></script>
+    <script src="../../js/social.js"></script> <script>
         document.addEventListener('DOMContentLoaded', function () {
-
-            // ----------- ESTADO -----------
             const selectEstado = document.getElementById('estado');
             const camposExtra = document.getElementById('camposExtra');
-
-            function toggleCampos() {
-                if (!selectEstado) return;
-                camposExtra.style.display =
-                    (selectEstado.value === 'Completado' || selectEstado.value === 'Abandonado')
-                    ? 'block' : 'none';
-            }
-
             if (selectEstado) {
-                selectEstado.addEventListener('change', toggleCampos);
-                toggleCampos();
+                const update = () => camposExtra.style.display = (['Completado', 'Abandonado'].includes(selectEstado.value)) ? 'block' : 'none';
+                selectEstado.onchange = update; update();
             }
 
-            // ----------- ESTRELLAS -----------
             const estrellas = document.querySelectorAll('.estrella');
-            const input = document.getElementById('puntuacion');
-
-            let valorActual = parseFloat(input.value) || 0;
-
-            function pintar(valor) {
-                estrellas.forEach((estrella, i) => {
-                    estrella.classList.remove('activa', 'media');
-
-                    const index = i + 1;
-
-                    if (valor >= index) {
-                        estrella.classList.add('activa');
-                    } else if (valor >= index - 0.5) {
-                        estrella.classList.add('media');
-                    }
-                });
-            }
-
-            estrellas.forEach((estrella, i) => {
-                estrella.addEventListener('mousemove', function (e) {
-                    const rect = estrella.getBoundingClientRect();
-                    const mitad = e.clientX - rect.left < rect.width / 2;
-                    pintar(mitad ? i + 0.5 : i + 1);
-                });
-
-                estrella.addEventListener('click', function (e) {
-                    const rect = estrella.getBoundingClientRect();
-                    const mitad = e.clientX - rect.left < rect.width / 2;
-
-                    valorActual = mitad ? i + 0.5 : i + 1;
-                    input.value = valorActual;
-                    pintar(valorActual);
-                });
-            });
-
-            document.getElementById('rating')?.addEventListener('mouseleave', function () {
-                pintar(valorActual);
-            });
-
-            pintar(valorActual);
+            const inputVal = document.getElementById('puntuacion');
+            const pintar = (v) => estrellas.forEach((s, i) => s.classList.toggle('activa', (i + 1) <= v));
+            estrellas.forEach((s, i) => s.onclick = () => { inputVal.value = i + 1; pintar(i + 1); });
+            pintar(parseFloat(inputVal.value));
         });
     </script>
 </body>

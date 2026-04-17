@@ -12,9 +12,9 @@ $id_objetivo = $_GET['id'];
 $queryUser = $conexion->prepare("SELECT gameTag FROM Usuario WHERE id_usuario = ?");
 $queryUser->bind_param("i", $id_objetivo);
 $queryUser->execute();
-$usuario = $queryUser->get_result()->fetch_assoc();
+$Usuario = $queryUser->get_result()->fetch_assoc();
 
-if (!$usuario) die("Usuario no encontrado");
+if (!$Usuario) die("Usuario no encontrado");
 
 $sql = "SELECT v.titulo, v.portada, b.horas_totales 
         FROM Biblioteca b 
@@ -30,7 +30,7 @@ $resultado = $query->get_result();
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Biblioteca de <?php echo $usuario['gameTag']; ?> - SalsaBox</title>
+    <title>Biblioteca de <?php echo $Usuario['gameTag']; ?> - SalsaBox</title>
     <link rel="stylesheet" href="../../../estilos/estilos_statsPerfil.css">
     <link rel="icon" href="../../../media/logoPlatino.png">
 </head>
@@ -39,7 +39,7 @@ $resultado = $query->get_result();
         <a href="perfilOtros.php?id=<?php echo $id_objetivo; ?>" class="btn-volver" style="color: #9ab3bc; text-decoration: none; font-weight: bold;">← Volver al Perfil</a>
         
         <h1 class="section-title" style="color: #e0be00; border-bottom: 2px solid #e0be00; padding-bottom: 10px; margin-top: 20px;">
-            Biblioteca de <?php echo htmlspecialchars($usuario['gameTag']); ?>
+            Biblioteca de <?php echo htmlspecialchars($Usuario['gameTag']); ?>
         </h1>
 
         <div class="grid-juegos" style="margin-top: 20px;">
@@ -61,7 +61,7 @@ $resultado = $query->get_result();
                 <?php endwhile; ?>
             <?php else: ?>
                 <p class="empty-msg" style="color: #9ab3bc; font-style: italic; text-align: center; margin-top: 50px;">
-                    Este usuario aún no ha añadido juegos a su biblioteca.
+                    Este Usuario aún no ha añadido juegos a su biblioteca.
                 </p>
             <?php endif; ?>
         </div>
