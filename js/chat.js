@@ -31,6 +31,12 @@ function seleccionarContacto(idReceptor, idConv, elemento) {
     document.getElementById('id_conversacion_activa').value = idConv;
     receptorNuevoID = idReceptor;
     iniciarBucle(idConv);
+        // Ocultar badge del chat seleccionado
+    const badgeChat = elemento.querySelector('.badge-chat');
+    if (badgeChat) badgeChat.style.display = 'none';
+    // Actualizar badge general
+    if (typeof actualizarBadgeGeneral === 'function') actualizarBadgeGeneral();
+    
 }
 
 function abrirAjustesGrupo(idConv) {

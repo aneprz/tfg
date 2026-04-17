@@ -11,10 +11,14 @@ $id_conv = isset($_GET['id_conversacion']) ? (int)$_GET['id_conversacion'] : 0;
 
 if ($id_conv <= 0) exit;
 
-// Marcar notificaciones como leídas al abrir el chat
+// Marcar notificaciones de este chat como leídas
 $urlPattern = "%conv=$id_conv%";
 mysqli_query($conexion, "UPDATE Notificacion SET leida = 1 WHERE id_usuario_destino = $id_yo AND url_destino LIKE '$urlPattern' AND leida = 0");
 
+// Resetear contador de no leídos al abrir el chat
+mysqli_query($conexion, "UPDATE chat_participante SET mensajes_no_leidos = 0 
+                         WHERE id_conversacion = $id_conv AND id_usuario = $id_yo");
+                         
 // 1. Obtener info básica del chat (para saber si es grupo y quién manda)
 $resInfo = mysqli_query($conexion, "SELECT tipo, id_usuario_creador FROM chat_conversacion WHERE id_conversacion = $id_conv");
 $info = mysqli_fetch_assoc($resInfo);

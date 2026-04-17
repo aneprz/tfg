@@ -143,18 +143,7 @@ if (isset($conexion) && $conexion) {
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="26" height="26">
                         <path d="M12 2C6.477 2 2 6.14 2 11.25c0 2.457 1.047 4.675 2.75 6.275L4 21l3.75-1.5c1.33.4 2.76.625 4.25.625 5.523 0 10-4.14 10-9.25S17.523 2 12 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <span id="chat-badge" style="
-                        position: absolute;
-                        top: -5px;
-                        right: -5px;
-                        background-color: #ff4444;
-                        color: white;
-                        font-size: 10px;
-                        font-weight: bold;
-                        padding: 2px 5px;
-                        border-radius: 10px;
-                        display: none;
-                    ">0</span>
+                    <span id="chat-badge" style="position: absolute; top: -8px; right: -10px; background: #f0c330; color: #000; border-radius: 50%; min-width: 18px; height: 18px; font-size: 10px; font-weight: bold; text-align: center; line-height: 18px; display: none; padding: 0 4px;">0</span>
                 </a>
             </div>
              <!-- NOTIFICACIONES -->

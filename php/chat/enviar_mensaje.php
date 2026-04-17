@@ -20,9 +20,15 @@ if (!$id_conv && $id_receptor) {
 }
 
 if ($id_conv) {
+    // Insertar mensaje
     mysqli_query($conexion, "INSERT INTO chat_mensaje (id_conversacion, id_emisor, contenido) VALUES ($id_conv, $id_yo, '$texto')");
-    // Actualizar mi propia lectura al enviar
+    
+    // Actualizar mi propia lectura
     mysqli_query($conexion, "UPDATE chat_participante SET ultima_lectura = NOW() WHERE id_conversacion = $id_conv AND id_usuario = $id_yo");
+    
+    // INCREMENTAR CONTADOR DE NO LEÍDOS PARA LOS RECEPTORES
+    mysqli_query($conexion, "UPDATE chat_participante SET mensajes_no_leidos = mensajes_no_leidos + 1 
+                             WHERE id_conversacion = $id_conv AND id_usuario != $id_yo");
 }
 
 // ========== CREAR NOTIFICACIÓN ==========
@@ -57,3 +63,4 @@ foreach ($destinatarios as $id_destino) {
 $stmt->close();
 
 echo json_encode(['success' => true, 'nueva_id_conversacion' => $nueva_id]);
+?>
