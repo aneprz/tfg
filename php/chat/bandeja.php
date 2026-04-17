@@ -162,47 +162,39 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
     </div>
 
     <div id="modal-ajustes-grupo" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center;">
-        <div style="background:#1a1a1a; padding:25px; border-radius:15px; width:450px; border:1px solid #f0c330; max-height: 90vh; overflow-y: auto;">
-            <h3 style="color:#f0c330; text-align:center; margin-top:0; margin-bottom:20px;">Ajustes del Grupo</h3>
+    <div style="background:#1a1a1a; padding:25px; border-radius:15px; width:450px; border:1px solid #f0c330; max-height: 90vh; overflow-y: auto;">
+        <h3 style="color:#f0c330; text-align:center; margin-top:0; margin-bottom:20px;">Ajustes del Grupo</h3>
+        
+        <form id="form-ajustes-grupo" onsubmit="event.preventDefault(); guardarAjustes();">
+            <input type="hidden" id="ajuste_id_conv" name="id_conv">
             
-            <!-- IMPORTANTE: Le puse id="form-ajustes-grupo" y enctype correcto -->
-            <form id="form-ajustes-grupo" enctype="multipart/form-data" onsubmit="event.preventDefault(); guardarAjustes();">
-                <input type="hidden" id="ajuste_id_conv" name="id_conv">
-                
-                <div style="display:flex; align-items:center; gap:15px; margin-bottom:20px; background:#000; padding:10px; border-radius:10px;">
-                    <input type="file" name="foto_grupo" id="input-foto-ajuste" style="display:none;" accept="image/*">
-                    
-                    <label for="input-foto-ajuste" style="cursor:pointer;" title="Haz clic para cambiar la foto">
-                        <img id="preview-foto-ajuste" src="../../img/avatares/grupo_default.png" 
-                            style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #f0c330;">
-                    </label>
+            <div style="margin-bottom:20px;">
+                <input type="text" id="edit-nombre-grupo" name="nombre_grupo" placeholder="Nombre del grupo"
+                    style="width:100%; padding:12px; background:#0e0e0e; border:1px solid #333; border-radius:8px; color:white; font-size:16px;">
+            </div>
 
-                    <input type="text" id="edit-nombre-grupo" name="nombre_grupo" placeholder="Nombre del grupo"
-                        style="flex:1; padding:8px; background:transparent; border:none; border-bottom:1px solid #333; color:white; font-size:16px;">
-                </div>
+            <h4 style="color:#f0c330; font-size:12px; margin-bottom:10px;">MIEMBROS ACTUALES</h4>
+            <div id="lista-gestion-miembros" style="margin-bottom:20px; background:#0e0e0e; border-radius:8px; padding:5px; max-height:250px; overflow-y:auto;">
+            </div>
 
-                <h4 style="color:#888; font-size:12px; margin-bottom:10px;">MIEMBROS ACTUALES</h4>
-                <div id="lista-gestion-miembros" style="margin-bottom:20px; background:#0e0e0e; border-radius:8px; padding:5px;">
-                    </div>
+            <h4 style="color:#f0c330; font-size:12px; margin-bottom:10px;">AÑADIR NUEVOS</h4>
+            <div id="lista-añadir-miembros" style="background:#0e0e0e; border-radius:8px; padding:5px; max-height:150px; overflow-y:auto; margin-bottom:20px;">
+            </div>
+            
+            <div style="padding: 15px 0;">
+                <button type="button" onclick="abandonarGrupo()" 
+                        style="width:100%; padding:10px; background:transparent; color:#ff4d4d; border:1px solid #ff4d4d; border-radius:8px; cursor:pointer; font-weight:bold;">
+                    ABANDONAR GRUPO
+                </button>
+            </div>
 
-                <h4 style="color:#888; font-size:12px; margin-bottom:10px;">AÑADIR NUEVOS</h4>
-                <div id="lista-añadir-miembros" style="background:#0e0e0e; border-radius:8px; padding:5px; max-height:150px; overflow-y:auto; margin-bottom:20px;">
-                    </div>
-                
-                <div style="padding: 15px 0;">
-                    <button type="button" onclick="abandonarGrupo()" 
-                            style="width:100%; padding:10px; background:transparent; color:#ff4d4d; border:1px solid #ff4d4d; border-radius:8px; cursor:pointer; font-weight:bold;">
-                        ABANDONAR GRUPO
-                    </button>
-                </div>
-
-                <div style="display:flex; gap:10px;">
-                    <button type="button" onclick="cerrarModalAjustes()" style="flex:1; padding:12px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
-                    <button type="submit" style="flex:1; padding:12px; background:#f0c330; color:black; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">Guardar Cambios</button>
-                </div>
-            </form>
-        </div>
+            <div style="display:flex; gap:10px;">
+                <button type="button" onclick="cerrarModalAjustes()" style="flex:1; padding:12px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
+                <button type="submit" style="flex:1; padding:12px; background:#f0c330; color:black; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">Guardar</button>
+            </div>
+        </form>
     </div>
+</div>
 
     <script src="../../js/chat.js"></script>
     <script>
