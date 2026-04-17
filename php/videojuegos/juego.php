@@ -39,6 +39,26 @@ $idJuego = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $idUsuario = $_SESSION['id_usuario'] ?? null;
 $admin = ($_SESSION['admin'] ?? false) === true;
 
+// --- ELIMINAR RESEÑA ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eliminar_resena']) && $idUsuario && $idJuego > 0) {
+    $idResena = isset($_POST['id_resena']) ? (int) $_POST['id_resena'] : 0;
+    if ($idResena > 0) {
+        if ($admin) {
+            $sqlDel = "DELETE FROM Resena WHERE id_resena = ? AND id_videojuego = ?";
+            $stmtDel = mysqli_prepare($conexion, $sqlDel);
+            mysqli_stmt_bind_param($stmtDel, "ii", $idResena, $idJuego);
+        } else {
+            $sqlDel = "DELETE FROM Resena WHERE id_resena = ? AND id_usuario = ? AND id_videojuego = ?";
+            $stmtDel = mysqli_prepare($conexion, $sqlDel);
+            mysqli_stmt_bind_param($stmtDel, "iii", $idResena, $idUsuario, $idJuego);
+        }
+        mysqli_stmt_execute($stmtDel);
+        mysqli_stmt_close($stmtDel);
+    }
+    header("Location: juego.php?id=" . $idJuego);
+    exit;
+}
+
 // --- PROCESAR FORMULARIO DE USUARIO ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['guardar_interaccion']) && $idUsuario && $idJuego > 0) {
     $estado = $_POST['estado'] ?? null;
@@ -205,7 +225,7 @@ if ($juego) {
                     </div>
 
                     <?php if ($idUsuario): ?>
-                        <div class="panelInteraccion">
+                        <div class="panelInteraccion" id="mi-resena">
                             <h3>Mi Lista</h3>
                             <form action="" method="POST">
                                 <input type="hidden" name="guardar_interaccion" value="1">
@@ -253,15 +273,92 @@ if ($juego) {
 
                     <section class="seccionResenas">
                         <h2>Reseñas</h2>
-                        <?php foreach ($resenas as $r): ?>
-                            <article class="resena">
-                                <a href="../user/amistades/perfilOtros.php?id=<?php echo $r['id_usuario']; ?>" class="resenaUsuario">
-                                    <img src="<?php echo htmlspecialchars(resolverAvatar($r['avatar'])); ?>" class="resenaAvatar">
-                                    <span><?php echo htmlspecialchars($r['gameTag']); ?></span>
-                                </a>
-                                <p><?php echo nl2br(htmlspecialchars($r['texto_resena'])); ?></p>
-                            </article>
-                        <?php endforeach; ?>
+                        <?php if (empty($resenas)): ?>
+                            <p class="resenasVacias">Aún no hay reseñas.</p>
+                        <?php else: ?>
+                            <div class="listaResenas">
+                                <?php foreach ($resenas as $r): ?>
+                                    <?php
+                                        $puntuacion10 = isset($r['puntuacion']) ? (float) $r['puntuacion'] : null; // 0..10
+                                        $puntuacion5 = $puntuacion10 !== null ? ($puntuacion10 / 2) : null; // 0..5
+                                        $relleno = $puntuacion10 !== null ? max(0, min(100, ($puntuacion10 / 10) * 100)) : 0;
+
+                                        $estadoResena = isset($r['estado']) ? trim((string) $r['estado']) : '';
+                                        $horasResena = isset($r['horas_totales']) ? (float) $r['horas_totales'] : 0;
+                                        $fechaResena = isset($r['fecha_publicacion']) ? trim((string) $r['fecha_publicacion']) : '';
+                                        $fechaResenaFmt = '';
+                                        if ($fechaResena !== '') {
+                                            $ts = strtotime($fechaResena);
+                                            if ($ts !== false) $fechaResenaFmt = date('d/m/Y', $ts);
+                                        }
+
+                                        $textoResena = isset($r['texto_resena']) ? trim((string) $r['texto_resena']) : '';
+                                    ?>
+                                    <article class="resena">
+                                        <div class="resenaHeader">
+                                            <a href="../user/amistades/perfilOtros.php?id=<?php echo (int) $r['id_usuario']; ?>" class="resenaUsuario resenaUsuarioLink">
+                                                <img src="<?php echo htmlspecialchars(resolverAvatar($r['avatar'])); ?>" class="resenaAvatar" alt="Avatar de <?php echo htmlspecialchars($r['gameTag']); ?>">
+                                                <div class="resenaMeta">
+                                                    <div class="resenaTag"><?php echo htmlspecialchars($r['gameTag']); ?></div>
+                                                    <div class="resenaSubmeta">
+                                                        <?php if ($estadoResena !== ''): ?>
+                                                            <span><?php echo htmlspecialchars($estadoResena); ?></span>
+                                                        <?php endif; ?>
+
+                                                        <?php if ($estadoResena !== '' && $horasResena > 0): ?>
+                                                            <span class="resenaPunto">•</span>
+                                                        <?php endif; ?>
+                                                        <?php if ($horasResena > 0): ?>
+                                                            <span><?php echo rtrim(rtrim(number_format($horasResena, 1, '.', ''), '0'), '.'); ?> h</span>
+                                                        <?php endif; ?>
+
+                                                        <?php if (($estadoResena !== '' || $horasResena > 0) && $fechaResenaFmt !== ''): ?>
+                                                            <span class="resenaPunto">•</span>
+                                                        <?php endif; ?>
+                                                        <?php if ($fechaResenaFmt !== ''): ?>
+                                                            <span><?php echo htmlspecialchars($fechaResenaFmt); ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </a>
+
+                                            <div class="resenaDerecha">
+                                                <div class="resenaRating">
+                                                    <?php if ($puntuacion10 !== null): ?>
+                                                        <span class="estrellas" aria-label="<?php echo htmlspecialchars(number_format($puntuacion5, 1)); ?> de 5">
+                                                            <span class="relleno" style="width:<?php echo $relleno; ?>%"></span>
+                                                        </span>
+                                                        <span><?php echo htmlspecialchars(number_format($puntuacion5, 1)); ?></span>
+                                                    <?php else: ?>
+                                                        <span class="resenaSubmeta">Sin nota</span>
+                                                    <?php endif; ?>
+                                                </div>
+
+                                                <?php
+                                                    $puedeGestionar = $idUsuario && (((int) $r['id_usuario']) === ((int) $idUsuario) || $admin);
+                                                ?>
+                                                <?php if ($puedeGestionar): ?>
+                                                    <div class="resenaAcciones">
+                                                        <?php if (((int) $r['id_usuario']) === ((int) $idUsuario)): ?>
+                                                            <a class="resenaAccion resenaAccionEditar" href="#mi-resena">Editar</a>
+                                                        <?php endif; ?>
+                                                        <form method="POST" class="resenaAccionForm" onsubmit="return confirm('¿Eliminar esta reseña?');">
+                                                            <input type="hidden" name="eliminar_resena" value="1">
+                                                            <input type="hidden" name="id_resena" value="<?php echo (int) ($r['id_resena'] ?? 0); ?>">
+                                                            <button type="submit" class="resenaAccion resenaAccionEliminar">Eliminar</button>
+                                                        </form>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+
+                                        <?php if ($textoResena !== ''): ?>
+                                            <div class="resenaTexto"><?php echo htmlspecialchars($textoResena); ?></div>
+                                        <?php endif; ?>
+                                    </article>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </section>
                 </div>
             </section>
