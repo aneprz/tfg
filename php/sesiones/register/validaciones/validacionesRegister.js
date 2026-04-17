@@ -7,6 +7,7 @@ const circleIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="1
 
 function textoValidarContraseña() {
     document.getElementById("requisitosContraseña").style.display = "block";
+    validarTodo(); // pinta los iconos aunque aún no se haya escrito nada
 }
 
 function validarTodo() {
@@ -42,6 +43,8 @@ function configurarOjo(idInput, idBoton, idIcono) {
     const inputPass = document.getElementById(idInput);
     const btnPass = document.getElementById(idBoton);
     const icono = document.getElementById(idIcono);
+
+    if (!inputPass || !btnPass) return;
 
     btnPass.addEventListener('click', () => {
         const esPass = inputPass.type === "password";
