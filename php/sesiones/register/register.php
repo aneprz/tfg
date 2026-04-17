@@ -2,7 +2,7 @@
 session_start();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,42 +11,36 @@ session_start();
     <title>Registro de Usuario</title>
 </head>
 <body>
-    <form action="procesarRegister.php" method="POST">
-        <div>
-            <h2>Crear Cuenta</h2>
-            <label for="gameTag">Nombre de Usuario: </label><br>
-            <input type="text" id="gameTag" name="gameTag" required placeholder="GameTag">
+    <form action="procesarRegister.php" method="POST" class="registerForm" autocomplete="on">
+        <h2>Crear Cuenta</h2>
+
+        <div class="formGroup">
+            <label for="gameTag">Nombre de Usuario</label>
+            <input type="text" id="gameTag" name="gameTag" required placeholder="GameTag" autocomplete="username">
         </div>
 
-        <br>    
-
-        <div>
-            <label for="nombreApellido">Nombre y Apellido:</label><br>
-            <input type="text" id="nombreApellido" name="nombreApellido" required placeholder="Nombre Apellido">
+        <div class="formGroup">
+            <label for="nombreApellido">Nombre y Apellido</label>
+            <input type="text" id="nombreApellido" name="nombreApellido" required placeholder="Nombre Apellido" autocomplete="name">
         </div>
 
-        <br>
-
-        <div>
-            <label for="email">Correo electrónico:</label><br>
-            <input type="email" id="email" name="email" required placeholder="tucorreo@gmail.com">
+        <div class="formGroup">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" required placeholder="tucorreo@gmail.com" autocomplete="email">
         </div>
 
-        <br>
-
-        <div>
-            <label for="password">Contraseña:</label><br>
-            <input type="password" id="contraseña" name="password" required placeholder="••••••••" onfocus="textoValidarContraseña()">
+        <div class="formGroup">
+            <label for="contraseña">Contraseña</label>
+            <input type="password" id="contraseña" name="password" required placeholder="••••••••" onfocus="textoValidarContraseña()" autocomplete="new-password">
         </div>
 
-        <br>
-
-        <div>
-            <label for="confirmPassword">Repetir contraseña:</label><br>
-            <input type="password" id="repetirContraseña" name="confirmPassword" required placeholder="••••••••">
+        <div class="formGroup">
+            <label for="repetirContraseña">Repetir contraseña</label>
+            <input type="password" id="repetirContraseña" name="confirmPassword" required placeholder="••••••••" autocomplete="new-password">
         </div>
 
-        <div id="requisitosContraseña" class="my-3" style="display: none; font-size: 0.85em; text-align: left; margin-left: 20px;">
+        <div id="requisitosContraseña" class="passwordRules" style="display: none;" aria-live="polite">
+            <div class="passwordRulesTitle">Requisitos de contraseña</div>
             <p class="textoContraseña" id="longitud">Mínimo 8 carácteres.</p>
             <p class="textoContraseña" id="mayuscula">Al menos una mayúscula.</p>
             <p class="textoContraseña" id="minuscula">Al menos una minúscula.</p>
@@ -54,8 +48,6 @@ session_start();
             <p class="textoContraseña" id="caracterEspecial">Al menos un carácter especial.</p>
             <p class="textoContraseña" id="contraseñasRepetidas">Se repiten las contraseñas.</p>
         </div>
-
-        <br>
 
         <button type="submit" id="registrarse" disabled>Registrarse</button>
         
