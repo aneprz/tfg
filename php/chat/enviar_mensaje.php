@@ -25,4 +25,35 @@ if ($id_conv) {
     mysqli_query($conexion, "UPDATE chat_participante SET ultima_lectura = NOW() WHERE id_conversacion = $id_conv AND id_usuario = $id_yo");
 }
 
+// ========== CREAR NOTIFICACIÓN ==========
+$infoConv = mysqli_query($conexion, "SELECT tipo, nombre_grupo FROM chat_conversacion WHERE id_conversacion = $id_conv");
+$conv = mysqli_fetch_assoc($infoConv);
+$tipoConv = $conv['tipo'];
+
+$resYo = mysqli_query($conexion, "SELECT gameTag FROM Usuario WHERE id_usuario = $id_yo");
+$yo = mysqli_fetch_assoc($resYo);
+$miNombre = $yo['gameTag'];
+
+$urlDestino = "../../chat/bandeja.php?conv=$id_conv";
+$destinatarios = [];
+
+if ($tipoConv == 'individual') {
+    $destinatarios = [$id_receptor];
+    $mensajeNotif = "$miNombre te ha enviado un mensaje";
+} else {
+    $resParticipantes = mysqli_query($conexion, "SELECT id_usuario FROM chat_participante WHERE id_conversacion = $id_conv AND id_usuario != $id_yo");
+    while($p = mysqli_fetch_assoc($resParticipantes)) {
+        $destinatarios[] = $p['id_usuario'];
+    }
+    $nombreGrupo = $conv['nombre_grupo'] ?? 'Grupo';
+    $mensajeNotif = "$miNombre ha enviado un mensaje en $nombreGrupo";
+}
+
+$stmt = $conexion->prepare("INSERT INTO Notificacion (id_usuario_destino, mensaje, url_destino, leida, tipo) VALUES (?, ?, ?, 0, 'usuario')");
+foreach ($destinatarios as $id_destino) {
+    $stmt->bind_param("iss", $id_destino, $mensajeNotif, $urlDestino);
+    $stmt->execute();
+}
+$stmt->close();
+
 echo json_encode(['success' => true, 'nueva_id_conversacion' => $nueva_id]);
