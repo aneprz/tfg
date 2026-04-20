@@ -4,8 +4,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const badge = document.getElementById('notif-badge');
     const list = document.getElementById('notif-list');
 
-    // Usar ruta ABSOLUTA desde la raíz del sitio
-    const baseUrl = '/';
+    // Cargar notificaciones de la campana (comunidades, sistema, etc.)
+    function cargarNotificaciones() {
+        fetch('/php/notificaciones/notificaciones_ajax.php')
+            .then(res => res.json())
+            .then(data => {
+                console.log("Notificaciones campana:", data.total);
+                
+                if (badge) {
+                    if (data.total > 0) {
+                        badge.style.display = 'block';
+                        badge.innerText = data.total;
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+                
+                if (list) list.innerHTML = data.html;
+            })
+            .catch(err => console.error("Error:", err));
+    }
+
+    // Cargar mensajes NO LEÍDOS de CHATS (para el badge del chat)
+    function cargarTotalChatsNoLeidos() {
+        fetch('/php/chat/obtener_total_no_leidos.php')
+            .then(res => res.json())
+            .then(data => {
+                console.log("Mensajes no leídos chats:", data.total);
+                
+                const chatBadge = document.getElementById('chat-badge');
+                if (chatBadge) {
+                    if (data.total > 0) {
+                        chatBadge.style.display = 'inline-block';
+                        chatBadge.innerText = data.total > 99 ? '99+' : data.total;
+                    } else {
+                        chatBadge.style.display = 'none';
+                    }
+                }
+            })
+            .catch(err => console.error("Error:", err));
+    }
 
     if (bell && dropdown) {
         bell.onclick = function(e) {
@@ -25,39 +63,15 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
-    function cargarNotificaciones() {
-        // Ruta ABSOLUTA desde la raíz
-        fetch('/php/notificaciones/notificaciones_ajax.php')
-            .then(res => res.json())
-            .then(data => {
-                console.log("Total notificaciones:", data.total);
-                
-                if (badge) {
-                    if (data.total > 0) {
-                        badge.style.display = 'block';
-                        badge.innerText = data.total;
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
-                
-                const chatBadge = document.getElementById('chat-badge');
-                if (chatBadge) {
-                    if (data.total > 0) {
-                        chatBadge.style.display = 'inline-block';
-                        chatBadge.innerText = data.total;
-                    } else {
-                        chatBadge.style.display = 'none';
-                    }
-                }
-                
-                if (list) list.innerHTML = data.html;
-            })
-            .catch(err => console.error("Error:", err));
-    }
-
+    // Cargar ambos al inicio
     cargarNotificaciones();
-    setInterval(cargarNotificaciones, 10000);
+    cargarTotalChatsNoLeidos();
+    
+    // Actualizar cada 10 segundos
+    setInterval(() => {
+        cargarNotificaciones();
+        cargarTotalChatsNoLeidos();
+    }, 10000);
 });
 
 function marcarLeidas() {
@@ -67,9 +81,6 @@ function marcarLeidas() {
             if (data.success) {
                 const badge = document.getElementById('notif-badge');
                 if (badge) badge.style.display = 'none';
-                
-                const chatBadge = document.getElementById('chat-badge');
-                if (chatBadge) chatBadge.style.display = 'none';
                 
                 const list = document.getElementById('notif-list');
                 if (list) {

@@ -32,6 +32,7 @@ if ($id_conv) {
 }
 
 // ========== CREAR NOTIFICACIÓN ==========
+$// ========== CREAR NOTIFICACIÓN ==========
 $infoConv = mysqli_query($conexion, "SELECT tipo, nombre_grupo FROM chat_conversacion WHERE id_conversacion = $id_conv");
 $conv = mysqli_fetch_assoc($infoConv);
 $tipoConv = $conv['tipo'];
@@ -44,9 +45,15 @@ $urlDestino = "../../chat/bandeja.php?conv=$id_conv";
 $destinatarios = [];
 
 if ($tipoConv == 'individual') {
-    $destinatarios = [$id_receptor];
+    // Obtener el receptor de la conversación (el que NO soy yo)
+    $resReceptor = mysqli_query($conexion, "SELECT id_usuario FROM chat_participante WHERE id_conversacion = $id_conv AND id_usuario != $id_yo LIMIT 1");
+    $receptor = mysqli_fetch_assoc($resReceptor);
+    $id_receptor_db = $receptor['id_usuario'];
+    
+    $destinatarios = [$id_receptor_db];
     $mensajeNotif = "$miNombre te ha enviado un mensaje";
 } else {
+    // Grupal: todos los participantes excepto yo
     $resParticipantes = mysqli_query($conexion, "SELECT id_usuario FROM chat_participante WHERE id_conversacion = $id_conv AND id_usuario != $id_yo");
     while($p = mysqli_fetch_assoc($resParticipantes)) {
         $destinatarios[] = $p['id_usuario'];
