@@ -203,3 +203,126 @@ input[type="file"].search-input {
     padding: 0.7rem;
     color: var(--text-muted);
 }
+
+/* ========== RESPONSIVE COMUNIDADES ========== */
+
+@media (max-width: 1024px) {
+    .grid-comunidades {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .central h1 {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .central {
+        padding: 2rem 1rem;
+    }
+    
+    .central h1 {
+        font-size: 1.8rem;
+    }
+    
+    .central p {
+        font-size: 0.9rem;
+    }
+    
+    .btn-agregar {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    main {
+        padding: 1rem 4%;
+    }
+    
+    h2 {
+        font-size: 0.8rem;
+    }
+    
+    .grid-comunidades {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .card-comunidad {
+        max-width: 100%;
+    }
+    
+    .banner-comunidad {
+        height: 120px;
+    }
+    
+    .cuerpo-comunidad {
+        padding: 1rem;
+    }
+    
+    .cuerpo-comunidad h3 {
+        font-size: 1.1rem;
+    }
+    
+    .acciones-com {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .btn-entrar, .botonUnirse {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .central {
+        padding: 1.5rem 0.8rem;
+    }
+    
+    .central h1 {
+        font-size: 1.3rem;
+    }
+    
+    .central p {
+        font-size: 0.75rem;
+    }
+    
+    .btn-agregar {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    .juego-tag {
+        font-size: 0.6rem;
+    }
+    
+    .cuerpo-comunidad h3 {
+        font-size: 1rem;
+    }
+    
+    .overlay-miembros {
+        font-size: 0.65rem;
+        padding: 3px 8px;
+    }
+}
+
+/* Responsive para formulario de crear comunidad */
+@media (max-width: 768px) {
+    .search-section {
+        padding: 1rem !important;
+    }
+    
+    .search-section label {
+        font-size: 0.85rem;
+    }
+    
+    .search-input, .select2-container {
+        font-size: 0.85rem;
+    }
+    
+    .btn-agregar {
+        font-size: 0.85rem;
+        padding: 0.6rem;
+    }
+}
