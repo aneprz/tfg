@@ -268,6 +268,18 @@ if ($juego) {
                         } else { echo 'Sin nota'; }
                         ?>
                     </p>
+
+                    <div class="game-times" style="font-size: 0.95rem; color: #aaa; margin-bottom: 15px; font-weight: bold;">
+                        <?php if (isset($juego['tiempo_historia']) && $juego['tiempo_historia'] > 0): ?>
+                            <span title="Historia principal">
+                                ⏱️ Historia: <?php echo $juego['tiempo_historia']; ?>h 
+                            </span>
+                            <span style="margin: 0 10px; opacity: 0.5;">|</span>
+                            <span title="Completista (100%)">
+                                🏆 100%: <?php echo $juego['tiempo_completo']; ?>h
+                            </span>
+                        <?php endif; ?>
+                    </div>
                     <p class="descripcion"><?php echo htmlspecialchars($juego['descripcion'] ?: 'Sin descripción.'); ?></p>
                     <a href="juegos.php" class="botonVolver">Volver</a>
 
