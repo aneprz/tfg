@@ -124,12 +124,30 @@ $admin = true;
     document.addEventListener('DOMContentLoaded', function() {
         const menuToggle = document.querySelector('.menu-toggle');
         const nav = document.querySelector('nav');
+        
         if (menuToggle) {
+            // Abrir/cerrar al hacer clic en el botón
             menuToggle.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 nav.classList.toggle('open');
             });
         }
+        
+        // Cerrar el menú al hacer clic en un enlace del nav
+        const navLinks = document.querySelectorAll('nav ul li a');
+        navLinks.forEach(function(link) {
+            link.addEventListener('click', function() {
+                nav.classList.remove('open');
+            });
+        });
+        
+        // Cerrar el menú al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            if (nav && menuToggle && !nav.contains(event.target) && !menuToggle.contains(event.target)) {
+                nav.classList.remove('open');
+            }
+        });
     });
 </script>
 </body>

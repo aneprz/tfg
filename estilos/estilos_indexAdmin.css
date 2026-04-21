@@ -475,3 +475,275 @@ input:checked + .slider:before { transform: translateX(26px); }
         width: 50px;
     }
 }
+/* ========== MENÚ HAMBURGUESA Y RESPONSIVE ========== */
+
+/* Botón hamburguesa - oculto en desktop */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: #e0be00;
+    font-size: 1.8rem;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
+/* Desktop (pantallas grandes) */
+@media (min-width: 769px) {
+    nav {
+        display: block !important;
+    }
+}
+
+/* Tablet y móvil (hasta 768px) */
+@media (max-width: 768px) {
+    /* Mostrar botón hamburguesa */
+    .menu-toggle {
+        display: block;
+        order: 2;
+    }
+    
+    /* Header flexible */
+    header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 5%;
+    }
+    
+    .tituloWeb {
+        order: 1;
+    }
+    
+    .user-actions {
+        order: 3;
+    }
+    
+    /* Nav oculto por defecto */
+    nav {
+        display: none;
+        width: 100%;
+        order: 4;
+        margin-top: 10px;
+    }
+    
+    /* Nav visible cuando tiene clase open */
+    nav.open {
+        display: block;
+    }
+    
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+    }
+    
+    nav ul li {
+        width: 100%;
+        text-align: center;
+    }
+    
+    nav ul li a {
+        display: inline-block;
+        padding: 8px 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        width: auto;
+        min-width: 150px;
+    }
+    
+    .tag {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.8rem;
+    }
+    
+    /* Ajustes del grid de admin */
+    .admin-container {
+        margin: 20px auto;
+        padding: 10px;
+    }
+    
+    .admin-container h2 {
+        font-size: 1.4rem;
+    }
+    
+    .admin-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .admin-card {
+        padding: 20px;
+    }
+    
+    .card-icon {
+        font-size: 2rem;
+    }
+    
+    .admin-card span {
+        font-size: 0.85rem;
+    }
+    
+    .central h1 {
+        font-size: 2rem;
+    }
+    
+    .central p {
+        font-size: 0.9rem;
+    }
+    
+    /* Tablas responsive */
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .admin-table th,
+    .admin-table td {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+    }
+    
+    .btn-editar {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+    
+    /* Formularios responsive */
+    form {
+        padding: 20px;
+        margin: 0 15px;
+    }
+    
+    form label {
+        font-size: 0.8rem;
+    }
+    
+    form input,
+    form textarea,
+    form select {
+        padding: 8px;
+        font-size: 0.85rem;
+    }
+    
+    form button {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Móvil pequeño (hasta 480px) */
+@media (max-width: 480px) {
+    .admin-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .admin-card {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 15px;
+        padding: 15px;
+    }
+    
+    .card-icon {
+        font-size: 1.8rem;
+        margin-bottom: 0;
+    }
+    
+    .central h1 {
+        font-size: 1.5rem;
+    }
+    
+    .central p {
+        font-size: 0.75rem;
+    }
+    
+    nav ul li a {
+        font-size: 0.8rem;
+        padding: 6px 15px;
+        min-width: 120px;
+    }
+    
+    .admin-table th,
+    .admin-table td {
+        padding: 6px 8px;
+        font-size: 0.7rem;
+    }
+    
+    /* Drag & drop responsive */
+    #addLootboxPage .container {
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+/* ========== HEADER RESPONSIVE CON BOTÓN VOLVER ========== */
+
+@media (max-width: 768px) {
+    header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .tituloWeb {
+        order: 1;
+    }
+    
+    .tag {
+        order: 2;
+    }
+    
+    nav {
+        order: 3;
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+    }
+    
+    nav ul {
+        display: block !important;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    
+    nav ul li {
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+    
+    nav ul li a {
+        display: inline-block;
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        text-decoration: none;
+        color: #e0be00;
+        width: auto;
+        min-width: 220px;
+    }
+    
+    nav ul li a:hover {
+        background: #e0be00;
+        color: #000;
+    }
+}
+
+@media (max-width: 480px) {
+    nav ul li a {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        min-width: 180px;
+    }
+}
