@@ -682,3 +682,112 @@ main {
         order: 1;
     }
 }
+
+/* ========== MENÚ HAMBURGUESA Y RESPONSIVE ========== */
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-size: 1.8rem;
+    cursor: pointer;
+    order: 2;
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .menu-toggle {
+        display: block;
+    }
+    
+    nav {
+        display: none;
+        width: 100%;
+        order: 3;
+        margin-top: 1rem;
+    }
+    
+    nav.open {
+        display: block;
+    }
+    
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    
+    nav ul li {
+        width: 100%;
+        text-align: center;
+    }
+    
+    nav ul li a {
+        display: block;
+        padding: 0.5rem;
+    }
+    
+    .user-actions {
+        order: 1;
+    }
+    
+    .chat-wrapper {
+        margin-right: 5px !important;
+    }
+    
+    .chat-wrapper svg {
+        width: 22px !important;
+        height: 22px !important;
+    }
+    
+    .tag {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+    }
+    
+    .tag::before {
+        width: 6px;
+        height: 6px;
+    }
+    
+    #notif-dropdown {
+        width: 280px;
+        right: -20px;
+        top: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        font-size: 1.2rem;
+    }
+    
+    .tituloWeb img {
+        width: 28px;
+    }
+    
+    .botonCrearCuenta {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.75rem;
+    }
+    
+    .user-actions {
+        gap: 5px;
+    }
+    
+    .tag {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
+    
+    #notif-dropdown {
+        width: 260px;
+        right: -30px;
+    }
+}
