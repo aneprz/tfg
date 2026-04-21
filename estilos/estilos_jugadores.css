@@ -143,3 +143,128 @@
     margin: 40px auto;
     animation: fadeInUp 1s ease-out; 
 }
+
+/* ========== RESPONSIVE JUGADORES ========== */
+
+@media (max-width: 1024px) {
+    .user-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 1.2rem;
+    }
+    
+    .central h1 {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .central {
+        padding: 2rem 1rem;
+    }
+    
+    .central h1 {
+        font-size: 1.8rem;
+    }
+    
+    .central p {
+        font-size: 0.9rem;
+        padding: 0 10px;
+    }
+    
+    .buscadorContainer input {
+        padding: 0.7rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    main {
+        padding: 1rem 4%;
+    }
+    
+    h2 {
+        font-size: 0.8rem;
+    }
+    
+    .user-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .player-card {
+        padding: 1rem;
+    }
+    
+    .player-avatar-wrapper img {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .player-info h3 {
+        font-size: 1rem;
+        margin-bottom: 5px;
+    }
+    
+    .player-bio {
+        font-size: 0.75rem;
+        margin-bottom: 10px;
+    }
+    
+    .btn-ver-perfil {
+        padding: 5px 12px;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .central {
+        padding: 1.5rem 0.8rem;
+    }
+    
+    .central h1 {
+        font-size: 1.3rem;
+    }
+    
+    .central p {
+        font-size: 0.75rem;
+    }
+    
+    .buscadorContainer input {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .user-grid {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+    
+    .player-card {
+        flex-direction: row;
+        text-align: left;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.8rem;
+    }
+    
+    .player-avatar-wrapper img {
+        width: 55px;
+        height: 55px;
+        margin-bottom: 0;
+    }
+    
+    .player-info {
+        flex: 1;
+    }
+    
+    .player-info h3 {
+        font-size: 0.9rem;
+    }
+    
+    .player-bio {
+        font-size: 0.7rem;
+    }
+    
+    .btn-ver-perfil {
+        padding: 4px 10px;
+        font-size: 0.65rem;
+    }
+}

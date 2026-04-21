@@ -47,6 +47,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                 <?php endif; ?>
             </ul>
         </nav>
+        <button class="menu-toggle" aria-label="Menú">☰</button>
         
         <?php if(!isset($_SESSION['tag'])) : ?>
             <a href="../sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
@@ -137,6 +138,21 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         inputBusqueda.addEventListener('input', fetchJugadores);
         fetchJugadores(); 
     });
+    </script>
+    <script>
+        // Menú hamburguesa
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const nav = document.querySelector('nav');
+            
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    nav.classList.toggle('open');
+                });
+            }
+        });
     </script>
     <script src="../../js/notificaciones.js"></script>
 </body>
