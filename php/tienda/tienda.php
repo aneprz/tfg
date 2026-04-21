@@ -74,6 +74,9 @@ if (isset($_SESSION['id_usuario'])) {
 
         </ul>
     </nav>
+    </nav>
+
+<button class="menu-toggle" aria-label="Menú">☰</button>
 
     <?php if (!isset($_SESSION['tag'])): ?>
 
@@ -342,6 +345,18 @@ window.onclick = e => {
     if (e.target === modal) modal.style.display = "none";
 };
 
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.querySelector('.menu-toggle');
+        const nav = document.querySelector('nav');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                nav.classList.toggle('open');
+            });
+        }
+    });
 </script>
 </body>
 </html>

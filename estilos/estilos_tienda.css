@@ -190,3 +190,206 @@
     pointer-events: none;
     z-index: 2;
 }
+
+/* ========== RESPONSIVE TIENDA ========== */
+
+@media (max-width: 1024px) {
+    .subnav-container {
+        gap: 20px;
+        padding: 8px 4%;
+    }
+    
+    .subnav-link {
+        font-size: 0.9rem;
+    }
+    
+    .central h1 {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .central {
+        padding: 2rem 1rem;
+    }
+    
+    .central h1 {
+        font-size: 1.8rem;
+    }
+    
+    .central p {
+        font-size: 0.9rem;
+    }
+    
+    .puntosUsuario {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .buscadorContainer input {
+        padding: 0.7rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .filtrosContainer select {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    main {
+        padding: 1rem 4%;
+    }
+    
+    h2 {
+        font-size: 0.8rem;
+    }
+    
+    .juegos {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .portadaJuego {
+        height: 160px;
+    }
+    
+    .infoJuego {
+        padding: 0.7rem;
+    }
+    
+    .tituloJuego {
+        font-size: 0.85rem;
+    }
+    
+    .precioItem {
+        font-size: 0.75rem;
+    }
+    
+    .btn-comprar, .btn-comprar-lootbox {
+        padding: 5px;
+        font-size: 0.7rem;
+    }
+    
+    .subnav-container {
+        gap: 15px;
+    }
+    
+    .subnav-link {
+        font-size: 0.8rem;
+    }
+    
+    /* MODAL RESPONSIVE */
+    .modal-content {
+        width: 90%;
+        padding: 15px;
+    }
+    
+    .perfil-preview {
+        width: 200px;
+    }
+    
+    .avatar-preview {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .carruselLootbox {
+        padding: 10px 0;
+    }
+    
+    .carrusel-item {
+        min-width: 70px;
+    }
+    
+    .carrusel-item img {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .itemGanado h3 {
+        font-size: 1rem;
+    }
+    
+    .itemGanado p {
+        font-size: 0.85rem;
+    }
+    
+    .itemGanado img {
+        width: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .central {
+        padding: 1.5rem 0.8rem;
+    }
+    
+    .central h1 {
+        font-size: 1.3rem;
+    }
+    
+    .central p {
+        font-size: 0.75rem;
+    }
+    
+    .puntosUsuario {
+        font-size: 0.8rem;
+    }
+    
+    .buscadorContainer input {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .filtrosContainer select {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+    }
+    
+    .juegos {
+        gap: 0.8rem;
+    }
+    
+    .portadaJuego {
+        height: 130px;
+    }
+    
+    .tituloJuego {
+        font-size: 0.75rem;
+    }
+    
+    .precioItem {
+        font-size: 0.7rem;
+    }
+    
+    .btn-comprar, .btn-comprar-lootbox {
+        font-size: 0.65rem;
+        padding: 4px;
+    }
+    
+    .subnav-container {
+        gap: 10px;
+    }
+    
+    .subnav-link {
+        font-size: 0.7rem;
+    }
+    
+    .perfil-preview {
+        width: 180px;
+    }
+    
+    .avatar-preview {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .carrusel-item {
+        min-width: 55px;
+    }
+    
+    .carrusel-item img {
+        width: 55px;
+        height: 55px;
+    }
+}
