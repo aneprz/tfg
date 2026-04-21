@@ -38,6 +38,8 @@ $admin = true;
                 <?php endif; ?>
             </ul>
         </nav>  
+
+        <button class="menu-toggle" aria-label="Menú">☰</button>
         
         <?php if(!isset($_SESSION['tag'])) : ?>
             <a href="../sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
@@ -117,5 +119,18 @@ $admin = true;
             </a>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.querySelector('.menu-toggle');
+        const nav = document.querySelector('nav');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                nav.classList.toggle('open');
+            });
+        }
+    });
+</script>
 </body>
 </html>

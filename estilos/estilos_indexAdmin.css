@@ -295,3 +295,183 @@ input:checked + .slider:before { transform: translateX(26px); }
     text-align: center;
     padding: 60px 0;
 }
+
+/* ========== RESPONSIVE ADMIN ========== */
+
+@media (max-width: 1024px) {
+    .admin-container {
+        margin: 30px auto;
+        padding: 15px;
+    }
+    
+    .admin-container h2 {
+        font-size: 1.8rem;
+    }
+    
+    .admin-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+    }
+    
+    .admin-card {
+        padding: 25px;
+    }
+    
+    .card-icon {
+        font-size: 2.5rem;
+    }
+    
+    .admin-card span {
+        font-size: 1rem;
+    }
+    
+    .central h1 {
+        font-size: 2.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .central {
+        padding: 2rem 1rem;
+    }
+    
+    .central h1 {
+        font-size: 2rem;
+    }
+    
+    .central p {
+        font-size: 0.9rem;
+    }
+    
+    .admin-container {
+        margin: 20px auto;
+        padding: 10px;
+    }
+    
+    .admin-container h2 {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+    
+    .admin-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .admin-card {
+        padding: 20px;
+    }
+    
+    .card-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .admin-card span {
+        font-size: 0.85rem;
+    }
+    
+    /* Formularios responsive */
+    form {
+        padding: 20px;
+        max-width: 100%;
+        margin: 0 15px;
+    }
+    
+    form label {
+        font-size: 0.8rem;
+    }
+    
+    form input, 
+    form textarea, 
+    form select {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+    
+    form button {
+        padding: 12px;
+        font-size: 0.85rem;
+    }
+    
+    /* Tablas responsive */
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .admin-table th, 
+    .admin-table td {
+        padding: 10px;
+        font-size: 0.8rem;
+    }
+    
+    .btn-editar {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .central {
+        padding: 1.5rem 0.8rem;
+    }
+    
+    .central h1 {
+        font-size: 1.5rem;
+    }
+    
+    .central p {
+        font-size: 0.75rem;
+    }
+    
+    .admin-container h2 {
+        font-size: 1.2rem;
+    }
+    
+    .admin-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .admin-card {
+        padding: 15px;
+        flex-direction: row;
+        gap: 15px;
+        justify-content: flex-start;
+    }
+    
+    .card-icon {
+        font-size: 1.8rem;
+        margin-bottom: 0;
+    }
+    
+    .admin-card span {
+        font-size: 0.9rem;
+    }
+    
+    /* Drag & drop responsive */
+    #addLootboxPage .container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    #addLootboxPage .items-disponibles,
+    #addLootboxPage .lootbox {
+        padding: 15px;
+    }
+    
+    #addLootboxPage h1 {
+        font-size: 1.8rem;
+    }
+    
+    #addLootboxPage li {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    #addLootboxPage input.prob {
+        width: 50px;
+    }
+}
