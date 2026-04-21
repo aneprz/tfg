@@ -55,12 +55,17 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
         <div class="lista-conversaciones">
             <div class="chat-toolbar">
                 <a href="../../index.php" class="btn-tool" title="Volver al Inicio">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
                 </a>
                 <span style="color:#eee; font-weight:bold; font-size:12px;">MENSAJES</span>
                 <button onclick="abrirModalGrupo()" class="btn-tool" title="Crear Grupo">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                     </svg>
                 </button>
             </div>
@@ -73,12 +78,25 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
                         $nombreChat = htmlspecialchars($c['nombre']);
                         $avatarChat = !empty($c['avatar']) ? $c['avatar'] : 'default.png';
                         $idReceptor = !empty($c['id_receptor']) ? (int)$c['id_receptor'] : 'null';
+                        
+                        // Obtener mensajes no leídos de esta conversación
+                        $sqlNL = "SELECT mensajes_no_leidos FROM chat_participante WHERE id_conversacion = $idConv AND id_usuario = $id_yo";
+                        $resNL = mysqli_query($conexion, $sqlNL);
+                        $rowNL = mysqli_fetch_assoc($resNL);
+                        $noLeidos = (int)$rowNL['mensajes_no_leidos'];
                 ?>
                     <div class="chat-item" onclick="seleccionarContacto(<?php echo $idReceptor; ?>, <?php echo $idConv; ?>, this)">
                         <img src="../../img/avatares/<?php echo ($tipoChat == 'grupal') ? 'grupo_default.png' : $avatarChat; ?>" style="width:45px; height:45px; border-radius:50%; object-fit: cover;">
-                        <div class="chat-info">
-                            <h4 style="color: <?php echo ($tipoChat == 'grupal') ? '#f0c330' : '#fff'; ?>;"><?php echo $nombreChat; ?></h4>
-                            <p style="font-size:11px; color:#888;"><?php echo ($tipoChat == 'grupal') ? 'Grupo' : 'Chat Privado'; ?></p>
+                        <div class="chat-info" style="flex:1;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h4 style="margin:0; color: <?php echo ($tipoChat == 'grupal') ? '#f0c330' : '#fff'; ?>;"><?php echo $nombreChat; ?></h4>
+                                <?php if($noLeidos > 0): ?>
+                                    <span class="badge-mensaje" style="background:#f0c330; color:#000; border-radius:50%; min-width:20px; height:20px; padding:0 5px; text-align:center; line-height:20px; font-size:11px; font-weight:bold;">
+                                        <?php echo $noLeidos; ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <p style="margin:4px 0 0; font-size:11px; color:#888;"><?php echo ($tipoChat == 'grupal') ? 'Grupo' : 'Chat Privado'; ?></p>
                         </div>
                     </div>
                 <?php endwhile; else: ?>
@@ -121,7 +139,6 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
             <input type="text" id="nombre-grupo" placeholder="Nombre del grupo..." style="width:100%; padding:12px; background:#0e0e0e; border:1px solid #333; color:white; border-radius:8px; margin-bottom:15px;">
             <div id="lista-amigos-grupo" style="max-height:280px; overflow-y:auto; margin-bottom:25px; background:#0e0e0e; border:1px solid #333; border-radius:8px;">
                 <?php 
-                // Consulta corregida: Seleccionamos al Usuario que NO es el Usuario actual (id_yo)
                 $sqlAmigos = "SELECT u.id_usuario, u.gameTag, u.avatar 
                             FROM amigos a 
                             JOIN Usuario u ON (CASE 
@@ -138,13 +155,10 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
                     while($amigo = mysqli_fetch_assoc($resAmigos)): ?>
                         <label style="display:flex; align-items:center; gap:15px; padding:12px; border-bottom:1px solid #222; cursor:pointer; color:white; transition: background 0.2s;" onmouseover="this.style.background='#1a1a1a'" onmouseout="this.style.background='transparent'">
                             <input type="checkbox" class="check-amigo" value="<?php echo $amigo['id_usuario']; ?>" style="accent-color: #f0c330;">
-                            
                             <?php 
-                                // Verificamos si tiene avatar, si no, ponemos el de por defecto
                                 $fotoPerfil = !empty($amigo['avatar']) ? "../../img/avatares/" . $amigo['avatar'] : "../../img/avatares/default.png"; 
                             ?>
                             <img src="<?php echo $fotoPerfil; ?>" style="width:35px; height:35px; border-radius:50%; object-fit: cover; border: 1px solid #333;">
-                            
                             <span style="font-size: 14px; font-weight: 500;"><?php echo htmlspecialchars($amigo['gameTag']); ?></span>
                         </label>
                     <?php endwhile; 
@@ -162,43 +176,43 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
     </div>
 
     <div id="modal-ajustes-grupo" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10000; align-items:center; justify-content:center;">
-    <div style="background:#1a1a1a; padding:25px; border-radius:15px; width:450px; border:1px solid #f0c330; max-height: 90vh; overflow-y: auto;">
-        <h3 style="color:#f0c330; text-align:center; margin-top:0; margin-bottom:20px;">Ajustes del Grupo</h3>
-        
-        <form id="form-ajustes-grupo" onsubmit="event.preventDefault(); guardarAjustes();">
-            <input type="hidden" id="ajuste_id_conv" name="id_conv">
+        <div style="background:#1a1a1a; padding:25px; border-radius:15px; width:450px; border:1px solid #f0c330; max-height: 90vh; overflow-y: auto;">
+            <h3 style="color:#f0c330; text-align:center; margin-top:0; margin-bottom:20px;">Ajustes del Grupo</h3>
             
-            <div style="margin-bottom:20px;">
-                <input type="text" id="edit-nombre-grupo" name="nombre_grupo" placeholder="Nombre del grupo"
-                    style="width:100%; padding:12px; background:#0e0e0e; border:1px solid #333; border-radius:8px; color:white; font-size:16px;">
-            </div>
+            <form id="form-ajustes-grupo" onsubmit="event.preventDefault(); guardarAjustes();">
+                <input type="hidden" id="ajuste_id_conv" name="id_conv">
+                
+                <div style="margin-bottom:20px;">
+                    <input type="text" id="edit-nombre-grupo" name="nombre_grupo" placeholder="Nombre del grupo"
+                        style="width:100%; padding:12px; background:#0e0e0e; border:1px solid #333; border-radius:8px; color:white; font-size:16px;">
+                </div>
 
-            <h4 style="color:#f0c330; font-size:12px; margin-bottom:10px;">MIEMBROS ACTUALES</h4>
-            <div id="lista-gestion-miembros" style="margin-bottom:20px; background:#0e0e0e; border-radius:8px; padding:5px; max-height:250px; overflow-y:auto;">
-            </div>
+                <h4 style="color:#f0c330; font-size:12px; margin-bottom:10px;">MIEMBROS ACTUALES</h4>
+                <div id="lista-gestion-miembros" style="margin-bottom:20px; background:#0e0e0e; border-radius:8px; padding:5px; max-height:250px; overflow-y:auto;">
+                </div>
 
-            <h4 style="color:#f0c330; font-size:12px; margin-bottom:10px;">AÑADIR NUEVOS</h4>
-            <div id="lista-añadir-miembros" style="background:#0e0e0e; border-radius:8px; padding:5px; max-height:150px; overflow-y:auto; margin-bottom:20px;">
-            </div>
-            
-            <div style="padding: 15px 0;">
-                <button type="button" onclick="abandonarGrupo()" 
-                        style="width:100%; padding:10px; background:transparent; color:#ff4d4d; border:1px solid #ff4d4d; border-radius:8px; cursor:pointer; font-weight:bold;">
-                    ABANDONAR GRUPO
-                </button>
-            </div>
+                <h4 style="color:#f0c330; font-size:12px; margin-bottom:10px;">AÑADIR NUEVOS</h4>
+                <div id="lista-añadir-miembros" style="background:#0e0e0e; border-radius:8px; padding:5px; max-height:150px; overflow-y:auto; margin-bottom:20px;">
+                </div>
+                
+                <div style="padding: 15px 0;">
+                    <button type="button" onclick="abandonarGrupo()" 
+                            style="width:100%; padding:10px; background:transparent; color:#ff4d4d; border:1px solid #ff4d4d; border-radius:8px; cursor:pointer; font-weight:bold;">
+                        ABANDONAR GRUPO
+                    </button>
+                </div>
 
-            <div style="display:flex; gap:10px;">
-                <button type="button" onclick="cerrarModalAjustes()" style="flex:1; padding:12px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
-                <button type="submit" style="flex:1; padding:12px; background:#f0c330; color:black; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">Guardar</button>
-            </div>
-        </form>
+                <div style="display:flex; gap:10px;">
+                    <button type="button" onclick="cerrarModalAjustes()" style="flex:1; padding:12px; background:#333; color:white; border:none; border-radius:8px; cursor:pointer;">Cancelar</button>
+                    <button type="submit" style="flex:1; padding:12px; background:#f0c330; color:black; font-weight:bold; border:none; border-radius:8px; cursor:pointer;">Guardar</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
     <script src="../../js/chat.js"></script>
+    <script src="../../js/notificaciones.js"></script>
     <script>
-        // Declaramos esto en el HTML para que chat.js lo pueda usar
         const MI_ID_USUARIO = <?php echo $_SESSION['id_usuario']; ?>;
     </script>
 </body>

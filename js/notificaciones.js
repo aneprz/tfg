@@ -4,70 +4,89 @@ document.addEventListener('DOMContentLoaded', function() {
     const badge = document.getElementById('notif-badge');
     const list = document.getElementById('notif-list');
 
+    // Cargar notificaciones de la campana (comunidades, sistema, etc.)
+    function cargarNotificaciones() {
+        fetch('/php/notificaciones/notificaciones_ajax.php')
+            .then(res => res.json())
+            .then(data => {
+                console.log("Notificaciones campana:", data.total);
+                
+                if (badge) {
+                    if (data.total > 0) {
+                        badge.style.display = 'block';
+                        badge.innerText = data.total;
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+                
+                if (list) list.innerHTML = data.html;
+            })
+            .catch(err => console.error("Error:", err));
+    }
+
+    // Cargar mensajes NO LEÍDOS de CHATS (para el badge del chat)
+    function cargarTotalChatsNoLeidos() {
+        fetch('/php/chat/obtener_total_no_leidos.php')
+            .then(res => res.json())
+            .then(data => {
+                console.log("Mensajes no leídos chats:", data.total);
+                
+                const chatBadge = document.getElementById('chat-badge');
+                if (chatBadge) {
+                    if (data.total > 0) {
+                        chatBadge.style.display = 'inline-block';
+                        chatBadge.innerText = data.total > 99 ? '99+' : data.total;
+                    } else {
+                        chatBadge.style.display = 'none';
+                    }
+                }
+            })
+            .catch(err => console.error("Error:", err));
+    }
+
     if (bell && dropdown) {
         bell.onclick = function(e) {
             e.stopPropagation();
-            // Alternar visibilidad
             if (dropdown.style.display === "block") {
                 dropdown.style.display = "none";
             } else {
                 dropdown.style.display = "block";
-                console.log("Abriendo notificaciones...");
                 cargarNotificaciones();
             }
         };
 
-        // Cerrar al clicar fuera
         document.onclick = function(e) {
-            if (!dropdown.contains(e.target) && e.target !== bell) {
+            if (dropdown && !dropdown.contains(e.target) && e.target !== bell) {
                 dropdown.style.display = "none";
             }
         };
     }
 
-    function cargarNotificaciones() {
-        // Usamos una ruta relativa a la raíz para evitar fallos en otras páginas
-        fetch('/php/notificaciones/notificaciones_ajax.php')
-            .then(res => res.json())
-            .then(data => {
-                if (badge && data.total > 0) {
-                    badge.style.display = 'block';
-                    badge.innerText = data.total;
-                } else if (badge) {
-                    badge.style.display = 'none';
-                }
-                if (list) list.innerHTML = data.html;
-            })
-            .catch(err => console.error("Error en fetch:", err));
-    }
-
-    // Cargar cada 30 seg
-    setInterval(cargarNotificaciones, 30000);
+    // Cargar ambos al inicio
     cargarNotificaciones();
+    cargarTotalChatsNoLeidos();
+    
+    // Actualizar cada 10 segundos
+    setInterval(() => {
+        cargarNotificaciones();
+        cargarTotalChatsNoLeidos();
+    }, 10000);
 });
 
 function marcarLeidas() {
-    console.log("Botón limpiar pulsado..."); // Si ves esto en la consola, el HTML está bien
-
-    // Usamos la ruta absoluta empezando desde la raíz /
     fetch('/php/notificaciones/marcar_leidas.php')
-        .then(res => {
-            if (!res.ok) throw new Error("Error en la red: " + res.status);
-            return res.json();
-        })
+        .then(res => res.json())
         .then(data => {
-            console.log("Respuesta del servidor:", data);
             if (data.success) {
-                // Ocultar el numerito
                 const badge = document.getElementById('notif-badge');
                 if (badge) badge.style.display = 'none';
-
-                // Vaciar la lista
+                
                 const list = document.getElementById('notif-list');
                 if (list) {
                     list.innerHTML = '<li style="padding: 15px; color: #888; text-align: center;">No tienes notificaciones</li>';
                 }
             }
         })
-        .catch(err => console.error("Fallo al limpiar:", err));
+        .catch(err => console.error("Error:", err));
 }

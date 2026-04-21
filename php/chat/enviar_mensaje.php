@@ -20,9 +20,53 @@ if (!$id_conv && $id_receptor) {
 }
 
 if ($id_conv) {
+    // Insertar mensaje
     mysqli_query($conexion, "INSERT INTO chat_mensaje (id_conversacion, id_emisor, contenido) VALUES ($id_conv, $id_yo, '$texto')");
-    // Actualizar mi propia lectura al enviar
+    
+    // Actualizar mi propia lectura
     mysqli_query($conexion, "UPDATE chat_participante SET ultima_lectura = NOW() WHERE id_conversacion = $id_conv AND id_usuario = $id_yo");
+    
+    // INCREMENTAR CONTADOR DE NO LEÍDOS PARA LOS RECEPTORES
+    mysqli_query($conexion, "UPDATE chat_participante SET mensajes_no_leidos = mensajes_no_leidos + 1 
+                             WHERE id_conversacion = $id_conv AND id_usuario != $id_yo");
+}
+
+// ========== CREAR NOTIFICACIÓN ==========
+// ========== CREAR NOTIFICACIÓN ==========
+$infoConv = mysqli_query($conexion, "SELECT tipo, nombre_grupo FROM chat_conversacion WHERE id_conversacion = $id_conv");
+$conv = mysqli_fetch_assoc($infoConv);
+$tipoConv = $conv['tipo'];
+
+$resYo = mysqli_query($conexion, "SELECT gameTag FROM Usuario WHERE id_usuario = $id_yo");
+$yo = mysqli_fetch_assoc($resYo);
+$miNombre = $yo['gameTag'];
+
+$urlDestino = "../../chat/bandeja.php?conv=$id_conv";
+
+if ($tipoConv == 'individual') {
+    // Obtener el receptor
+    $resReceptor = mysqli_query($conexion, "SELECT id_usuario FROM chat_participante WHERE id_conversacion = $id_conv AND id_usuario != $id_yo LIMIT 1");
+    $receptor = mysqli_fetch_assoc($resReceptor);
+    $id_destino = $receptor['id_usuario'];
+    $mensajeNotif = "$miNombre te ha enviado un mensaje";
+    
+    $stmt = $conexion->prepare("INSERT INTO Notificacion (id_usuario_destino, mensaje, url_destino, leida, tipo) VALUES (?, ?, ?, 0, 'usuario')");
+    $stmt->bind_param("iss", $id_destino, $mensajeNotif, $urlDestino);
+    $stmt->execute();
+    $stmt->close();
+} else {
+    // Grupal
+    $resParticipantes = mysqli_query($conexion, "SELECT id_usuario FROM chat_participante WHERE id_conversacion = $id_conv AND id_usuario != $id_yo");
+    $nombreGrupo = $conv['nombre_grupo'] ?? 'Grupo';
+    $mensajeNotif = "$miNombre ha enviado un mensaje en $nombreGrupo";
+    
+    $stmt = $conexion->prepare("INSERT INTO Notificacion (id_usuario_destino, mensaje, url_destino, leida, tipo) VALUES (?, ?, ?, 0, 'usuario')");
+    while($p = mysqli_fetch_assoc($resParticipantes)) {
+        $stmt->bind_param("iss", $p['id_usuario'], $mensajeNotif, $urlDestino);
+        $stmt->execute();
+    }
+    $stmt->close();
 }
 
 echo json_encode(['success' => true, 'nueva_id_conversacion' => $nueva_id]);
+?>
