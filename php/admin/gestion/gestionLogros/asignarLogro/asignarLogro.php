@@ -91,5 +91,22 @@
             });
         });
     </script>
+    <script>
+    (function() {
+        var btnVolver = document.createElement('button');
+        btnVolver.innerHTML = '← Volver';
+        btnVolver.id = 'btnVolverMovil';
+        btnVolver.style.cssText = 'display:none; position:fixed; bottom:20px; left:20px; background:#e0be00; color:#000; border:none; padding:12px 20px; border-radius:50px; font-weight:bold; cursor:pointer; z-index:9999; box-shadow:0 2px 10px rgba(0,0,0,0.3);';
+        document.body.appendChild(btnVolver);
+        btnVolver.onclick = function() {
+            window.location.href = '../gestionLogros.php';
+        };
+        function checkWidth() {
+            btnVolver.style.display = window.innerWidth <= 768 ? 'block' : 'none';
+        }
+        window.addEventListener('resize', checkWidth);
+        checkWidth();
+    })();
+</script>
 </body>
 </html>
