@@ -46,4 +46,43 @@ document.addEventListener("DOMContentLoaded", () => {
                 btn.disabled = false;
             });
     });
+    
+    // ========== MANEJAR UNIRSE/ABANDONAR COMUNIDAD SIN RECARGAR ==========
+document.addEventListener("click", function(e) {
+    const btn = e.target.closest(".btn-accion-comunidad");
+    if (!btn) return;
+    
+    e.preventDefault();
+    
+    const idComunidad = btn.getAttribute("data-id");
+    const accion = btn.getAttribute("data-accion");
+    
+    btn.textContent = "...";
+    btn.disabled = true;
+    
+    fetch(`gestionar_miembro.php?accion=${accion}&id_comunidad=${idComunidad}`)
+        .then(response => response.text())
+        .then(() => {
+            // Cambiar el botón al estado contrario sin recargar
+            if (accion === 'unirse') {
+                btn.setAttribute("data-accion", "salir");
+                btn.textContent = "Abandonar";
+                btn.style.backgroundColor = "#ff4d4d";
+                btn.style.color = "#000";
+                btn.style.border = "2px solid #cc0000";
+            } else {
+                btn.setAttribute("data-accion", "unirse");
+                btn.textContent = "Unirse";
+                btn.style.backgroundColor = "#f1c40f";
+                btn.style.color = "#000";
+                btn.style.border = "2px solid #f1c40f";
+            }
+            btn.disabled = false;
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            btn.textContent = "Error";
+            btn.disabled = false;
+        });
+});
 });
