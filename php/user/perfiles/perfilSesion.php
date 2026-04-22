@@ -162,11 +162,19 @@ if ($avatar_item) {
             </a>
         </div>
 
-        <div>
+        <?php if (!isset($_SESSION["steamid"]) || empty($_SESSION["steamid"])): ?>
+
+            <a href="#" onclick="alert('Tienes que iniciar sesión con tu cuenta de Steam antes'); return false;" class="btn-sync-steam">
+                Sincronizar logros de Steam
+            </a>
+
+        <?php else: ?>
+
             <a href="../../../Steam/sync_logros_steam.php" class="btn-sync-steam">
                 Sincronizar logros de Steam
             </a>
-        </div>
+
+        <?php endif; ?>
 
         <!-- BIO -->
         <div class="perfil-body">
