@@ -120,6 +120,9 @@ if (isset($_SESSION['id_usuario'])) {
         <?php endif; ?>
     </ul>
 </nav>
+</nav>
+
+<button class="menu-toggle" aria-label="Menú">☰</button>
 <?php if (!isset($_SESSION['tag'])): ?>
     <a href="../../php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
 <?php else: ?>
@@ -357,6 +360,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 50);
     }
 });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.querySelector('.menu-toggle');
+        const nav = document.querySelector('nav');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                nav.classList.toggle('open');
+            });
+        }
+    });
 </script>
 <script src="../../js/social.js"></script>
 </body>

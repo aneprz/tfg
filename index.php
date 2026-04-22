@@ -136,6 +136,7 @@ if (isset($conexion) && $conexion) {
             <?php endif; ?>
         </ul>
     </nav>
+    <button class="menu-toggle" aria-label="Menú">☰</button>
 
     <?php if (!isset($_SESSION['tag'])): ?>
     <a href="php/sesiones/login/login.php" class="botonCrearCuenta">Iniciar sesión</a>
@@ -316,6 +317,16 @@ if (isset($conexion) && $conexion) {
 <p>&copy; 2026 SalsaBox. Creado para los gamers.</p>
 
 </footer>
+
+<script>
+    const menuToggle = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('nav');
+    if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+            nav.classList.toggle('open');
+        });
+    }
+</script>
 
 <script src="js/notificaciones.js"></script>
 </body>

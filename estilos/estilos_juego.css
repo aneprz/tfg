@@ -538,3 +538,167 @@ footer {
         padding: 1.5rem;
     }
 }
+
+/* ========== RESPONSIVE JUEGO DETALLE ========== */
+
+@media (max-width: 768px) {
+    header {
+        flex-wrap: wrap;
+        gap: 0.8rem;
+        justify-content: center;
+    }
+    
+    nav ul {
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    nav a {
+        font-size: 0.85rem;
+    }
+    
+    .tag {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+    }
+    
+    main {
+        margin: 1.5rem auto;
+        padding: 0 4%;
+    }
+    
+    .contenidoJuego {
+        padding: 1.2rem;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .meta {
+        font-size: 0.85rem;
+    }
+    
+    .descripcion {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .panelInteraccion {
+        padding: 1rem;
+    }
+    
+    .panelInteraccion h3 {
+        font-size: 1rem;
+    }
+    
+    .grupoFormulario label {
+        font-size: 0.8rem;
+    }
+    
+    .grupoFormulario select,
+    .grupoFormulario input,
+    .grupoFormulario textarea {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    .botonGuardar {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+    
+    .resenaHeader {
+        flex-wrap: wrap;
+    }
+    
+    .resenaUsuario {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .resenaTag {
+        font-size: 0.85rem;
+        max-width: 180px;
+    }
+    
+    .resenaSubmeta {
+        font-size: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    .resenaDerecha {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+    
+    .resenaRating {
+        font-size: 0.85rem;
+    }
+    
+    .resenaAccion {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+    }
+    
+    .resenaTexto {
+        font-size: 0.85rem;
+    }
+    
+    .botonVolver {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .estrella {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        font-size: 1.3rem;
+    }
+    
+    .tituloWeb img {
+        width: 32px;
+    }
+    
+    h1 {
+        font-size: 1.4rem;
+    }
+    
+    .contenidoJuego {
+        padding: 1rem;
+    }
+    
+    .resenaTag {
+        max-width: 120px;
+        font-size: 0.8rem;
+    }
+    
+    .resenaSubmeta {
+        font-size: 0.7rem;
+    }
+    
+    .resenaAvatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .estrella {
+        font-size: 18px;
+    }
+    
+    .clasificacionEstrellas {
+        gap: 4px;
+    }
+    
+    .game-times {
+        font-size: 0.75rem !important;
+    }
+}

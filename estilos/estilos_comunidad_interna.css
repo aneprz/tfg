@@ -291,3 +291,130 @@ body.body-comunidad {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ========== RESPONSIVE COMUNIDAD INTERNA ========== */
+
+@media (max-width: 1024px) {
+    .layout-comunidad {
+        grid-template-columns: 220px 1fr 260px;
+    }
+    
+    .feed {
+        padding: 15px 20px;
+    }
+    
+    .input-post {
+        margin: 10px 20px 20px 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    body.body-comunidad {
+        height: auto;
+        overflow-y: auto;
+    }
+    
+    .layout-comunidad {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        height: auto;
+    }
+    
+    .sidebar-canales {
+        display: none;
+    }
+    
+    .sidebar-info {
+        order: 3;
+        padding: 15px;
+        margin-top: 1rem;
+    }
+    
+    .info-juego-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .info-juego-card img {
+        width: 80px;
+        margin-bottom: 0;
+    }
+    
+    .botones-comunidad {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .botonUnirse, .botonSalir, .btn-secundario {
+        width: auto;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .banner-top {
+        min-height: 120px;
+        padding: 15px 20px;
+    }
+    
+    .banner-top h1 {
+        font-size: 1.5rem;
+    }
+    
+    .feed {
+        padding: 15px;
+    }
+    
+    .post-card {
+        padding: 8px;
+    }
+    
+    .post-autor {
+        font-size: 0.85rem;
+    }
+    
+    .post-fecha {
+        font-size: 0.65rem;
+    }
+    
+    .post-contenido {
+        font-size: 0.85rem;
+    }
+    
+    .input-post {
+        margin: 10px 15px 20px 15px;
+        padding: 8px 12px;
+    }
+    
+    .input-post textarea {
+        font-size: 0.85rem;
+    }
+    
+    .input-acciones button {
+        padding: 5px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .banner-top h1 {
+        font-size: 1.2rem;
+    }
+    
+    .info-juego-card {
+        flex-wrap: wrap;
+    }
+    
+    .botones-comunidad {
+        flex-wrap: wrap;
+    }
+    
+    .post-header {
+        flex-wrap: wrap;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+}

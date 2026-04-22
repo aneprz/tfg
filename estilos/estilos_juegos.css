@@ -193,3 +193,143 @@ main {
     70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
     100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
 }
+
+/* ========== RESPONSIVE JUEGOS ========== */
+
+@media (max-width: 1024px) {
+    .central h1 {
+        font-size: 2.5rem;
+    }
+    
+    .juegos {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 1.2rem;
+    }
+    
+    .portadaJuego {
+        height: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+    .central {
+        padding: 2rem 1rem;
+    }
+    
+    .central h1 {
+        font-size: 1.8rem;
+    }
+    
+    .central p {
+        font-size: 0.9rem;
+        padding: 0 10px;
+    }
+    
+    .buscadorContainer input {
+        padding: 0.7rem 0.8rem;
+        font-size: 0.9rem;
+    }
+    
+    .filtrosContainer select {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    main {
+        padding: 1rem 3%;
+    }
+    
+    h2 {
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    
+    .juegos {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+    
+    .portadaJuego {
+        height: 160px;
+    }
+    
+    .infoJuego {
+        padding: 0.7rem;
+    }
+    
+    .tituloJuego {
+        font-size: 0.8rem;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.3;
+        min-height: 2.6rem;
+    }
+    
+    .estrellas {
+        font-size: 12px;
+    }
+    
+    .nota {
+        font-size: 10px;
+    }
+    
+    .puntuacionJuego {
+        gap: 4px;
+    }
+    
+    .pag-btn {
+        font-size: 16px;
+        padding: 6px 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .central {
+        padding: 1.5rem 0.8rem;
+    }
+    
+    .central h1 {
+        font-size: 1.3rem;
+    }
+    
+    .central p {
+        font-size: 0.75rem;
+    }
+    
+    .buscadorContainer input {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    
+    .filtrosContainer select {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+    }
+    
+    .juegos {
+        gap: 0.6rem;
+    }
+    
+    .portadaJuego {
+        height: 130px;
+    }
+    
+    .tituloJuego {
+        font-size: 0.7rem;
+        min-height: 2.2rem;
+    }
+    
+    .estrellas {
+        font-size: 10px;
+    }
+    
+    .nota {
+        font-size: 9px;
+    }
+    
+    .pag-btn {
+        font-size: 14px;
+        padding: 4px 10px;
+    }
+}

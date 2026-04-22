@@ -215,5 +215,61 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
     <script>
         const MI_ID_USUARIO = <?php echo $_SESSION['id_usuario']; ?>;
     </script>
+    <script>
+    // Control de vista móvil para el chat
+    (function() {
+        var lista = document.querySelector('.lista-conversaciones');
+        var ventana = document.querySelector('.ventana-chat');
+        
+        // Función para mostrar el chat y ocultar la lista
+        function mostrarChat() {
+            if (window.innerWidth <= 768) {
+                if (lista) lista.classList.add('oculta-movil');
+                if (ventana) ventana.classList.add('activa-movil');
+            }
+        }
+        
+        // Función para mostrar la lista y ocultar el chat
+        function mostrarLista() {
+            if (window.innerWidth <= 768) {
+                if (lista) lista.classList.remove('oculta-movil');
+                if (ventana) ventana.classList.remove('activa-movil');
+            }
+        }
+        
+        // Añadir botón volver al header del chat
+        function añadirBotonVolver() {
+            var header = document.getElementById('chat-header');
+            if (header && !document.querySelector('.btn-volver-chat')) {
+                var btn = document.createElement('button');
+                btn.innerHTML = '←';
+                btn.className = 'btn-volver-chat';
+                btn.title = 'Volver';
+                btn.onclick = mostrarLista;
+                header.insertBefore(btn, header.firstChild);
+            }
+        }
+        
+        // Modificar la función seleccionarContacto
+        if (typeof seleccionarContacto === 'function') {
+            var original = seleccionarContacto;
+            window.seleccionarContacto = function(idReceptor, idConv, elemento) {
+                original(idReceptor, idConv, elemento);
+                mostrarChat();
+            };
+        }
+        
+        // Inicializar
+        añadirBotonVolver();
+        
+        // Al redimensionar, resetear vista si es necesario
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                if (lista) lista.classList.remove('oculta-movil');
+                if (ventana) ventana.classList.remove('activa-movil');
+            }
+        });
+    })();
+</script>
 </body>
 </html>

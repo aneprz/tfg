@@ -70,5 +70,39 @@
         }
     }
 </script>
+<script>
+    // Botón volver flotante para móvil
+    (function() {
+        // Crear el botón
+        var btnVolver = document.createElement('button');
+        btnVolver.innerHTML = '← Volver';
+        btnVolver.id = 'btnVolverMovil';
+        btnVolver.style.cssText = 'display:none; position:fixed; bottom:20px; left:20px; background:#e0be00; color:#000; border:none; padding:12px 20px; border-radius:50px; font-weight:bold; cursor:pointer; z-index:9999; box-shadow:0 2px 10px rgba(0,0,0,0.3);';
+        
+        document.body.appendChild(btnVolver);
+        
+        // Función para obtener la URL anterior
+        btnVolver.onclick = function() {
+            if (document.referrer && document.referrer !== '') {
+                window.location.href = document.referrer;
+            } else {
+                // Si no hay referrer, ir a la página principal de admin
+                window.location.href = '../gestionComunidades.php';
+            }
+        };
+        
+        // Mostrar solo en móvil (ancho menor a 768px)
+        function checkWidth() {
+            if (window.innerWidth <= 768) {
+                btnVolver.style.display = 'block';
+            } else {
+                btnVolver.style.display = 'none';
+            }
+        }
+        
+        window.addEventListener('resize', checkWidth);
+        checkWidth();
+    })();
+</script>
 </body>
 </html>

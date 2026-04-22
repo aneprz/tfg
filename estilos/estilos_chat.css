@@ -159,3 +159,82 @@
     color: #eee;
     border-bottom-left-radius: 2px;
 }
+
+/* ========== RESPONSIVE CHAT ========== */
+
+@media (max-width: 768px) {
+    .contenedor-chat {
+        flex-direction: column !important;
+        margin: 0 !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+    }
+    
+    .lista-conversaciones {
+        width: 100% !important;
+        height: 40% !important;
+        border-right: none !important;
+        border-bottom: 1px solid #333 !important;
+    }
+    
+    .ventana-chat {
+        height: 60% !important;
+    }
+    
+    .chat-item img {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .mensaje {
+        max-width: 85% !important;
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+    }
+    
+    .input-area {
+        padding: 10px 12px !important;
+    }
+    
+    .input-area input {
+        padding: 8px !important;
+        font-size: 14px !important;
+    }
+    
+    .input-area button {
+        padding: 0 15px !important;
+        font-size: 13px !important;
+    }
+    
+    .chat-toolbar {
+        padding: 10px 12px !important;
+    }
+    
+    .badge-mensaje {
+        min-width: 18px !important;
+        height: 18px !important;
+        font-size: 10px !important;
+        line-height: 18px !important;
+        padding: 0 4px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .lista-conversaciones {
+        height: 35% !important;
+    }
+    
+    .ventana-chat {
+        height: 65% !important;
+    }
+    
+    .chat-item img {
+        width: 35px !important;
+        height: 35px !important;
+    }
+    
+    .mensaje {
+        max-width: 90% !important;
+        font-size: 12px !important;
+    }
+}
