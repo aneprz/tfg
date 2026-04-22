@@ -38,12 +38,13 @@ function steam_api($url){
 
 
 /* =========================
-   FUNCION SECUENCIAL (REEMPLAZA MULTI CURL)
+   FUNCION MULTI CURL
    ========================= */
 
 function steam_multi_api($urls){
 
-    $responses = [];
+    $multi = curl_multi_init();
+    $channels = [];
 
     foreach($urls as $key => $url){
 
@@ -53,12 +54,29 @@ function steam_multi_api($urls){
         curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
         curl_setopt($ch,CURLOPT_TIMEOUT,10);
 
-        $response = curl_exec($ch);
+        curl_multi_add_handle($multi,$ch);
 
-        curl_close($ch);
-
-        $responses[$key] = json_decode($response,true);
+        $channels[$key] = $ch;
     }
+
+    $running = null;
+
+    do{
+        curl_multi_exec($multi,$running);
+        curl_multi_select($multi);
+    }while($running > 0);
+
+    $responses = [];
+
+    foreach($channels as $key => $ch){
+
+        $responses[$key] = json_decode(curl_multi_getcontent($ch),true);
+
+        curl_multi_remove_handle($multi,$ch);
+        curl_close($ch);
+    }
+
+    curl_multi_close($multi);
 
     return $responses;
 }
@@ -179,14 +197,14 @@ foreach($games as $game){
 
 
 /* =========================
-   OBTENER LOGROS (SECUENCIAL)
+   OBTENER LOGROS EN PARALELO
    ========================= */
 
 $achievements_data = steam_multi_api($achievement_urls);
 
 
 /* =========================
-   PROCESAR LOGROS + PUNTOS
+   PROCESAR LOGROS + WALLET
    ========================= */
 
 foreach($achievements_data as $appid => $data){
@@ -226,14 +244,17 @@ foreach($achievements_data as $appid => $data){
         ('$id_usuario','$id_logro','$fecha')
         ");
 
+        // 🔥 SOLO SI ES NUEVO → DAR PUNTOS
         if(mysqli_affected_rows($conexion) > 0){
 
+            // sumar puntos al Usuario
             mysqli_query($conexion,"
             UPDATE Usuario
             SET puntos_actuales = puntos_actuales + $puntos
             WHERE id_usuario = '$id_usuario'
             ");
 
+            // registrar movimiento
             mysqli_query($conexion,"
             INSERT INTO Movimientos_Puntos
             (id_usuario,puntos,tipo,descripcion)
@@ -253,4 +274,3 @@ $_SESSION["steam_sync"] = "Biblioteca y logros sincronizados correctamente";
 
 header("Location: ../php/user/perfiles/perfilSesion.php");
 exit;
-?>

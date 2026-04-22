@@ -11,12 +11,12 @@ return
         'default_environment' => 'development',
         'production' => [
             'adapter' => 'mysql',
-            'host' => 'localhost',
-            'name' => 'salsabox_db',
-            'user' => 'root',
-            'pass' => '',
+            'host' => 'sql100.infinityfree.com',
+            'name' => 'if0_41716581_salsabox_db',
+            'user' => 'if0_41716581',
+            'pass' => 'SalsaBox12',
             'port' => '3306',
-            'charset' => 'utf8',
+            'charset' => 'utf8'
         ],
         'development' => [
             'adapter' => 'mysql',
