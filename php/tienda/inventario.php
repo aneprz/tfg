@@ -3,7 +3,10 @@ session_start();
 require '../../db/conexiones.php';
 
 $avatar_usuario = "../../media/perfil_default.jpg";
-
+if (!isset($_SESSION['id_usuario'])) {
+    header("Location: ../../index.php");
+    exit();
+}
 if (isset($_SESSION['id_usuario'])) {
     $id = $_SESSION['id_usuario'];
     $res = mysqli_query($conexion, "SELECT avatar FROM Usuario WHERE id_usuario = $id");
