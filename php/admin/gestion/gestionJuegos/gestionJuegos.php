@@ -57,6 +57,11 @@ $admin = true;
             <div class="card-icon">✏️🎮</div>
             <span>Editar Videojuego</span>
         </a>
+
+        <a href="importarCatalogo.php" class="admin-card">
+            <div class="card-icon">⬇️🎮</div>
+            <span>Importar Catalogo</span>
+        </a>
     </div>
 </div>
 
