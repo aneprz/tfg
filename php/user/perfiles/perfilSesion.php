@@ -188,6 +188,7 @@ if ($avatar_item) {
 
         <!-- FOOTER -->
         <div class="perfil-footer">
+            <a href="dashboard.php" class="btn-volver">Ver Dashboard</a>
             <a href="../../../index.php" class="btn-volver">Volver al inicio</a>
             <a href="../../sesiones/logout/logout.php" class="btn-logout">Cerrar Sesión</a>
         </div>

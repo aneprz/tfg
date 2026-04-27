@@ -7,7 +7,7 @@ $tag=$_POST['gameTag']??'';
 $pass=$_POST['password']??'';
 
 $stmt=$conexion->prepare("
-SELECT id_usuario,password,admin,email_verificado
+SELECT id_usuario,password,admin,email_verificado,steamid
 FROM Usuario
 WHERE gameTag=?
 ");
@@ -29,6 +29,7 @@ if($Usuario && password_verify($pass,$Usuario['password'])){
 
 	session_regenerate_id(true);
 	$_SESSION['tag']=$tag;
+	$_SESSION['steamid']=$Usuario['steamid'];
 	$_SESSION['id_usuario']=$Usuario['id_usuario'];
 	$_SESSION['admin']=(bool)$Usuario['admin'];
 
