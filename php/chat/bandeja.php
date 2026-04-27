@@ -237,18 +237,6 @@ $resContactos = mysqli_query($conexion, $sqlContactos);
             }
         }
         
-        // Añadir botón volver al header del chat
-        function añadirBotonVolver() {
-            var header = document.getElementById('chat-header');
-            if (header && !document.querySelector('.btn-volver-chat')) {
-                var btn = document.createElement('button');
-                btn.innerHTML = '←';
-                btn.className = 'btn-volver-chat';
-                btn.title = 'Volver';
-                btn.onclick = mostrarLista;
-                header.insertBefore(btn, header.firstChild);
-            }
-        }
         
         // Modificar la función seleccionarContacto
         if (typeof seleccionarContacto === 'function') {

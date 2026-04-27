@@ -9,8 +9,6 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/php/notificaciones/notificaciones_ajax.php')
             .then(res => res.json())
             .then(data => {
-                console.log("Notificaciones campana:", data.total);
-                
                 if (badge) {
                     if (data.total > 0) {
                         badge.style.display = 'block';
@@ -30,8 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/php/chat/obtener_total_no_leidos.php')
             .then(res => res.json())
             .then(data => {
-                console.log("Mensajes no leídos chats:", data.total);
-                
                 const chatBadge = document.getElementById('chat-badge');
                 if (chatBadge) {
                     if (data.total > 0) {
