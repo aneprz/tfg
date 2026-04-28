@@ -2,6 +2,8 @@
 
 final class ImportPipelineService
 {
+    private const STEAM_CACHE_TTL = 604800;
+
     private mysqli $db;
     private string $projectRoot;
     private string $apiDir;
@@ -56,6 +58,25 @@ final class ImportPipelineService
                 ]
             ]
         ];
+    }
+
+    public function buildAchievementsResumeState(array $config): array
+    {
+        $state = $this->buildInitialState($config);
+        $phase =& $state['phases']['import_logros'];
+        $phase['total_games'] = $this->countGamesWithSteamAppId();
+
+        $processedGames = $this->clamp(
+            (int) ($state['config']['achievements_start_progress'] ?? 0),
+            0,
+            max(0, (int) $phase['total_games'])
+        );
+
+        $phase['processed_games'] = $processedGames;
+        $phase['last_id'] = $this->resolveAchievementsLastIdFromProgress($processedGames);
+        $state['current_phase'] = 'import_logros';
+
+        return $state;
     }
 
     public function processStep(array $state): array
@@ -304,30 +325,63 @@ final class ImportPipelineService
             throw new RuntimeException('Falta steam_api_key en API/credenciales.php.');
         }
 
-        $stmt = $this->db->prepare(
-            'INSERT IGNORE INTO Logros
-            (id_videojuego, nombre_logro, descripcion, puntos_logro, icono, icono_gris, porcentaje_global, steam_api_name)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-        );
+        $responses = $this->fetchAchievementResponses($games, $steamApiKey);
 
-        if (!$stmt) {
-            throw new RuntimeException('No se pudo preparar la insercion de logros.');
+        $insertedAchievements = 0;
+        $gamesWithAchievements = 0;
+        $gamesWithoutAchievements = 0;
+
+        foreach ($responses as $responseGroup) {
+            $game = $responseGroup['game'];
+            $schema = is_array($responseGroup['schema']) ? $responseGroup['schema'] : [];
+            $statsJson = is_array($responseGroup['stats']) ? $responseGroup['stats'] : null;
+
+            $achievements = $schema['game']['availableGameStats']['achievements'] ?? null;
+
+            if (!$achievements || !is_array($achievements)) {
+                $gamesWithoutAchievements++;
+                $logs[] = sprintf('logros: %s sin logros disponibles.', $game['titulo']);
+                continue;
+            }
+
+            $gamesWithAchievements++;
+            $statsMap = $this->buildAchievementStatsMap($statsJson);
+            $insertedForGame = $this->insertAchievementsForGame($game, $achievements, $statsMap);
+
+            $insertedAchievements += $insertedForGame;
+            $logs[] = sprintf('logros: %s -> %d insertados.', $game['titulo'], $insertedForGame);
         }
 
+        $phase['processed_games'] += count($games);
+        $phase['games_with_achievements'] += $gamesWithAchievements;
+        $phase['games_without_achievements'] += $gamesWithoutAchievements;
+        $phase['inserted_achievements'] += $insertedAchievements;
+        $phase['last_id'] = (int) end($games)['id_videojuego'];
+
+        return $state;
+    }
+
+    private function fetchAchievementResponses(array $games, string $steamApiKey): array
+    {
+        if (
+            function_exists('curl_multi_init') &&
+            function_exists('curl_multi_add_handle') &&
+            function_exists('curl_multi_exec') &&
+            function_exists('curl_multi_getcontent')
+        ) {
+            return $this->fetchAchievementResponsesConcurrent($games, $steamApiKey);
+        }
+
+        return $this->fetchAchievementResponsesSequential($games, $steamApiKey);
+    }
+
+    private function fetchAchievementResponsesConcurrent(array $games, string $steamApiKey): array
+    {
         $mh = curl_multi_init();
         $handles = [];
 
         foreach ($games as $game) {
-            $appid = (int) $game['steam_appid'];
-            $schemaUrl = sprintf(
-                'https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=%s&appid=%d',
-                rawurlencode($steamApiKey),
-                $appid
-            );
-            $statsUrl = sprintf(
-                'https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=%d',
-                $appid
-            );
+            [$schemaUrl, $statsUrl] = $this->buildAchievementUrls((int) $game['steam_appid'], $steamApiKey);
 
             $schemaHandle = $this->createCurlHandle($schemaUrl);
             $statsHandle = $this->createCurlHandle($statsUrl);
@@ -343,94 +397,170 @@ final class ImportPipelineService
         }
 
         $this->runMultiCurl($mh);
-
-        $insertedAchievements = 0;
-        $gamesWithAchievements = 0;
-        $gamesWithoutAchievements = 0;
-
-        $this->db->begin_transaction();
+        $responses = [];
 
         try {
             foreach ($handles as $handleGroup) {
-                $game = $handleGroup['game'];
-                $schema = json_decode(curl_multi_getcontent($handleGroup['schema']), true);
-                $statsJson = json_decode(curl_multi_getcontent($handleGroup['stats']), true);
+                $responses[] = [
+                    'game' => $handleGroup['game'],
+                    'schema' => json_decode(curl_multi_getcontent($handleGroup['schema']), true),
+                    'stats' => json_decode(curl_multi_getcontent($handleGroup['stats']), true)
+                ];
 
                 curl_multi_remove_handle($mh, $handleGroup['schema']);
                 curl_multi_remove_handle($mh, $handleGroup['stats']);
                 curl_close($handleGroup['schema']);
                 curl_close($handleGroup['stats']);
-
-                $achievements = $schema['game']['availableGameStats']['achievements'] ?? null;
-
-                if (!$achievements || !is_array($achievements)) {
-                    $gamesWithoutAchievements++;
-                    $logs[] = sprintf('logros: %s sin logros disponibles.', $game['titulo']);
-                    continue;
-                }
-
-                $gamesWithAchievements++;
-                $statsMap = [];
-
-                if (isset($statsJson['achievementpercentages']['achievements']) && is_array($statsJson['achievementpercentages']['achievements'])) {
-                    foreach ($statsJson['achievementpercentages']['achievements'] as $stat) {
-                        if (isset($stat['name'], $stat['percent'])) {
-                            $statsMap[$stat['name']] = (float) $stat['percent'];
-                        }
-                    }
-                }
-
-                $insertedForGame = 0;
-
-                foreach ($achievements as $achievement) {
-                    $nombre = $achievement['displayName'] ?? '';
-
-                    if ($nombre === '') {
-                        continue;
-                    }
-
-                    $descripcion = $achievement['description'] ?? '';
-                    $icono = $achievement['icon'] ?? '';
-                    $iconoGris = $achievement['icongray'] ?? '';
-                    $steamApiName = $achievement['name'] ?? '';
-                    $porcentaje = $statsMap[$steamApiName] ?? null;
-                    $puntos = $this->calculateAchievementPoints($porcentaje);
-
-                    $stmt->bind_param(
-                        'ississds',
-                        $game['id_videojuego'],
-                        $nombre,
-                        $descripcion,
-                        $puntos,
-                        $icono,
-                        $iconoGris,
-                        $porcentaje,
-                        $steamApiName
-                    );
-
-                    $stmt->execute();
-                    $insertedForGame += ($stmt->affected_rows > 0) ? 1 : 0;
-                }
-
-                $insertedAchievements += $insertedForGame;
-                $logs[] = sprintf('logros: %s -> %d insertados.', $game['titulo'], $insertedForGame);
             }
-
-            $this->db->commit();
-        } catch (Throwable $exception) {
-            $this->db->rollback();
-            throw $exception;
         } finally {
             curl_multi_close($mh);
         }
 
-        $phase['processed_games'] += count($games);
-        $phase['games_with_achievements'] += $gamesWithAchievements;
-        $phase['games_without_achievements'] += $gamesWithoutAchievements;
-        $phase['inserted_achievements'] += $insertedAchievements;
-        $phase['last_id'] = (int) end($games)['id_videojuego'];
+        return $responses;
+    }
 
-        return $state;
+    private function fetchAchievementResponsesSequential(array $games, string $steamApiKey): array
+    {
+        $responses = [];
+
+        foreach ($games as $game) {
+            [$schemaUrl, $statsUrl] = $this->buildAchievementUrls((int) $game['steam_appid'], $steamApiKey);
+
+            $schemaHandle = $this->createCurlHandle($schemaUrl);
+            $schemaJson = curl_exec($schemaHandle);
+            if ($schemaJson === false) {
+                $error = curl_error($schemaHandle);
+                curl_close($schemaHandle);
+                throw new RuntimeException('No se pudo consultar el esquema de logros de Steam: ' . $error);
+            }
+            curl_close($schemaHandle);
+
+            $statsHandle = $this->createCurlHandle($statsUrl);
+            $statsJson = curl_exec($statsHandle);
+            if ($statsJson === false) {
+                $error = curl_error($statsHandle);
+                curl_close($statsHandle);
+                throw new RuntimeException('No se pudo consultar los porcentajes globales de Steam: ' . $error);
+            }
+            curl_close($statsHandle);
+
+            $responses[] = [
+                'game' => $game,
+                'schema' => json_decode($schemaJson, true),
+                'stats' => json_decode($statsJson, true)
+            ];
+        }
+
+        return $responses;
+    }
+
+    private function buildAchievementUrls(int $appid, string $steamApiKey): array
+    {
+        $schemaUrl = sprintf(
+            'https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=%s&appid=%d',
+            rawurlencode($steamApiKey),
+            $appid
+        );
+        $statsUrl = sprintf(
+            'https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=%d',
+            $appid
+        );
+
+        return [$schemaUrl, $statsUrl];
+    }
+
+    private function buildAchievementStatsMap(?array $statsJson): array
+    {
+        $statsMap = [];
+
+        if (
+            is_array($statsJson)
+            && isset($statsJson['achievementpercentages']['achievements'])
+            && is_array($statsJson['achievementpercentages']['achievements'])
+        ) {
+            foreach ($statsJson['achievementpercentages']['achievements'] as $stat) {
+                if (isset($stat['name'], $stat['percent'])) {
+                    $statsMap[$stat['name']] = (float) $stat['percent'];
+                }
+            }
+        }
+
+        return $statsMap;
+    }
+
+    private function insertAchievementsForGame(array $game, array $achievements, array $statsMap): int
+    {
+        $attempt = 0;
+
+        while ($attempt < 2) {
+            $attempt++;
+
+            try {
+                $this->ensureDatabaseConnection();
+
+                $stmt = $this->db->prepare(
+                    'INSERT IGNORE INTO Logros
+                    (id_videojuego, nombre_logro, descripcion, puntos_logro, icono, icono_gris, porcentaje_global, steam_api_name)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+                );
+
+                if (!$stmt) {
+                    throw new RuntimeException('No se pudo preparar la insercion de logros.');
+                }
+
+                $insertedForGame = 0;
+                $this->db->begin_transaction();
+
+                try {
+                    foreach ($achievements as $achievement) {
+                        $nombre = $achievement['displayName'] ?? '';
+
+                        if ($nombre === '') {
+                            continue;
+                        }
+
+                        $descripcion = $achievement['description'] ?? '';
+                        $icono = $achievement['icon'] ?? '';
+                        $iconoGris = $achievement['icongray'] ?? '';
+                        $steamApiName = $achievement['name'] ?? '';
+                        $porcentaje = $statsMap[$steamApiName] ?? null;
+                        $puntos = $this->calculateAchievementPoints($porcentaje);
+
+                        $stmt->bind_param(
+                            'ississds',
+                            $game['id_videojuego'],
+                            $nombre,
+                            $descripcion,
+                            $puntos,
+                            $icono,
+                            $iconoGris,
+                            $porcentaje,
+                            $steamApiName
+                        );
+
+                        $stmt->execute();
+                        $insertedForGame += ($stmt->affected_rows > 0) ? 1 : 0;
+                    }
+
+                    $this->db->commit();
+                    return $insertedForGame;
+                } catch (Throwable $exception) {
+                    $this->safeRollback();
+                    throw $exception;
+                } finally {
+                    $this->safeCloseStatement($stmt);
+                }
+            } catch (Throwable $exception) {
+                if ($attempt < 2 && $this->isLostConnectionException($exception)) {
+                    $this->reconnectDatabase();
+                    continue;
+                }
+
+                throw $exception;
+            }
+        }
+
+        return 0;
     }
 
     private function moveToSteamPhase(array $state): array
@@ -662,6 +792,37 @@ final class ImportPipelineService
         return $games;
     }
 
+    private function resolveAchievementsLastIdFromProgress(int $processedGames): int
+    {
+        if ($processedGames <= 0) {
+            return 0;
+        }
+
+        $offset = $processedGames - 1;
+        $stmt = $this->db->prepare(
+            'SELECT id_videojuego
+            FROM Videojuego
+            WHERE steam_appid IS NOT NULL
+            ORDER BY id_videojuego ASC
+            LIMIT ?, 1'
+        );
+
+        if (!$stmt) {
+            throw new RuntimeException('No se pudo calcular el progreso manual para import_logros.');
+        }
+
+        try {
+            $stmt->bind_param('i', $offset);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result ? $result->fetch_assoc() : null;
+
+            return (int) ($row['id_videojuego'] ?? 0);
+        } finally {
+            $this->safeCloseStatement($stmt);
+        }
+    }
+
     private function countGamesWithoutSteamAppId(): int
     {
         $result = $this->db->query('SELECT COUNT(*) AS total FROM Videojuego WHERE steam_appid IS NULL');
@@ -814,19 +975,24 @@ final class ImportPipelineService
         }
 
         $cachePath = $this->apiDir . '/steam_cache.json';
+        $json = null;
 
-        if (is_file($cachePath)) {
+        if (is_file($cachePath) && (time() - (int) filemtime($cachePath)) < self::STEAM_CACHE_TTL) {
             $json = file_get_contents($cachePath);
-        } else {
-            $handle = $this->createCurlHandle('https://raw.githubusercontent.com/dgibbs64/SteamCMD-AppID-List/master/steamcmd_appid.json');
-            $json = curl_exec($handle);
+        }
 
-            if ($json === false) {
-                throw new RuntimeException('No se pudo descargar la cache de Steam: ' . curl_error($handle));
+        if (!is_string($json) || trim($json) === '') {
+            $json = $this->downloadSteamAppList();
+
+            if ($json !== null && trim($json) !== '') {
+                file_put_contents($cachePath, $json);
+            } elseif (is_file($cachePath)) {
+                $json = file_get_contents($cachePath);
             }
+        }
 
-            curl_close($handle);
-            file_put_contents($cachePath, $json);
+        if (!is_string($json) || trim($json) === '') {
+            throw new RuntimeException('No se pudo cargar la cache de Steam.');
         }
 
         $data = json_decode($json, true);
@@ -842,6 +1008,33 @@ final class ImportPipelineService
         }
 
         return $this->steamAppList;
+    }
+
+    private function downloadSteamAppList(): ?string
+    {
+        $sources = [
+            'https://api.steampowered.com/ISteamApps/GetAppList/v2/',
+            'https://raw.githubusercontent.com/dgibbs64/SteamCMD-AppID-List/master/steamcmd_appid.json'
+        ];
+
+        foreach ($sources as $source) {
+            $handle = $this->createCurlHandle($source);
+            $json = curl_exec($handle);
+
+            if ($json === false) {
+                curl_close($handle);
+                continue;
+            }
+
+            $httpCode = (int) curl_getinfo($handle, CURLINFO_HTTP_CODE);
+            curl_close($handle);
+
+            if ($httpCode >= 200 && $httpCode < 300 && trim($json) !== '') {
+                return $json;
+            }
+        }
+
+        return null;
     }
 
     private function createCurlHandle(string $url)
@@ -877,6 +1070,71 @@ final class ImportPipelineService
                 }
             }
         } while ($running);
+    }
+
+    private function ensureDatabaseConnection(): void
+    {
+        try {
+            if ($this->db->ping()) {
+                return;
+            }
+        } catch (Throwable $exception) {
+        }
+
+        $this->reconnectDatabase();
+    }
+
+    private function reconnectDatabase(): void
+    {
+        try {
+            $this->db->close();
+        } catch (Throwable $exception) {
+        }
+
+        $connectionPath = $this->projectRoot . '/db/conexiones.php';
+
+        if (!is_file($connectionPath)) {
+            throw new RuntimeException('No existe db/conexiones.php para reabrir MySQL.');
+        }
+
+        $conexion = (static function (string $path) {
+            $conexion = null;
+            require $path;
+            return $conexion;
+        })($connectionPath);
+
+        if (!$conexion instanceof mysqli) {
+            throw new RuntimeException('No se pudo reabrir la conexion MySQL.');
+        }
+
+        $this->db = $conexion;
+    }
+
+    private function safeRollback(): void
+    {
+        try {
+            $this->db->rollback();
+        } catch (Throwable $exception) {
+        }
+    }
+
+    private function safeCloseStatement(mysqli_stmt $statement): void
+    {
+        try {
+            $statement->close();
+        } catch (Throwable $exception) {
+        }
+    }
+
+    private function isLostConnectionException(Throwable $exception): bool
+    {
+        $message = strtolower($exception->getMessage());
+        $code = (int) $exception->getCode();
+
+        return $code === 2006
+            || $code === 2013
+            || str_contains($message, 'mysql server has gone away')
+            || str_contains($message, 'lost connection to mysql server');
     }
 
     private function calculateAchievementPoints(?float $percent): int
@@ -932,7 +1190,8 @@ final class ImportPipelineService
             'games_limit' => $this->clamp((int) ($config['games_limit'] ?? 150), 25, 500),
             'games_max_offset' => $this->clamp((int) ($config['games_max_offset'] ?? 10000), 100, 50000),
             'steam_batch_size' => $this->clamp((int) ($config['steam_batch_size'] ?? 80), 10, 500),
-            'achievements_batch_size' => $this->clamp((int) ($config['achievements_batch_size'] ?? 8), 1, 30)
+            'achievements_batch_size' => $this->clamp((int) ($config['achievements_batch_size'] ?? 8), 1, 30),
+            'achievements_start_progress' => max(0, (int) ($config['achievements_start_progress'] ?? 0))
         ];
     }
 
@@ -961,6 +1220,13 @@ final class ImportPipelineService
 
     private function normalizeText(string $text): string
     {
+        if (function_exists('iconv')) {
+            $transliterated = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text);
+            if ($transliterated !== false) {
+                $text = $transliterated;
+            }
+        }
+
         $text = strtolower($text);
         $text = str_replace(
             ['®', '™', '’', "'", '-', '_', ':', '(', ')', '[', ']', '!', '?', '.'],

@@ -65,6 +65,12 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
             color: #fff;
         }
 
+        .config-help {
+            color: #9eb0bd;
+            font-size: 0.82rem;
+            line-height: 1.4;
+        }
+
         .actions-row {
             display: flex;
             flex-wrap: wrap;
@@ -253,10 +259,16 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
                     <label for="achievements_batch_size">Lote <code>import_logros</code></label>
                     <input id="achievements_batch_size" type="number" min="1" max="30" value="8">
                 </div>
+                <div class="config-field">
+                    <label for="achievements_start_progress">Progreso manual <code>import_logros</code></label>
+                    <input id="achievements_start_progress" type="number" min="0" value="0">
+                    <small class="config-help">Si el ultimo intento se corto en 120/540 juegos, escribe 120 para seguir desde ahi.</small>
+                </div>
             </div>
 
             <div class="actions-row">
                 <button id="startBtn" class="action-btn action-primary">Empezar desde cero</button>
+                <button id="startAchievementsBtn" class="action-btn action-secondary">Empezar logros desde progreso</button>
                 <button id="resumeBtn" class="action-btn action-secondary">Reanudar</button>
                 <button id="stepBtn" class="action-btn action-secondary">Ejecutar un paso</button>
                 <button id="resetBtn" class="action-btn action-secondary">Resetear estado</button>
@@ -319,6 +331,7 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
         const achievementMetrics = document.getElementById('achievementMetrics');
         const logOutput = document.getElementById('logOutput');
         const startBtn = document.getElementById('startBtn');
+        const startAchievementsBtn = document.getElementById('startAchievementsBtn');
         const resumeBtn = document.getElementById('resumeBtn');
         const stepBtn = document.getElementById('stepBtn');
         const resetBtn = document.getElementById('resetBtn');
@@ -330,12 +343,14 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
                 games_limit: document.getElementById('games_limit').value,
                 games_max_offset: document.getElementById('games_max_offset').value,
                 steam_batch_size: document.getElementById('steam_batch_size').value,
-                achievements_batch_size: document.getElementById('achievements_batch_size').value
+                achievements_batch_size: document.getElementById('achievements_batch_size').value,
+                achievements_start_progress: document.getElementById('achievements_start_progress').value
             };
         }
 
         function setButtonsBusy(busy) {
             startBtn.disabled = busy;
+            startAchievementsBtn.disabled = busy;
             resumeBtn.disabled = busy;
             stepBtn.disabled = busy;
             resetBtn.disabled = busy;
@@ -449,6 +464,21 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 
             try {
                 await callApi('start', formConfig());
+                runLoop();
+            } catch (error) {
+                autoRunning = false;
+                setButtonsBusy(false);
+                appendLogs([`ERROR: ${error.message}`]);
+            }
+        });
+
+        startAchievementsBtn.addEventListener('click', async () => {
+            autoRunning = true;
+            setButtonsBusy(true);
+            logOutput.textContent = 'Sin actividad todavia.';
+
+            try {
+                await callApi('start_achievements', formConfig());
                 runLoop();
             } catch (error) {
                 autoRunning = false;

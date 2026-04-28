@@ -17,7 +17,18 @@ $sessionKey = 'catalog_import_pipeline';
 
 function respond(array $payload): void
 {
-    echo json_encode($payload);
+    $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+
+    if ($json === false) {
+        http_response_code(500);
+        echo json_encode([
+            'error' => 'No se pudo serializar la respuesta JSON.',
+            'json_error' => json_last_error_msg()
+        ], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        exit();
+    }
+
+    echo $json;
     exit();
 }
 
@@ -26,7 +37,8 @@ if ($action === 'start') {
         'games_limit' => $_POST['games_limit'] ?? null,
         'games_max_offset' => $_POST['games_max_offset'] ?? null,
         'steam_batch_size' => $_POST['steam_batch_size'] ?? null,
-        'achievements_batch_size' => $_POST['achievements_batch_size'] ?? null
+        'achievements_batch_size' => $_POST['achievements_batch_size'] ?? null,
+        'achievements_start_progress' => $_POST['achievements_start_progress'] ?? null
     ];
 
     $state = $service->buildInitialState($config);
@@ -36,6 +48,32 @@ if ($action === 'start') {
     respond([
         'ok' => true,
         'logs' => ['Importacion inicializada.'],
+        'summary' => $service->summarize($state)
+    ]);
+}
+
+if ($action === 'start_achievements') {
+    $config = [
+        'games_limit' => $_POST['games_limit'] ?? null,
+        'games_max_offset' => $_POST['games_max_offset'] ?? null,
+        'steam_batch_size' => $_POST['steam_batch_size'] ?? null,
+        'achievements_batch_size' => $_POST['achievements_batch_size'] ?? null,
+        'achievements_start_progress' => $_POST['achievements_start_progress'] ?? null
+    ];
+
+    $state = $service->buildAchievementsResumeState($config);
+    $state['status'] = 'running';
+    $_SESSION[$sessionKey] = $state;
+
+    $processed = (int) ($state['phases']['import_logros']['processed_games'] ?? 0);
+    $total = (int) ($state['phases']['import_logros']['total_games'] ?? 0);
+
+    respond([
+        'ok' => true,
+        'logs' => [
+            sprintf('Importacion de logros inicializada desde %d/%d juegos procesados.', $processed, $total),
+            'Los contadores de logros insertados empiezan a contar desde esta reanudacion manual.'
+        ],
         'summary' => $service->summarize($state)
     ]);
 }
