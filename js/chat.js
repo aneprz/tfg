@@ -31,12 +31,10 @@ function seleccionarContacto(idReceptor, idConv, elemento) {
     document.getElementById('id_conversacion_activa').value = idConv;
     receptorNuevoID = idReceptor;
     iniciarBucle(idConv);
-        // Ocultar badge del chat seleccionado
+    
     const badgeChat = elemento.querySelector('.badge-chat');
     if (badgeChat) badgeChat.style.display = 'none';
-    // Actualizar badge general
     if (typeof actualizarBadgeGeneral === 'function') actualizarBadgeGeneral();
-    
 }
 
 function abrirAjustesGrupo(idConv) {
@@ -200,6 +198,7 @@ function iniciarBucle(id) {
     chatInterval = setInterval(refrescar, 2500);
 }
 
+// ========== ENVÍO DE TEXTO NORMAL ==========
 document.getElementById('form-mensaje').addEventListener('submit', function(e) {
     e.preventDefault();
     const input = document.getElementById('input-texto');
@@ -218,6 +217,69 @@ document.getElementById('form-mensaje').addEventListener('submit', function(e) {
         .then(() => { input.value = ''; })
         .catch(err => console.error("Error:", err));
 });
+
+// ========== ENVÍO DE IMÁGENES ==========
+const fileInput = document.createElement('input');
+fileInput.type = 'file';
+fileInput.accept = 'image/jpeg,image/png,image/gif,image/webp';
+fileInput.style.display = 'none';
+document.body.appendChild(fileInput);
+
+const btnAdjuntar = document.createElement('button');
+btnAdjuntar.type = 'button';
+btnAdjuntar.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f0c330" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+</svg>`;
+btnAdjuntar.style.fontSize = '0';
+btnAdjuntar.style.background = 'none';
+btnAdjuntar.style.border = 'none';
+btnAdjuntar.style.color = '#f0c330';
+btnAdjuntar.style.fontSize = '1.5rem';
+btnAdjuntar.style.cursor = 'pointer';
+btnAdjuntar.style.marginRight = '10px';
+btnAdjuntar.style.padding = '5px';
+
+const formMensaje = document.getElementById('form-mensaje');
+const inputTexto = document.getElementById('input-texto');
+if (formMensaje && inputTexto) {
+    formMensaje.insertBefore(btnAdjuntar, inputTexto);
+}
+
+btnAdjuntar.onclick = () => fileInput.click();
+
+fileInput.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen no puede superar los 5MB');
+        fileInput.value = '';
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('imagen', file);
+    const idConv = document.getElementById('id_conversacion_activa').value;
+    if (idConv && idConv !== "0") {
+        formData.append('id_conversacion', idConv);
+    } else {
+        formData.append('id_receptor', receptorNuevoID);
+    }
+    
+    fetch('enviar_imagen.php', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const idConvActual = document.getElementById('id_conversacion_activa').value;
+                if (idConvActual) iniciarBucle(idConvActual);
+                fileInput.value = '';
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(err => console.error('Error:', err));
+};
 
 function abrirModalGrupo() {
     const modal = document.getElementById('modal-grupo');
