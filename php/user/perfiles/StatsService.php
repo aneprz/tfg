@@ -890,11 +890,11 @@ class StatsService
     {
         $tiers = [
             ['label' => 'Novato', 'min' => 0],
-            ['label' => 'Explorador', 'min' => 50],
-            ['label' => 'Constante', 'min' => 150],
-            ['label' => 'Cazalogros', 'min' => 300],
-            ['label' => 'Maestro', 'min' => 600],
-            ['label' => 'Leyenda', 'min' => 1000]
+            ['label' => 'Explorador', 'min' => 500],
+            ['label' => 'Guerrero', 'min' => 1500],
+            ['label' => 'Cazalogros', 'min' => 3000],
+            ['label' => 'Maestro', 'min' => 6000],
+            ['label' => 'Leyenda', 'min' => 10000]
         ];
 
         $current = $tiers[0];

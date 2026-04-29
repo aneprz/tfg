@@ -492,7 +492,9 @@ footer {
 .estrella.activa {
     color: gold;
 }
-
+.estrella.media {
+    color: #444; /* base gris */
+}
 .estrella.media::before {
     content: "★";
     position: absolute;
@@ -500,6 +502,7 @@ footer {
     width: 50%;
     overflow: hidden;
     color: gold;
+    z-index: 1;
 }
 
 .estrella:hover {

@@ -294,7 +294,6 @@ if ($juego) {
                                 <?php foreach ($resenas as $r): ?>
                                     <?php
                                         $puntuacion10 = isset($r['puntuacion']) ? (float) $r['puntuacion'] : null; // 0..10
-                                        $puntuacion5 = $puntuacion10 !== null ? ($puntuacion10 / 2) : null; // 0..5
                                         $relleno = $puntuacion10 !== null ? max(0, min(100, ($puntuacion10 / 10) * 100)) : 0;
 
                                         $estadoResena = isset($r['estado']) ? trim((string) $r['estado']) : '';
@@ -339,10 +338,10 @@ if ($juego) {
                                             <div class="resenaDerecha">
                                                 <div class="resenaRating">
                                                     <?php if ($puntuacion10 !== null): ?>
-                                                        <span class="estrellas" aria-label="<?php echo htmlspecialchars(number_format($puntuacion5, 1)); ?> de 5">
+                                                        <span class="estrellas" aria-label="<?php echo htmlspecialchars(number_format($puntuacion10, 1)); ?>">
                                                             <span class="relleno" style="width:<?php echo $relleno; ?>%"></span>
                                                         </span>
-                                                        <span><?php echo htmlspecialchars(number_format($puntuacion5, 1)); ?></span>
+                                                        <span><?php echo htmlspecialchars(number_format($puntuacion10, 1)); ?></span>
                                                     <?php else: ?>
                                                         <span class="resenaSubmeta">Sin nota</span>
                                                     <?php endif; ?>
@@ -391,9 +390,42 @@ if ($juego) {
 
             const estrellas = document.querySelectorAll('.estrella');
             const inputVal = document.getElementById('puntuacion');
-            const pintar = (v) => estrellas.forEach((s, i) => s.classList.toggle('activa', (i + 1) <= v));
-            estrellas.forEach((s, i) => s.onclick = () => { inputVal.value = i + 1; pintar(i + 1); });
-            pintar(parseFloat(inputVal.value));
+
+            let valorActual = parseFloat(inputVal.value) || 0;
+
+            function pintar(valor) {
+                estrellas.forEach((estrella, i) => {
+                    estrella.classList.remove('activa', 'media');
+
+                    const index = i + 1;
+
+                    if (valor >= index) {
+                        estrella.classList.add('activa'); // llena
+                    } else if (valor >= index - 0.5) {
+                        estrella.classList.add('media'); // media
+                    }
+                });
+            }
+
+            estrellas.forEach((estrella, i) => {
+                estrella.addEventListener('click', () => {
+                    const index = i + 1;
+
+                    if (valorActual === index) {
+                        valorActual = index - 0.5; // pasa a media
+                    } else if (valorActual === index - 0.5) {
+                        valorActual = index; // vuelve a entera
+                    } else {
+                        valorActual = index; // nueva selección
+                    }
+
+                    inputVal.value = valorActual;
+                    pintar(valorActual);
+                });
+            });
+
+            // pintar inicial
+            pintar(valorActual);
         });
     </script>
 

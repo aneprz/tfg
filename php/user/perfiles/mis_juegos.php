@@ -42,10 +42,15 @@ function estrellasDesdePuntuacion($puntuacion): string
         return '☆☆☆☆☆';
     }
 
-    $valor = (int) $puntuacion;
-    $valor = max(0, min(5, $valor));
+    $valor = $puntuacion / 2;
 
-    return str_repeat('★', $valor) . str_repeat('☆', 5 - $valor);
+    $enteras = floor($valor);
+    $media = ($valor - $enteras) >= 0.5 ? 1 : 0;
+    $vacias = 5 - $enteras - $media;
+
+    return str_repeat('★', $enteras)
+         . ($media ? '⯪' : '') // media estrella
+         . str_repeat('☆', $vacias);
 }
 
 $query = $conexion->prepare("
@@ -109,7 +114,13 @@ $total_juegos = $resultado->num_rows;
                             </span>
                         </td>
                         <td style="color: #9ab3bc;">
-                            <?php echo htmlspecialchars(estrellasDesdePuntuacion($row['puntuacion'])); ?>
+                            <?php
+                                $p = (float)$row['puntuacion']; // 0..10
+                                $relleno = ($p / 10) * 100;
+                            ?>
+                            <span class="estrellas">
+                                <span class="relleno" style="width: <?php echo $relleno; ?>%"></span>
+                            </span>
                         </td>
                     </tr>
                     <?php endwhile; ?>
