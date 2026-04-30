@@ -164,14 +164,22 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             </section>
 
             <div class="input-post">
-                <form action="guardar_post.php" method="POST">
-                    <input type="hidden" name="id_comunidad" value="<?php echo $id_comunidad; ?>">
-                    <textarea name="contenido" placeholder="Escribe un mensaje..." required></textarea>
-                    <div class="input-acciones">
-                        <button type="submit" class="botonCrearCuenta">Enviar</button>
-                    </div>
-                </form>
+    <?php if ($esMiembro): ?>
+        <form action="guardar_post.php" method="POST">
+            <input type="hidden" name="id_comunidad" value="<?php echo $id_comunidad; ?>">
+            <textarea name="contenido" placeholder="Escribe un mensaje..." required></textarea>
+            <div class="input-acciones">
+                <button type="submit" class="botonCrearCuenta">Enviar</button>
             </div>
+        </form>
+    <?php else: ?>
+        <div style="text-align: center; padding: 20px; background: #2c3440; border-radius: 8px;">
+            <p style="color: #e0be00; margin-bottom: 10px;">🔒 No eres miembro de esta comunidad</p>
+            <p style="color: #aaa; font-size: 0.9rem;">Únete para poder escribir mensajes y participar en la comunidad.</p>
+            <a href="gestionar_miembro.php?accion=unirse&id_comunidad=<?php echo $id_comunidad; ?>" class="botonUnirse" style="display: inline-block; margin-top: 10px;">Unirse a la comunidad</a>
+        </div>
+    <?php endif; ?>
+</div>
         </main>
 
         <aside class="sidebar-info">
