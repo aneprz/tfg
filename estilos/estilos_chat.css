@@ -238,3 +238,16 @@
         font-size: 12px !important;
     }
 }
+
+/* Estilos para imágenes en el chat */
+.contenido-imagen img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.contenido-imagen img:hover {
+    transform: scale(1.02);
+}

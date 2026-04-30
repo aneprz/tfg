@@ -56,8 +56,17 @@ while ($m = mysqli_fetch_assoc($res)) {
         $html .= '<b style="font-size:11px; color:#f0c330; display:block; margin-bottom:4px;">' . htmlspecialchars($m['gameTag']) . $corona . '</b>';
     }
 
-    $html .= '<div class="contenido-texto">' . htmlspecialchars($m['contenido']) . '</div>';
-    
+    // Detectar si es una imagen
+    $contenido = htmlspecialchars($m['contenido']);
+    if (strpos($contenido, '[IMAGEN] ') === 0) {
+        $ruta_imagen = substr($contenido, 9);
+        $html .= '<div class="contenido-imagen" style="margin-top: 5px;">';
+        $html .= '<img src="' . $ruta_imagen . '" alt="Imagen" style="max-width: 200px; max-height: 200px; border-radius: 10px; cursor: pointer;" onclick="window.open(this.src)">';
+        $html .= '</div>';
+    } else {
+        $html .= '<div class="contenido-texto">' . $contenido . '</div>';
+    }
+        
     // Footer del mensaje
     $status_visto = "";
     if ($es_mio) {
