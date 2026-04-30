@@ -1,7 +1,6 @@
 <?php
 
 ini_set('display_errors',1);
-ini_set('display_startup_errors',1);
 error_reporting(E_ALL);
 
 session_start();
@@ -9,247 +8,195 @@ session_start();
 require "../db/conexiones.php";
 require "../API/credenciales.php";
 
-if(!isset($_SESSION["id_usuario"])){
-    header("Location: ../login.php");
-    exit;
+if (!isset($_SESSION["id_usuario"])) {
+    exit(header("Location: ../login.php"));
 }
 
-$id_usuario = $_SESSION["id_usuario"];
+$id_usuario = (int) $_SESSION["id_usuario"];
+
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 
 /* =========================
-   FUNCION API NORMAL
+   RECONNECT SI MUERE MYSQL
    ========================= */
+function db_ping($conexion){
+    if (!$conexion->ping()) {
+        global $conexion;
+        $conexion->close();
+        require "../db/conexiones.php";
+    }
+}
 
+
+/* =========================
+   STEAM API
+   ========================= */
 function steam_api($url){
+    $ch = curl_init($url);
+    curl_setopt_array($ch,[
+        CURLOPT_RETURNTRANSFER=>true,
+        CURLOPT_TIMEOUT=>15
+    ]);
 
-    $ch = curl_init();
-
-    curl_setopt($ch,CURLOPT_URL,$url);
-    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
-    curl_setopt($ch,CURLOPT_TIMEOUT,10);
-
-    $response = curl_exec($ch);
-
+    $res = curl_exec($ch);
     curl_close($ch);
 
-    return json_decode($response,true);
+    return json_decode($res,true);
 }
 
 
 /* =========================
-   FUNCION SECUENCIAL (REEMPLAZA MULTI CURL)
+   STEAMID
    ========================= */
+$stmt = $conexion->prepare("SELECT steamid FROM Usuario WHERE id_usuario=?");
+$stmt->bind_param("i",$id_usuario);
+$stmt->execute();
+$steamid = $stmt->get_result()->fetch_assoc()["steamid"] ?? null;
 
-function steam_multi_api($urls){
-
-    $responses = [];
-
-    foreach($urls as $key => $url){
-
-        $ch = curl_init();
-
-        curl_setopt($ch,CURLOPT_URL,$url);
-        curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
-        curl_setopt($ch,CURLOPT_TIMEOUT,10);
-
-        $response = curl_exec($ch);
-
-        curl_close($ch);
-
-        $responses[$key] = json_decode($response,true);
-    }
-
-    return $responses;
+if(!$steamid){
+    exit(header("Location: ../perfilSesion.php"));
 }
 
 
 /* =========================
-   OBTENER STEAMID
+   MAPAS (OPTIMIZADO)
    ========================= */
-
-$res = mysqli_query($conexion,"
-SELECT steamid
-FROM Usuario
-WHERE id_usuario='$id_usuario'
-");
-
-$row = mysqli_fetch_assoc($res);
-
-if(!$row || !$row["steamid"]){
-
-    $_SESSION["steam_sync"] = "No tienes una cuenta de Steam vinculada";
-
-    header("Location: ../perfilSesion.php");
-    exit;
-}
-
-$steamid = $row["steamid"];
-
-
-/* =========================
-   CARGAR JUEGOS DE TU BD
-   ========================= */
-
 $juegos_bd = [];
-
-$res = mysqli_query($conexion,"
-SELECT id_videojuego, steam_appid
-FROM Videojuego
-");
-
-while($row = mysqli_fetch_assoc($res)){
-    $juegos_bd[$row["steam_appid"]] = $row["id_videojuego"];
+$res = $conexion->query("SELECT id_videojuego, steam_appid FROM Videojuego");
+while($r = $res->fetch_assoc()){
+    $juegos_bd[(int)$r["steam_appid"]] = (int)$r["id_videojuego"];
 }
-
-
-/* =========================
-   CARGAR LOGROS DE TU BD
-   ========================= */
 
 $logros_bd = [];
+$res = $conexion->query("SELECT id_logro, steam_api_name, id_videojuego, puntos_logro FROM Logros");
 
-$res = mysqli_query($conexion,"
-SELECT id_logro, steam_api_name, id_videojuego, puntos_logro
-FROM Logros
-");
-
-while($row = mysqli_fetch_assoc($res)){
-    $logros_bd[$row["id_videojuego"]][$row["steam_api_name"]] = $row;
+while($r = $res->fetch_assoc()){
+    $logros_bd[$r["id_videojuego"]][$r["steam_api_name"]] = $r;
 }
 
 
 /* =========================
-   OBTENER JUEGOS STEAM
+   STEAM GAMES
    ========================= */
+$data = steam_api("https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=$steam_api_key&steamid=$steamid&include_appinfo=1");
 
-$url = "https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=$steam_api_key&steamid=$steamid&include_appinfo=true&include_played_free_games=true";
-
-$data = steam_api($url);
-
-if(!isset($data["response"]["games"])){
-
-    $_SESSION["steam_sync"] = "No se pudieron obtener juegos de Steam";
-
-    header("Location: ../perfilSesion.php");
-    exit;
-}
+if(!$data || empty($data["response"]["games"])) exit;
 
 $games = $data["response"]["games"];
 
 
 /* =========================
-   PREPARAR URLS LOGROS
+   PREPARE STATEMENTS (fuera loop)
    ========================= */
+$insBib = $conexion->prepare("
+INSERT IGNORE INTO Biblioteca
+(id_usuario,id_videojuego,estado,horas_totales)
+VALUES (?,?,?,?)
+");
 
-$achievement_urls = [];
+$insLog = $conexion->prepare("
+INSERT IGNORE INTO Logros_Usuario
+(id_usuario,id_logro,fecha_obtencion)
+VALUES (?,?,?)
+");
 
-foreach($games as $game){
+$updPts = $conexion->prepare("
+UPDATE Usuario SET puntos_actuales = puntos_actuales + ? WHERE id_usuario=?
+");
 
-    $appid = $game["appid"];
+$insMov = $conexion->prepare("
+INSERT INTO Movimientos_Puntos
+(id_usuario,puntos,tipo,descripcion)
+VALUES (?,?,?,?)
+");
 
-    if(!isset($juegos_bd[$appid])){
-        continue;
-    }
 
-    $id_videojuego = $juegos_bd[$appid];
-
-    $horas = 0;
-
-    if(isset($game["playtime_forever"])){
-        $horas = $game["playtime_forever"] / 60;
-    }
-
-    $estado = ($horas > 0) ? "jugado" : "pendiente";
-
-    mysqli_query($conexion,"
-    INSERT IGNORE INTO Biblioteca
-    (id_usuario,id_videojuego,estado,horas_totales)
-    VALUES
-    ('$id_usuario','$id_videojuego','$estado','$horas')
-    ");
-
-    if(!isset($logros_bd[$id_videojuego])){
-        continue;
-    }
-
-    $achievement_urls[$appid] =
-    "https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=$steam_api_key&steamid=$steamid&appid=$appid";
-}
+$total = 0;
+$counter = 0;
 
 
 /* =========================
-   OBTENER LOGROS (SECUENCIAL)
+   JUEGOS
    ========================= */
+foreach($games as $g){
 
-$achievements_data = steam_multi_api($achievement_urls);
+    $appid = (int)$g["appid"];
 
-
-/* =========================
-   PROCESAR LOGROS + PUNTOS
-   ========================= */
-
-foreach($achievements_data as $appid => $data){
+    if(!isset($juegos_bd[$appid])) continue;
 
     $id_videojuego = $juegos_bd[$appid];
+    $horas = ($g["playtime_forever"] ?? 0)/60;
+    $estado = $horas>0 ? "jugado":"pendiente";
 
-    if(!isset($data["playerstats"]["achievements"])){
-        continue;
+    $insBib->bind_param("iisd",$id_usuario,$id_videojuego,$estado,$horas);
+    $insBib->execute();
+
+    if(isset($logros_bd[$id_videojuego])){
+        $urls[$appid] = "https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=$steam_api_key&steamid=$steamid&appid=$appid";
     }
 
-    foreach($data["playerstats"]["achievements"] as $ach){
-
-        if($ach["achieved"] != 1){
-            continue;
-        }
-
-        $api_name = $ach["apiname"];
-
-        if(!isset($logros_bd[$id_videojuego][$api_name])){
-            continue;
-        }
-
-        $logro = $logros_bd[$id_videojuego][$api_name];
-        $id_logro = $logro["id_logro"];
-        $puntos = $logro["puntos_logro"] ?? 0;
-
-        $fecha = null;
-
-        if(isset($ach["unlocktime"]) && $ach["unlocktime"] > 0){
-            $fecha = date("Y-m-d H:i:s",$ach["unlocktime"]);
-        }
-
-        mysqli_query($conexion,"
-        INSERT IGNORE INTO Logros_Usuario
-        (id_usuario,id_logro,fecha_obtencion)
-        VALUES
-        ('$id_usuario','$id_logro','$fecha')
-        ");
-
-        if(mysqli_affected_rows($conexion) > 0){
-
-            mysqli_query($conexion,"
-            UPDATE Usuario
-            SET puntos_actuales = puntos_actuales + $puntos
-            WHERE id_usuario = '$id_usuario'
-            ");
-
-            mysqli_query($conexion,"
-            INSERT INTO Movimientos_Puntos
-            (id_usuario,puntos,tipo,descripcion)
-            VALUES
-            ('$id_usuario',$puntos,'logro','Logro desbloqueado')
-            ");
-        }
+    // 👇 IMPORTANTE: evita overflow conexión
+    if(++$counter % 50 == 0){
+        db_ping($conexion);
+        usleep(200000);
     }
 }
 
 
 /* =========================
-   FINALIZAR
+   LOGROS
    ========================= */
+foreach($urls as $appid=>$url){
 
-$_SESSION["steam_sync"] = "Biblioteca y logros sincronizados correctamente";
+    $data = steam_api($url);
+    if(!$data || empty($data["playerstats"]["achievements"])) continue;
+
+    $id_videojuego = $juegos_bd[$appid];
+
+    foreach($data["playerstats"]["achievements"] as $a){
+
+        if($a["achieved"] != 1) continue;
+
+        $api = $a["apiname"];
+
+        if(!isset($logros_bd[$id_videojuego][$api])) continue;
+
+        $log = $logros_bd[$id_videojuego][$api];
+
+        $fecha = !empty($a["unlocktime"])
+            ? date("Y-m-d H:i:s",$a["unlocktime"])
+            : null;
+
+        $insLog->bind_param("iis",$id_usuario,$log["id_logro"],$fecha);
+        $insLog->execute();
+
+        if($insLog->affected_rows){
+            $total += (int)$log["puntos_logro"];
+        }
+    }
+
+    db_ping($conexion);
+}
+
+
+/* =========================
+   UPDATE FINAL
+   ========================= */
+if($total>0){
+
+    $tipo = "logro";
+    $desc = "Logro desbloqueado";
+
+    $updPts->bind_param("ii",$total,$id_usuario);
+    $updPts->execute();
+
+    $insMov->bind_param("iiss",$id_usuario,$total,$tipo,$desc);
+    $insMov->execute();
+}
+
+
+$_SESSION["steam_sync"]="OK";
 
 header("Location: ../php/user/perfiles/perfilSesion.php");
 exit;

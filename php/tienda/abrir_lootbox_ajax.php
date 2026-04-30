@@ -18,7 +18,7 @@ try {
        1. OBTENER LOOTBOX
     ========================= */
     $res = mysqli_query($conexion, "
-        SELECT precio 
+        SELECT precio, nombre 
         FROM Tienda_Items 
         WHERE id_item = $id_lootbox AND tipo='lootbox'
     ");
@@ -29,6 +29,7 @@ try {
 
     $lootbox = mysqli_fetch_assoc($res);
     $precio = (float)$lootbox['precio'];
+    $nombre = $lootbox['nombre'] ?? 'Lootbox';
 
     /* =========================
        2. BLOQUEAR USUARIO
@@ -51,16 +52,25 @@ try {
     }
 
     /* =========================
-       3. RESTAR PUNTOS
+       3. RESTAR PUNTOS + MOVIMIENTO
     ========================= */
-    mysqli_query($conexion, "
+    if (!mysqli_query($conexion, "
         UPDATE Usuario 
         SET puntos_actuales = puntos_actuales - $precio
         WHERE id_usuario = $id_usuario
-    ");
+    ")) {
+        throw new Exception("Error al restar puntos");
+    }
+
+    if (!mysqli_query($conexion, "
+        INSERT INTO Movimientos_Puntos (id_usuario, puntos, tipo, descripcion)
+        VALUES ($id_usuario, -$precio, 'lootbox', 'Apertura de lootbox: $nombre')
+    ")) {
+        throw new Exception("Error al registrar movimiento de compra");
+    }
 
     /* =========================
-       4. OBTENER ITEMS (INCLUYENDO RAREZA)
+       4. OBTENER ITEMS
     ========================= */
     $resItems = mysqli_query($conexion, "
         SELECT ti.id_item, ti.nombre, ti.imagen, ti.rareza, lr.probabilidad
@@ -77,7 +87,7 @@ try {
     $totalProb = 0;
 
     while ($row = mysqli_fetch_assoc($resItems)) {
-        $prob = max(0, (float)$row['probabilidad']); // ✅ DECIMALES
+        $prob = max(0, (float)$row['probabilidad']);
         $row['probabilidad'] = $prob;
         $totalProb += $prob;
         $items[] = $row;
@@ -88,7 +98,7 @@ try {
     }
 
     /* =========================
-       5. RNG REAL (DECIMALES)
+       5. RNG
     ========================= */
     $rand = (mt_rand() / mt_getrandmax()) * $totalProb;
 
@@ -97,7 +107,6 @@ try {
 
     foreach ($items as $item) {
         $acumulado += $item['probabilidad'];
-
         if ($rand <= $acumulado) {
             $ganado = $item;
             break;
@@ -121,6 +130,7 @@ try {
     $valorItem = 0;
 
     if ($esDuplicado) {
+
         $resValor = mysqli_query($conexion, "
             SELECT precio FROM Tienda_Items 
             WHERE id_item = {$ganado['id_item']}
@@ -128,20 +138,34 @@ try {
 
         $valorItem = (float)(mysqli_fetch_assoc($resValor)['precio'] ?? 0);
 
-        mysqli_query($conexion, "
+        if (!mysqli_query($conexion, "
             UPDATE Usuario 
             SET puntos_actuales = puntos_actuales + $valorItem
             WHERE id_usuario = $id_usuario
-        ");
+        ")) {
+            throw new Exception("Error devolviendo puntos");
+        }
+
+        // ✅ MOVIMIENTO POSITIVO
+        if (!mysqli_query($conexion, "
+            INSERT INTO Movimientos_Puntos (id_usuario, puntos, tipo, descripcion)
+            VALUES ($id_usuario, $valorItem, 'duplicado', 'Duplicado: {$ganado['nombre']}')
+        ")) {
+            throw new Exception("Error al registrar devolución");
+        }
+
     } else {
-        mysqli_query($conexion, "
+
+        if (!mysqli_query($conexion, "
             INSERT INTO Usuario_Items (id_usuario, id_item)
             VALUES ($id_usuario, {$ganado['id_item']})
-        ");
+        ")) {
+            throw new Exception("Error insertando item");
+        }
     }
 
     /* =========================
-       7. OBTENER PUNTOS REALES
+       7. PUNTOS FINALES
     ========================= */
     $resFinal = mysqli_query($conexion, "
         SELECT puntos_actuales FROM Usuario 
@@ -150,7 +174,7 @@ try {
 
     $puntosFinales = (float)mysqli_fetch_assoc($resFinal)['puntos_actuales'];
 
-    mysqli_commit($conexion); // ✅ CRÍTICO
+    mysqli_commit($conexion);
 
     /* =========================
        8. RESPUESTA
@@ -165,7 +189,9 @@ try {
     ]);
 
 } catch (Exception $e) {
+
     mysqli_rollback($conexion);
+
     echo json_encode([
         "ok" => false,
         "error" => $e->getMessage()
