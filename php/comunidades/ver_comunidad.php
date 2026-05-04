@@ -179,7 +179,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <a href="gestionar_miembro.php?accion=unirse&id_comunidad=<?php echo $id_comunidad; ?>" class="botonUnirse" style="display: inline-block; margin-top: 10px;">Unirse a la comunidad</a>
         </div>
     <?php endif; ?>
-</div>
+</div> 
         </main>
 
         <aside class="sidebar-info">
