@@ -59,18 +59,24 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         .caja-basica:hover { border-color: #aeb4c4; box-shadow: 0 5px 20px rgba(174, 180, 196, 0.2); }
         .caja-epica:hover { border-color: #c724b1; box-shadow: 0 5px 20px rgba(199, 36, 177, 0.3); }
         .caja-legendaria:hover { border-color: #f0c330; box-shadow: 0 5px 20px rgba(240, 195, 48, 0.4); }
-
+        .caja-hueco {
+            height: 150px; 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
         .caja-imagen {
-            width: 300px;
-            height: 300px;
-            margin-bottom: 15px;
+            width: 280px;  /* Hazla todo lo grande que quieras aquí */
+            height: 280px; /* Hazla todo lo grande que quieras aquí */
             object-fit: contain;
             filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.5));
             transition: transform 0.3s;
         }
 
         .caja-item:hover .caja-imagen {
-            transform: scale(1.1);
+            transform: scale(1.05); /* Efecto al pasar el ratón */
         }
 
         .caja-titulo {
@@ -208,7 +214,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
         <!-- CAJA ÉPICA -->
         <div class="caja-item caja-epica">
-            <img src="../../media/caja_epica.png" alt="Caja Épica" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/logoPlatino.png'">
+            <img src="../../media/caja_epica.png" alt="Caja Épica" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-epica.png'">
             <div class="caja-titulo">Caja Triple A</div>
             <div class="caja-precio">500 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(2)">Abrir Caja</button>
@@ -217,7 +223,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
         <!-- CAJA LEGENDARIA -->
         <div class="caja-item caja-legendaria">
-            <img src="../../media/caja_legendaria.png" alt="Caja Legendaria" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/logoPlatino.png'">
+            <img src="../../media/caja_legendaria.png" alt="Caja Legendaria" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-legendaria.png'">
             <div class="caja-titulo">Caja SalsaBox Pro</div>
             <div class="caja-precio">1200 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(3)">Abrir Caja</button>
@@ -226,7 +232,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
         <!-- CAJA TEMÁTICA -->
         <div class="caja-item caja-basica">
-            <img src="../../media/caja_terror.png" alt="Caja Terror" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/logoPlatino.png'">
+            <img src="../../media/caja_terror.png" alt="Caja Terror" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-horror.png'">
             <div class="caja-titulo">Caja Survival Horror</div>
             <div class="caja-precio">300 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(4)">Abrir Caja</button>
