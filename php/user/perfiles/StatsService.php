@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../../../db/conexiones.php';
+require_once __DIR__ . '/UserProgressService.php';
 
 class StatsService
 {
@@ -33,7 +34,7 @@ class StatsService
 
         return [
             'overview' => $overview,
-            'rank' => self::buildRank((int) $points['lifetime_points']),
+            'rank' => self::buildRank((int) $points['current_points']),
             'charts' => [
                 'rating_evolution' => self::getRatingEvolution((int) $userId),
                 'points_evolution' => self::getPointsEvolution((int) $userId),
@@ -236,7 +237,7 @@ class StatsService
                     continue;
                 }
 
-                $key = strtolower($label);
+                $key = self::normalizeTaxonomyToken($label);
 
                 if (!isset($totals[$key])) {
                     $totals[$key] = [
@@ -836,7 +837,7 @@ class StatsService
         $fullAverage = (float) $stateSummary['avg_full_hours'];
         $completedAverage = (float) $stateSummary['avg_hours_completed'];
 
-        $playStyle = self::buildPlayStyle($completedAverage, $storyAverage, $fullAverage);
+        $playStyle = self::buildPlayStyle($topGenres);
 
         return [
             'backlog_count' => $backlog,
@@ -857,78 +858,160 @@ class StatsService
         ];
     }
 
-    private static function buildPlayStyle(float $completedAverage, float $storyAverage, float $fullAverage): array
+    private static function buildPlayStyle(array $topGenres): array
     {
-        if ($completedAverage <= 0 || ($storyAverage <= 0 && $fullAverage <= 0)) {
+        $rankedGenres = array_values(array_filter($topGenres, static function (array $genre): bool {
+            return (float) ($genre['hours'] ?? 0) > 0 || (int) ($genre['games'] ?? 0) > 0;
+        }));
+
+        if ($rankedGenres === []) {
             return [
                 'label' => 'Sin suficiente historial',
-                'copy' => 'Completa algunos juegos mas para detectar tu estilo de juego.'
+                'copy' => 'Juega un poco mas para detectar un patron real en tus generos habituales.'
             ];
         }
 
-        if ($fullAverage > 0 && $completedAverage >= ($fullAverage * 0.9)) {
-            return [
-                'label' => 'Completista',
-                'copy' => 'Tus horas se acercan mucho al 100%. Sueles exprimir bastante cada juego.'
-            ];
-        }
-
-        if ($storyAverage > 0 && $completedAverage >= ($storyAverage * 1.2)) {
-            return [
-                'label' => 'Explorador',
-                'copy' => 'Sueles dedicar mas horas que la historia principal. Te gusta desviarte y curiosear.'
-            ];
-        }
-
-        return [
-            'label' => 'Directo al grano',
-            'copy' => 'Tiendes a completar juegos cerca del camino principal sin entretenerte demasiado.'
-        ];
-    }
-
-    private static function buildRank(int $lifetimePoints): array
-    {
-        $tiers = [
-            ['label' => 'Novato', 'min' => 0],
-            ['label' => 'Explorador', 'min' => 500],
-            ['label' => 'Guerrero', 'min' => 1500],
-            ['label' => 'Cazalogros', 'min' => 3000],
-            ['label' => 'Maestro', 'min' => 6000],
-            ['label' => 'Leyenda', 'min' => 10000]
+        $focusGenres = array_slice($rankedGenres, 0, 3);
+        $styleCatalog = [
+            'explorador_narrativo' => [
+                'label' => 'Explorador narrativo',
+                'keywords' => ['rpg', 'role-playing', 'adventure', 'aventur', 'metroidvania', 'story', 'narrative', 'visual novel', 'misterio'],
+                'copy' => '%s marcan la mayor parte de tus partidas. Sueles buscar mundos para recorrer, progreso sostenido y sesiones con peso narrativo.'
+            ],
+            'especialista_en_accion' => [
+                'label' => 'Especialista en accion',
+                'keywords' => ['action', 'accion', 'shooter', 'fps', 'fight', 'fighting', 'hack', 'slash', 'beat', 'roguelike', 'roguelite', 'souls'],
+                'copy' => '%s dominan tu historial. Todo apunta a un estilo de reflejos, ritmo alto y partidas intensas.'
+            ],
+            'mente_estratega' => [
+                'label' => 'Mente estratega',
+                'keywords' => ['strategy', 'estrateg', 'moba', 'tactic', 'tactica', 'card', 'deck', 'tower defense', 'auto battler'],
+                'copy' => '%s aparecen una y otra vez en tu biblioteca. Prefieres planificar, optimizar y ganar ventaja a base de decisiones.'
+            ],
+            'constructor_paciente' => [
+                'label' => 'Constructor paciente',
+                'keywords' => ['simulation', 'simul', 'farming', 'granja', 'sandbox', 'craft', 'builder', 'city', 'tycoon', 'survival'],
+                'copy' => '%s sostienen buena parte de tu tiempo de juego. Disfrutas crecer poco a poco, gestionar recursos y moldear la partida.'
+            ],
+            'competidor_arcade' => [
+                'label' => 'Competidor arcade',
+                'keywords' => ['racing', 'carreras', 'sports', 'deportes', 'arcade', 'platform', 'plataform', 'rhythm', 'music', 'party'],
+                'copy' => '%s son los generos que mas repites. Tiendes a priorizar partidas rapidas, dominio mecanico y rejugabilidad constante.'
+            ]
         ];
 
-        $current = $tiers[0];
-        $next = null;
+        $scores = [];
+        foreach ($styleCatalog as $key => $style) {
+            $scores[$key] = 0.0;
+        }
 
-        foreach ($tiers as $index => $tier) {
-            if ($lifetimePoints >= $tier['min']) {
-                $current = $tier;
-                $next = $tiers[$index + 1] ?? null;
+        foreach ($focusGenres as $genre) {
+            $weight = max(1.0, (float) ($genre['hours'] ?? 0)) + ((int) ($genre['games'] ?? 0) * 1.5);
+            $matched = false;
+
+            foreach ($styleCatalog as $key => $style) {
+                if (self::genreMatchesStyle((string) ($genre['label'] ?? ''), $style['keywords'])) {
+                    $scores[$key] += $weight;
+                    $matched = true;
+                }
+            }
+
+            if (!$matched) {
+                $scores['constructor_paciente'] += $weight * 0.35;
+                $scores['explorador_narrativo'] += $weight * 0.35;
+                $scores['competidor_arcade'] += $weight * 0.3;
             }
         }
 
-        if ($next === null) {
+        arsort($scores);
+
+        $styleKeys = array_keys($scores);
+        $dominantKey = $styleKeys[0] ?? 'explorador_narrativo';
+        $dominantScore = (float) ($scores[$dominantKey] ?? 0.0);
+        $runnerUpScore = isset($styleKeys[1]) ? (float) ($scores[$styleKeys[1]] ?? 0.0) : 0.0;
+        $genreLabelList = self::joinLabels(
+            array_map(static function (array $genre): string {
+                return (string) ($genre['label'] ?? '');
+            }, array_slice($focusGenres, 0, 2))
+        );
+
+        if ($dominantScore <= 0 || ($runnerUpScore > 0 && $runnerUpScore >= ($dominantScore * 0.92))) {
             return [
-                'label' => $current['label'],
-                'current_points' => $lifetimePoints,
-                'next_label' => null,
-                'points_to_next' => 0,
-                'progress_percent' => 100
+                'label' => 'Jugador versatil',
+                'copy' => sprintf(
+                    'Tu historial mezcla %s sin un genero claramente dominante. Tu estilo cambia segun el reto que te apetece en cada momento.',
+                    $genreLabelList !== '' ? $genreLabelList : 'varios generos'
+                )
             ];
         }
 
-        $currentMin = (int) $current['min'];
-        $nextMin = (int) $next['min'];
-        $range = max(1, $nextMin - $currentMin);
-        $progress = (int) floor((($lifetimePoints - $currentMin) / $range) * 100);
+        $style = $styleCatalog[$dominantKey];
 
         return [
-            'label' => $current['label'],
-            'current_points' => $lifetimePoints,
-            'next_label' => $next['label'],
-            'points_to_next' => max(0, $nextMin - $lifetimePoints),
-            'progress_percent' => max(0, min(100, $progress))
+            'label' => $style['label'],
+            'copy' => sprintf(
+                $style['copy'],
+                $genreLabelList !== '' ? $genreLabelList : 'Tus generos principales'
+            )
         ];
+    }
+
+    private static function buildRank(int $currentPoints): array
+    {
+        return UserProgressService::buildRankFromPoints($currentPoints);
+    }
+
+    private static function genreMatchesStyle(string $genre, array $keywords): bool
+    {
+        $normalizedGenre = self::normalizeTaxonomyToken($genre);
+
+        foreach ($keywords as $keyword) {
+            if (strpos($normalizedGenre, self::normalizeTaxonomyToken($keyword)) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static function normalizeTaxonomyToken(string $value): string
+    {
+        return strtr(
+            strtolower(trim($value)),
+            [
+                'á' => 'a',
+                'é' => 'e',
+                'í' => 'i',
+                'ó' => 'o',
+                'ú' => 'u',
+                'ü' => 'u',
+                'ñ' => 'n'
+            ]
+        );
+    }
+
+    private static function joinLabels(array $labels): string
+    {
+        $labels = array_values(array_filter(array_map('trim', $labels), static function (string $label): bool {
+            return $label !== '';
+        }));
+
+        $count = count($labels);
+
+        if ($count === 0) {
+            return '';
+        }
+
+        if ($count === 1) {
+            return $labels[0];
+        }
+
+        if ($count === 2) {
+            return $labels[0] . ' y ' . $labels[1];
+        }
+
+        $last = array_pop($labels);
+        return implode(', ', $labels) . ' y ' . $last;
     }
 
     private static function normalizeState(string $state): string

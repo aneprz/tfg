@@ -7,6 +7,7 @@ session_start();
 
 require "../db/conexiones.php";
 require "../API/credenciales.php";
+require_once __DIR__ . '/../php/user/perfiles/UserProgressService.php';
 
 if (!isset($_SESSION["id_usuario"])) {
     exit(header("Location: ../login.php"));
@@ -101,19 +102,9 @@ INSERT IGNORE INTO Logros_Usuario
 VALUES (?,?,?)
 ");
 
-$updPts = $conexion->prepare("
-UPDATE Usuario SET puntos_actuales = puntos_actuales + ? WHERE id_usuario=?
-");
-
-$insMov = $conexion->prepare("
-INSERT INTO Movimientos_Puntos
-(id_usuario,puntos,tipo,descripcion)
-VALUES (?,?,?,?)
-");
-
-
 $total = 0;
 $counter = 0;
+$urls = [];
 
 
 /* =========================
@@ -188,11 +179,8 @@ if($total>0){
     $tipo = "logro";
     $desc = "Logro desbloqueado";
 
-    $updPts->bind_param("ii",$total,$id_usuario);
-    $updPts->execute();
-
-    $insMov->bind_param("iiss",$id_usuario,$total,$tipo,$desc);
-    $insMov->execute();
+    UserProgressService::applyPointDelta($conexion, $id_usuario, $total);
+    UserProgressService::registerPointMovement($conexion, $id_usuario, $total, $tipo, $desc);
 }
 
 

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require '../../db/conexiones.php';
+require_once __DIR__ . '/../user/perfiles/UserProgressService.php';
 
 $id_usuario = $_SESSION['id_usuario'] ?? 0;
 $id_lootbox = (int)($_POST['id_lootbox'] ?? 0);
@@ -28,7 +29,7 @@ try {
     }
 
     $lootbox = mysqli_fetch_assoc($res);
-    $precio = (float)$lootbox['precio'];
+    $precio = (int) ($lootbox['precio'] ?? 0);
     $nombre = $lootbox['nombre'] ?? 'Lootbox';
 
     /* =========================
@@ -54,20 +55,14 @@ try {
     /* =========================
        3. RESTAR PUNTOS + MOVIMIENTO
     ========================= */
-    if (!mysqli_query($conexion, "
-        UPDATE Usuario 
-        SET puntos_actuales = puntos_actuales - $precio
-        WHERE id_usuario = $id_usuario
-    ")) {
-        throw new Exception("Error al restar puntos");
-    }
-
-    if (!mysqli_query($conexion, "
-        INSERT INTO Movimientos_Puntos (id_usuario, puntos, tipo, descripcion)
-        VALUES ($id_usuario, -$precio, 'lootbox', 'Apertura de lootbox: $nombre')
-    ")) {
-        throw new Exception("Error al registrar movimiento de compra");
-    }
+    UserProgressService::applyPointDelta($conexion, (int) $id_usuario, -$precio);
+    UserProgressService::registerPointMovement(
+        $conexion,
+        (int) $id_usuario,
+        -$precio,
+        'lootbox',
+        'Apertura de lootbox: ' . $nombre
+    );
 
     /* =========================
        4. OBTENER ITEMS
@@ -136,23 +131,16 @@ try {
             WHERE id_item = {$ganado['id_item']}
         ");
 
-        $valorItem = (float)(mysqli_fetch_assoc($resValor)['precio'] ?? 0);
+        $valorItem = (int) (mysqli_fetch_assoc($resValor)['precio'] ?? 0);
 
-        if (!mysqli_query($conexion, "
-            UPDATE Usuario 
-            SET puntos_actuales = puntos_actuales + $valorItem
-            WHERE id_usuario = $id_usuario
-        ")) {
-            throw new Exception("Error devolviendo puntos");
-        }
-
-        // ✅ MOVIMIENTO POSITIVO
-        if (!mysqli_query($conexion, "
-            INSERT INTO Movimientos_Puntos (id_usuario, puntos, tipo, descripcion)
-            VALUES ($id_usuario, $valorItem, 'duplicado', 'Duplicado: {$ganado['nombre']}')
-        ")) {
-            throw new Exception("Error al registrar devolución");
-        }
+        UserProgressService::applyPointDelta($conexion, (int) $id_usuario, $valorItem);
+        UserProgressService::registerPointMovement(
+            $conexion,
+            (int) $id_usuario,
+            $valorItem,
+            'duplicado',
+            'Duplicado: ' . ($ganado['nombre'] ?? 'Item')
+        );
 
     } else {
 
@@ -172,7 +160,7 @@ try {
         WHERE id_usuario = $id_usuario
     ");
 
-    $puntosFinales = (float)mysqli_fetch_assoc($resFinal)['puntos_actuales'];
+    $puntosFinales = (int) (mysqli_fetch_assoc($resFinal)['puntos_actuales'] ?? 0);
 
     mysqli_commit($conexion);
 
