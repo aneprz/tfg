@@ -202,41 +202,77 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     </div>
 
     <div id="modalMiembros" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h3>Miembros de la comunidad</h3>
-            <ul class="lista-miembros-modal">
-                <?php
-                $sqlMiembros = "SELECT u.id_usuario, u.gameTag FROM miembro_comunidad mc 
-                                JOIN Usuario u ON mc.id_usuario = u.id_usuario 
-                                WHERE mc.id_comunidad = $id_comunidad";
-                
-                $resMiembros = mysqli_query($conexion, $sqlMiembros);
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Miembros de la comunidad</h3>
+        <ul class="lista-miembros-modal" id="lista-miembros-modal">
+            <?php
+            $sqlMiembros = "SELECT u.id_usuario, u.gameTag, u.avatar 
+                            FROM miembro_comunidad mc 
+                            JOIN Usuario u ON mc.id_usuario = u.id_usuario 
+                            WHERE mc.id_comunidad = $id_comunidad
+                            ORDER BY u.gameTag ASC";
+            
+            $resMiembros = mysqli_query($conexion, $sqlMiembros);
 
-                if (!$resMiembros) {
-                    echo '<li style="color: red;">Error en BD: ' . mysqli_error($conexion) . '</li>';
-                } elseif (mysqli_num_rows($resMiembros) > 0) {
-                    $id_sesion_actual = $_SESSION['id_usuario'] ?? 0;
+            if (!$resMiembros) {
+                echo '<li style="color: red;">Error en BD: ' . mysqli_error($conexion) . '</li>';
+            } elseif (mysqli_num_rows($resMiembros) > 0) {
+                $id_sesion_actual = $_SESSION['id_usuario'] ?? 0;
 
-                    while ($miembro = mysqli_fetch_assoc($resMiembros)) {
-                        $id_miembro = $miembro['id_usuario'];
-                        $nombre_miembro = htmlspecialchars($miembro['gameTag']);
-
-                        if ($id_miembro == $id_sesion_actual) {
-                            $ruta_perfil = '../user/perfiles/perfilSesion.php'; 
-                        } else {
-                            $ruta_perfil = '../user/amistades/perfilOtros.php?id=' . $id_miembro; 
-                        }
-
-                        echo '<li><a href="' . $ruta_perfil . '" style="color: inherit; text-decoration: none; display: block; width: 100%;">' . $nombre_miembro . '</a></li>';
+                while ($miembro = mysqli_fetch_assoc($resMiembros)) {
+                    $id_miembro = $miembro['id_usuario'];
+                    $nombre_miembro = htmlspecialchars($miembro['gameTag']);
+                    
+                    // Obtener estado de amistad
+                    $estado_amistad = '';
+                    $sqlAmistad = "SELECT estado FROM amigos WHERE 
+                                   (id_usuario = $id_sesion_actual AND id_amigo = $id_miembro) OR 
+                                   (id_usuario = $id_miembro AND id_amigo = $id_sesion_actual)";
+                    $resAmistad = mysqli_query($conexion, $sqlAmistad);
+                    if ($resAmistad && $rowAmistad = mysqli_fetch_assoc($resAmistad)) {
+                        $estado_amistad = $rowAmistad['estado'];
                     }
-                } else {
-                    echo '<li>Aún no hay miembros en esta comunidad.</li>';
+                    
+                    $avatarPath = !empty($miembro['avatar']) ? "../../media/" . $miembro['avatar'] : "../../media/perfil_default.jpg";
+
+                    echo '<li style="display: flex; align-items: center; justify-content: space-between; padding: 10px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="' . $avatarPath . '" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                <span style="color: #fff; font-weight: 500;">' . $nombre_miembro . '</span>
+                            </div>
+                            <div class="amistad-accion" data-usuario="' . $id_miembro . '">';
+                    
+                    if ($id_miembro == $id_sesion_actual) {
+                        echo '<span style="color: #888;">(Tú)</span>';
+                    } elseif ($estado_amistad === 'aceptada') {
+                        echo '<span class="badge-amigo" style="color: #28a745; font-weight: bold;">Amigos ✓</span>';
+                    } elseif ($estado_amistad === 'pendiente') {
+                        // Verificar quién envió la solicitud
+                        $sqlSolicitante = "SELECT id_usuario FROM amigos WHERE 
+                                           (id_usuario = $id_sesion_actual AND id_amigo = $id_miembro) OR 
+                                           (id_usuario = $id_miembro AND id_amigo = $id_sesion_actual) AND estado = 'pendiente'";
+                        $resSolic = mysqli_query($conexion, $sqlSolicitante);
+                        $solic = mysqli_fetch_assoc($resSolic);
+                        if ($solic['id_usuario'] == $id_sesion_actual) {
+                            echo '<button class="btn-pendiente" disabled style="background: #6c757d; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: not-allowed;">Pendiente</button>';
+                        } else {
+                            echo '<span style="color: #ffc107;">Solicitud recibida</span>';
+                        }
+                    } else {
+                        echo '<button class="btn-agregar-miembro" data-id="' . $id_miembro . '" style="background: #f0c330; color: #000; border: none; padding: 5px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;">+ Agregar</button>';
+                    }
+                    
+                    echo '</div>
+                        </li>';
                 }
-                ?>
-            </ul>
-        </div>
+            } else {
+                echo '<li>Aún no hay miembros en esta comunidad.</li>';
+            }
+            ?>
+        </ul>
     </div>
+</div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -250,6 +286,37 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             }
         });
     </script>
+
+    <script>
+// Manejar agregar amigo desde el modal de miembros
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-agregar-miembro');
+    if (!btn) return;
+    
+    e.preventDefault();
+    const idAmigo = btn.getAttribute('data-id');
+    const contenedor = btn.parentElement;
+    
+    btn.textContent = '...';
+    btn.disabled = true;
+    
+    fetch(`agregar_amigo_ajax.php?id=${idAmigo}&accion=agregar`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                contenedor.innerHTML = '<button class="btn-pendiente" disabled style="background: #6c757d; color: white; border: none; padding: 5px 12px; border-radius: 5px; cursor: not-allowed;">Pendiente</button>';
+            } else {
+                btn.textContent = 'Error';
+                btn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            btn.textContent = '+ Agregar';
+            btn.disabled = false;
+        });
+});
+</script>
 
     <script src="../../js/comunidades.js"></script>
     <script src="../../js/social.js"></script>
