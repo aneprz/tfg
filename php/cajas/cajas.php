@@ -1,14 +1,9 @@
 <?php
 session_start();
 require_once '../../db/conexiones.php';
-// Si este archivo va a estar dentro de una carpeta (ej: php/cajas/cajas.php), 
-// recuerda ajustar las rutas de los href y src añadiendo "../../"
 
 $idUsuarioSesion = isset($_SESSION['id_usuario']) ? (int) $_SESSION['id_usuario'] : 0;
 $admin = ($_SESSION['admin'] ?? false) === true;
-
-// Aquí más adelante haremos la consulta para sacar las cajas de la base de datos
-// $sqlCajas = "SELECT * FROM lootboxes"; ...
 ?>
 
 <!DOCTYPE html>
@@ -23,110 +18,41 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     <link rel="icon" href="../../media/logoPlatino.png">
 
     <style>
-        /* ESTILOS ESPECÍFICOS PARA LAS CAJAS (Llévalo a tu CSS luego) */
-        .seccion-cajas {
-            padding: 40px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .grid-cajas {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        .caja-item {
-            background-color: #1a1c23; /* Tono oscuro de fondo de carta */
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid #2d313d;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .caja-item:hover {
-            transform: translateY(-5px);
-        }
-
-        /* Estilos por rareza */
+        /* ESTILOS ESPECÍFICOS PARA LAS CAJAS */
+        .seccion-cajas { padding: 40px 20px; max-width: 1200px; margin: 0 auto; }
+        .grid-cajas { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px; margin-top: 30px; }
+        .caja-item { background-color: #1a1c23; border-radius: 10px; padding: 20px; text-align: center; border: 1px solid #2d313d; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden; }
+        .caja-item:hover { transform: translateY(-5px); }
         .caja-basica:hover { border-color: #aeb4c4; box-shadow: 0 5px 20px rgba(174, 180, 196, 0.2); }
         .caja-epica:hover { border-color: #c724b1; box-shadow: 0 5px 20px rgba(199, 36, 177, 0.3); }
         .caja-legendaria:hover { border-color: #f0c330; box-shadow: 0 5px 20px rgba(240, 195, 48, 0.4); }
-        .caja-hueco {
-            height: 150px; 
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .caja-imagen {
-            width: 280px;  /* Hazla todo lo grande que quieras aquí */
-            height: 280px; /* Hazla todo lo grande que quieras aquí */
-            object-fit: contain;
-            filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.5));
-            transition: transform 0.3s;
-        }
-
-        .caja-item:hover .caja-imagen {
-            transform: scale(1.05); /* Efecto al pasar el ratón */
-        }
-
-        .caja-titulo {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .caja-precio {
-            font-size: 1.1rem;
-            color: #f0c330; /* El dorado de tu web */
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        .boton-abrir {
-            background-color: #f0c330;
-            color: #111;
-            border: none;
-            padding: 10px 30px;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: background-color 0.2s;
-            width: 100%;
-        }
-
-        .boton-abrir:hover {
-            background-color: #dcb028;
-        }
-
+        .caja-hueco { height: 150px; width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
+        .caja-imagen { width: 280px; height: 280px; object-fit: contain; filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.5)); transition: transform 0.3s; }
+        .caja-item:hover .caja-imagen { transform: scale(1.05); }
+        .caja-titulo { font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .caja-precio { font-size: 1.1rem; color: #f0c330; font-weight: bold; margin-bottom: 20px; }
+        .boton-abrir { background-color: #f0c330; color: #111; border: none; padding: 10px 30px; font-size: 1rem; font-weight: bold; border-radius: 5px; cursor: pointer; text-transform: uppercase; transition: background-color 0.2s; width: 100%; }
+        .boton-abrir:hover { background-color: #dcb028; }
         .caja-epica .boton-abrir { background-color: #c724b1; color: white; }
         .caja-epica .boton-abrir:hover { background-color: #a31d91; }
+        .ver-contenido { margin-top: 15px; font-size: 0.85rem; color: #888; cursor: pointer; text-decoration: underline; }
+        .ver-contenido:hover { color: #fff; }
 
-        /* Etiqueta de contenido */
-        .ver-contenido {
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: #888;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-        .ver-contenido:hover {
-            color: #fff;
-        }
+        /* NUEVOS ESTILOS DEL MODAL Y LA RULETA (CS:GO Style) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { background: #1a1c23; border: 2px solid #f0c330; border-radius: 10px; padding: 30px; text-align: center; color: white; box-shadow: 0 0 30px rgba(240, 195, 48, 0.3); }
+        .modal-box h2 { margin-top: 0; color: #f0c330; }
+        #btn-cerrar-modal { background: #f0c330; border: none; padding: 10px 20px; color: black; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 15px; width: 100%; }
+        
+        .ruleta-box { width: 800px; max-width: 95%; }
+        .ruleta-ventana { width: 100%; height: 160px; background: #111; border: 2px solid #2d313d; border-radius: 5px; position: relative; overflow: hidden; margin: 20px 0; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+        .ruleta-selector { position: absolute; top: 0; bottom: 0; left: 50%; width: 4px; background: #ff4444; transform: translateX(-50%); z-index: 10; box-shadow: 0 0 10px #ff4444; }
+        .ruleta-pista { display: flex; height: 100%; width: max-content; transition: transform 6s cubic-bezier(0.1, 0.9, 0.2, 1); transform: translateX(0); }
+        .ruleta-item-track { width: 140px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; border-right: 1px solid #333; background: linear-gradient(to bottom, #222, #1a1c23); flex-shrink: 0; }
+        .ruleta-item-track img { width: 80px; height: 80px; object-fit: contain; margin-bottom: 10px; }
+        .ruleta-item-track span { font-size: 0.9rem; font-weight: bold; color: #aaa; }
+        .premio-oro span { color: #f0c330; } 
+        .mensaje-premio { font-size: 1.5rem; color: #f0c330; font-weight: bold; min-height: 35px; }
     </style>
 </head>
 
@@ -192,10 +118,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
 <div class="central">
     <h1>Cajas de Botín</h1>
-    <p>
-        Prueba tu suerte. Abre cajas misteriosas y consigue juegos, avatares exclusivos 
-        o puntos extra para tu cuenta. ¿Te tocará el drop legendario?
-    </p>
+    <p>Prueba tu suerte. Abre cajas misteriosas y consigue juegos, avatares exclusivos o puntos extra para tu cuenta. ¿Te tocará el drop legendario?</p>
 </div>
 
 <main class="seccion-cajas">
@@ -205,8 +128,10 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         
         <!-- CAJA BÁSICA -->
         <div class="caja-item caja-basica">
-            <img src="../../media/caja_basica.png" alt="Caja Bronce" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja_indie.png'">
-            <div class="caja-titulo">Caja Indie</div>
+            <div class="caja-hueco">
+                <img src="../../media/caja_basica.png" alt="Caja Bronce" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja_indie.png'">
+            </div>
+            <div class="caja-titulo">Salsa Indie</div>
             <div class="caja-precio">150 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(1)">Abrir Caja</button>
             <div class="ver-contenido">Ver contenido posible</div>
@@ -214,8 +139,10 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
         <!-- CAJA ÉPICA -->
         <div class="caja-item caja-epica">
-            <img src="../../media/caja_epica.png" alt="Caja Épica" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-epica.png'">
-            <div class="caja-titulo">Caja Triple A</div>
+            <div class="caja-hueco">
+                <img src="../../media/caja_epica.png" alt="Caja Épica" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-epica.png'">
+            </div>
+            <div class="caja-titulo">Salsa Triple A</div>
             <div class="caja-precio">500 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(2)">Abrir Caja</button>
             <div class="ver-contenido">Ver contenido posible</div>
@@ -223,8 +150,10 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
         <!-- CAJA LEGENDARIA -->
         <div class="caja-item caja-legendaria">
-            <img src="../../media/caja_legendaria.png" alt="Caja Legendaria" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-legendaria.png'">
-            <div class="caja-titulo">Caja SalsaBox Pro</div>
+            <div class="caja-hueco">
+                <img src="../../media/caja_legendaria.png" alt="Caja Legendaria" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-legendaria.png'">
+            </div>
+            <div class="caja-titulo">Salsa Goty</div>
             <div class="caja-precio">1200 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(3)">Abrir Caja</button>
             <div class="ver-contenido">Ver contenido posible</div>
@@ -232,8 +161,10 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
         <!-- CAJA TEMÁTICA -->
         <div class="caja-item caja-basica">
-            <img src="../../media/caja_terror.png" alt="Caja Terror" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-horror.png'">
-            <div class="caja-titulo">Caja Survival Horror</div>
+            <div class="caja-hueco">
+                <img src="../../media/caja_terror.png" alt="Caja Terror" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-horror.png'">
+            </div>
+            <div class="caja-titulo">Salsa Horror</div>
             <div class="caja-precio">300 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(4)">Abrir Caja</button>
             <div class="ver-contenido">Ver contenido posible</div>
@@ -241,6 +172,22 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
     </div>
 </main>
+
+<!-- NUEVO MODAL RULETA ESTILO CS:GO -->
+<div id="modal-ruleta" class="modal-overlay" style="display: none;">
+    <div class="modal-box ruleta-box">
+        <h2 id="ruleta-titulo">Abriendo bote...</h2>
+        
+        <div class="ruleta-ventana" id="ruleta-ventana">
+            <div class="ruleta-selector"></div>
+            <div class="ruleta-pista" id="ruleta-pista"></div>
+        </div>
+
+        <p id="ruleta-mensaje" class="mensaje-premio"></p>
+        <p id="ruleta-saldo"></p>
+        <button id="btn-cerrar-modal" style="display: none;" onclick="cerrarRuleta()">Cerrar y recoger</button>
+    </div>
+</div>
 
 <footer>
     <p>&copy; 2026 SalsaBox. Creado para los gamers.</p>
@@ -255,16 +202,97 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         });
     }
 
-    // Función temporal para probar los botones
+    // EL NUEVO MOTOR JAVASCRIPT DE LA RULETA
     function abrirCaja(idCaja) {
         <?php if (!isset($_SESSION['id_usuario'])): ?>
             alert("¡Debes iniciar sesión para abrir cajas!");
             window.location.href = "../sesiones/login/login.php";
             return;
         <?php endif; ?>
+
+        const modal = document.getElementById('modal-ruleta');
+        const pista = document.getElementById('ruleta-pista');
+        const titulo = document.getElementById('ruleta-titulo');
+        const mensaje = document.getElementById('ruleta-mensaje');
+        const saldo = document.getElementById('ruleta-saldo');
+        const btnCerrar = document.getElementById('btn-cerrar-modal');
+
+        modal.style.display = 'flex';
+        titulo.innerText = "Girando...";
+        mensaje.innerText = "";
+        saldo.innerText = "";
+        btnCerrar.style.display = 'none';
         
-        // Aquí conectaremos con la animación de ruleta y el PHP por AJAX más adelante
-        alert("Preparando ruleta para la caja ID: " + idCaja + "...");
+        pista.style.transition = 'none';
+        pista.style.transform = 'translateX(0)';
+        pista.innerHTML = '';
+
+        const formData = new FormData();
+        formData.append('id_caja', idCaja);
+
+        fetch('abrir_caja_ajax.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const totalItems = 70;
+                const indexGanador = 60; 
+                const anchoItem = 140; 
+
+                for (let i = 0; i < totalItems; i++) {
+                    let div = document.createElement('div');
+                    div.className = 'ruleta-item-track';
+                    
+                    if (i === indexGanador) {
+                        div.classList.add('premio-oro');
+                        div.innerHTML = `<img src="../../media/logoPlatino.png"><span>PREMIO</span>`;
+                    } else {
+                        let esJuego = Math.random() > 0.8;
+                        div.innerHTML = esJuego 
+                            ? `<img src="../../media/bote_indie.png" style="filter: grayscale(100%); opacity: 0.5;"><span>Juego</span>` 
+                            : `<img src="../../media/logoPlatino.png" style="filter: grayscale(100%); opacity: 0.5;"><span>Puntos</span>`;
+                    }
+                    pista.appendChild(div);
+                }
+
+                pista.offsetHeight; 
+
+                const anchoVentana = document.getElementById('ruleta-ventana').clientWidth;
+                let distancia = (indexGanador * anchoItem); 
+                distancia = distancia - (anchoVentana / 2);
+                distancia = distancia + (anchoItem / 2);
+                
+                const randomOffset = Math.floor(Math.random() * 100) - 50;
+                distancia = distancia + randomOffset;
+
+                pista.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
+                pista.style.transform = `translateX(-${distancia}px)`;
+
+                setTimeout(() => {
+                    titulo.innerText = "¡Resultado!";
+                    mensaje.innerText = data.mensaje;
+                    saldo.innerText = "Tu nuevo saldo: " + data.nuevo_saldo + " Puntos";
+                    btnCerrar.style.display = 'block';
+                }, 6000); 
+
+            } else {
+                titulo.innerText = "Error";
+                mensaje.innerText = data.mensaje;
+                btnCerrar.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            titulo.innerText = "Error de conexión";
+            btnCerrar.style.display = 'block';
+        });
+    }
+
+    function cerrarRuleta() {
+        document.getElementById('modal-ruleta').style.display = 'none';
+        location.reload(); 
     }
 </script>
 
