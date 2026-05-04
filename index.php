@@ -129,6 +129,7 @@ if (isset($conexion) && $conexion) {
             <li><a href="php/jugadores/jugadores.php">Jugadores</a></li>
             <li><a href="php/comunidades/comunidades.php">Comunidades</a></li>
             <li><a href="php/tienda/tienda.php">Tienda</a></li>
+            <li><a href="php/cajas/cajas.php">Cajas</a></li>
             <li><a href="php/logros/logros.php">Logros</a></li>
             <li><a href="php/ranking/ranking.php">Ranking</a></li>
             <?php if ($admin): ?>
@@ -330,4 +331,4 @@ if (isset($conexion) && $conexion) {
 
 <script src="js/notificaciones.js"></script>
 </body>
-</html>
+</html> 
