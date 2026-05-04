@@ -183,7 +183,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                 </div>
             </div>
 
-            <a class="tag" href="php/user/perfiles/perfilSesion.php">
+            <a class="tag" href="../user/perfiles/perfilSesion.php">
                 <?php echo htmlspecialchars($_SESSION['tag']); ?>
             </a>
         </div>
