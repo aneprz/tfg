@@ -40,7 +40,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                 <li><a href="jugadores.php" class="activo">Jugadores</a></li>
                 <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
                 <li><a href="../tienda/tienda.php">Tienda</a></li>
-                <li><a href="php/cajas/cajas.php">Cajas</a></li>
+                <li><a href="../cajas/cajas.php">Cajas</a></li>
                 <li><a href="../logros/logros.php">Logros</a></li>
                 <li><a href="../ranking/ranking.php">Ranking</a></li>
                 <?php if ($admin): ?>

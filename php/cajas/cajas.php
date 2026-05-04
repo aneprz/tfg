@@ -26,6 +26,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         .caja-basica:hover { border-color: #aeb4c4; box-shadow: 0 5px 20px rgba(174, 180, 196, 0.2); }
         .caja-epica:hover { border-color: #c724b1; box-shadow: 0 5px 20px rgba(199, 36, 177, 0.3); }
         .caja-legendaria:hover { border-color: #f0c330; box-shadow: 0 5px 20px rgba(240, 195, 48, 0.4); }
+        .caja-horror:hover { border-color: #fd0000; box-shadow: 0 5px 20px rgba(174, 180, 196, 0.2); }
         .caja-hueco { height: 150px; width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px; }
         .caja-imagen { width: 280px; height: 280px; object-fit: contain; filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.5)); transition: transform 0.3s; }
         .caja-item:hover .caja-imagen { transform: scale(1.05); }
@@ -70,8 +71,8 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <li><a href="../videojuegos/juegos.php">Juegos</a></li>
             <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
             <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
-            <li><a href="cajas.php" class="activo">Cajas</a></li>
             <li><a href="../tienda/tienda.php">Tienda</a></li>
+            <li><a href="cajas.php" class="activo">Cajas</a></li>
             <li><a href="../logros/logros.php">Logros</a></li>
             <li><a href="../ranking/ranking.php">Ranking</a></li>
             <?php if ($admin): ?>
@@ -160,7 +161,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         </div>
 
         <!-- CAJA TEMÁTICA -->
-        <div class="caja-item caja-basica">
+        <div class="caja-item caja-horror">
             <div class="caja-hueco">
                 <img src="../../media/caja_terror.png" alt="Caja Terror" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-horror.png'">
             </div>
