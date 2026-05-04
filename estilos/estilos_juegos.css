@@ -333,3 +333,74 @@ main {
         padding: 4px 10px;
     }
 }
+
+/* Estilos para la modal de biblioteca */
+#contenido-biblioteca table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#contenido-biblioteca th {
+    text-align: left;
+    padding: 12px;
+    color: #9ab;
+    border-bottom: 2px solid #f0c330;
+}
+
+#contenido-biblioteca td {
+    padding: 12px;
+    border-bottom: 1px solid #2c3440;
+}
+
+#contenido-biblioteca tr {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#contenido-biblioteca tr:hover {
+    background: #2a2a2a;
+}
+
+#contenido-biblioteca .portada {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+#contenido-biblioteca .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#contenido-biblioteca .status-badge.Completado { background: #2ecc71; color: #000; }
+#contenido-biblioteca .status-badge.Jugando { background: #f0c330; color: #000; }
+#contenido-biblioteca .status-badge.Pendiente { background: #e74c3c; color: #fff; }
+#contenido-biblioteca .status-badge.Abandonado { background: #95a5a6; color: #000; }
+
+#contenido-biblioteca .estrellas {
+    position: relative;
+    display: inline-block;
+    font-size: 16px;
+    color: #444;
+}
+
+#contenido-biblioteca .estrellas::before {
+    content: "★★★★★";
+}
+
+#contenido-biblioteca .estrellas .relleno {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    color: gold;
+}
+
+#contenido-biblioteca .estrellas .relleno::before {
+    content: "★★★★★";
+}
