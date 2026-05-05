@@ -9,6 +9,7 @@ $nombre = $_POST['nombreApellido'];
 $bio = $_POST['biografia'];
 $gameTag = $_POST['gameTag'];
 
+// 1. Sacamos su foto actual para saber qué hacemos luego con ella
 $stmt_old = $conexion->prepare("SELECT avatar FROM Usuario WHERE id_usuario = ?");
 $stmt_old->bind_param("i", $id);
 $stmt_old->execute();
@@ -17,28 +18,43 @@ $user_old = $res_old->fetch_assoc();
 
 $nombre_avatar_final = $user_old['avatar']; 
 $ruta_media = "../../../media/";
+$foto_a_borrar = $user_old['avatar'];
 
-if (isset($_FILES['avatar_archivo']) && $_FILES['avatar_archivo']['error'] === UPLOAD_ERR_OK) {
+// 2. LÓGICA A: ¿Ha seleccionado un avatar de su inventario?
+if (isset($_POST['avatar_inventario']) && !empty($_POST['avatar_inventario'])) {
+    
+    $nombre_avatar_final = $_POST['avatar_inventario']; // Ej: "premiosIndie/1.png"
+
+    // Si antes tenía una foto subida por él, la borramos para ahorrar espacio.
+    // Solo borramos si empieza por "u" + su ID (así no borramos cosas de la tienda por error).
+    if (!empty($foto_a_borrar) && strpos($foto_a_borrar, 'u'.$id.'_') === 0) {
+        if (file_exists($ruta_media . $foto_a_borrar)) {
+            unlink($ruta_media . $foto_a_borrar);
+        }
+    }
+
+} 
+// 3. LÓGICA B: No ha elegido del inventario, pero ¿ha subido una foto desde su PC?
+elseif (isset($_FILES['avatar_archivo']) && $_FILES['avatar_archivo']['error'] === UPLOAD_ERR_OK) {
     
     $ext = pathinfo($_FILES['avatar_archivo']['name'], PATHINFO_EXTENSION);
     $nuevo_nombre = "u" . $id . "_" . time() . "." . $ext;
     $destino = $ruta_media . $nuevo_nombre;
 
     if (move_uploaded_file($_FILES['avatar_archivo']['tmp_name'], $destino)) {
-    
-        $foto_a_borrar = $user_old['avatar'];
-
-        if (!empty($foto_a_borrar) && 
-            $foto_a_borrar !== 'perfil_default.jpg' && 
-            file_exists($ruta_media . $foto_a_borrar)) {
-            
-            unlink($ruta_media . $foto_a_borrar);
+        
+        // Igual que antes, solo borramos la vieja si era una foto subida por él
+        if (!empty($foto_a_borrar) && strpos($foto_a_borrar, 'u'.$id.'_') === 0) {
+            if (file_exists($ruta_media . $foto_a_borrar)) {
+                unlink($ruta_media . $foto_a_borrar);
+            }
         }
 
         $nombre_avatar_final = $nuevo_nombre; 
     }
 }
 
+// 4. Actualizamos la sesión y la base de datos
 $_SESSION['tag'] = $gameTag;
 $stmt = $conexion->prepare("UPDATE Usuario SET gameTag = ?, nombre_apellido = ?, biografia = ?, avatar = ? WHERE id_usuario = ?");
 $stmt->bind_param("ssssi", $gameTag, $nombre, $bio, $nombre_avatar_final, $id);
