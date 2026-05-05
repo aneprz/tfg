@@ -65,6 +65,7 @@ $user = $stmt->get_result()->fetch_assoc();
 
 $biografia = $user['biografia'] ?? '';
 $puntos_actuales = $user['puntos_actuales'] ?? 0;
+$steamVinculado = isset($_SESSION["steamid"]) && !empty($_SESSION["steamid"]);
 
 /* =========================
    AVATAR FINAL
@@ -87,7 +88,7 @@ if ($avatar_item) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil de <?php echo htmlspecialchars($_SESSION['tag']); ?></title>
 
-    <link rel="icon" href="../../../media/logoplatino.png">
+    <link rel="icon" href="../../../media/logoPlatino.png">
     <link rel="stylesheet" href="../../../estilos/estilos_perfilSesion.css?v=<?php echo time(); ?>">
 </head>
 
@@ -162,7 +163,7 @@ if ($avatar_item) {
             </a>
         </div>
 
-        <?php if (!isset($_SESSION["steamid"]) || empty($_SESSION["steamid"])): ?>
+        <?php if (!$steamVinculado): ?>
 
             <a href="#" onclick="alert('Tienes que iniciar sesión con tu cuenta de Steam antes'); return false;" class="btn-sync-steam">
                 Sincronizar logros de Steam
@@ -170,9 +171,21 @@ if ($avatar_item) {
 
         <?php else: ?>
 
-            <a href="../../../Steam/sync_logros_steam.php" class="btn-sync-steam">
+            <a href="../../../Steam/sync_logros_steam.php" class="btn-sync-steam" id="steamSyncButton">
                 Sincronizar logros de Steam
             </a>
+
+            <div id="steamSyncFeedback" class="steam-sync-feedback" hidden aria-live="polite">
+                <div class="steam-sync-head">
+                    <span id="steamSyncLabel">Sincronizando logros de Steam...</span>
+                    <span id="steamSyncPercent">0%</span>
+                </div>
+                <div class="steam-sync-track">
+                    <div id="steamSyncBar" class="steam-sync-fill"></div>
+                </div>
+                <p id="steamSyncCopy" class="steam-sync-copy">Preparando tu biblioteca para la sincronizacion.</p>
+                <iframe id="steamSyncFrame" class="steam-sync-frame" title="Sincronizacion Steam"></iframe>
+            </div>
 
         <?php endif; ?>
 
@@ -196,6 +209,147 @@ if ($avatar_item) {
     </div>
 
 </main>
+
+<?php if ($steamVinculado): ?>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const syncButton = document.getElementById('steamSyncButton');
+    const feedback = document.getElementById('steamSyncFeedback');
+    const bar = document.getElementById('steamSyncBar');
+    const percent = document.getElementById('steamSyncPercent');
+    const copy = document.getElementById('steamSyncCopy');
+    const frame = document.getElementById('steamSyncFrame');
+
+    if (!syncButton || !feedback || !bar || !percent || !copy || !frame) {
+        return;
+    }
+
+    let syncing = false;
+    let pollTimer = null;
+    let activeToken = '';
+
+    function buildSyncToken() {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+            return `steam-sync-${window.crypto.randomUUID()}`;
+        }
+
+        return `steam-sync-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+
+    function setProgress(value, message) {
+        const safeValue = Math.max(0, Math.min(100, Number(value) || 0));
+        bar.style.width = `${safeValue}%`;
+        percent.textContent = `${Math.round(safeValue)}%`;
+
+        if (message) {
+            copy.textContent = message;
+        }
+    }
+
+    function setButtonLoadingState(isLoading) {
+        syncing = isLoading;
+        syncButton.classList.toggle('is-loading', isLoading);
+        syncButton.setAttribute('aria-disabled', isLoading ? 'true' : 'false');
+        syncButton.style.pointerEvents = isLoading ? 'none' : '';
+        syncButton.textContent = isLoading ? 'Sincronizando...' : 'Sincronizar logros de Steam';
+    }
+
+    function stopPolling() {
+        if (pollTimer) {
+            window.clearInterval(pollTimer);
+            pollTimer = null;
+        }
+    }
+
+    async function readProgress(token) {
+        try {
+            const response = await fetch(`../../../Steam/steam_sync_status.php?token=${encodeURIComponent(token)}&ts=${Date.now()}`, {
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                return null;
+            }
+
+            return await response.json();
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function finishSync(status, message) {
+        stopPolling();
+
+        if (status === 'success') {
+            setProgress(100, message);
+            window.setTimeout(() => {
+                window.location.reload();
+            }, 700);
+            return;
+        }
+
+        setProgress(100, message);
+        setButtonLoadingState(false);
+    }
+
+    async function pollProgress() {
+        if (!activeToken) {
+            return;
+        }
+
+        const payload = await readProgress(activeToken);
+        if (!payload) {
+            return;
+        }
+
+        setProgress(payload.progress, payload.message);
+
+        if (payload.status === 'success' || payload.status === 'error') {
+            finishSync(payload.status, payload.message || 'La sincronizacion ha terminado.');
+        }
+    }
+
+    function startPolling(token) {
+        activeToken = token;
+        stopPolling();
+        pollTimer = window.setInterval(pollProgress, 450);
+        pollProgress();
+    }
+
+    syncButton.addEventListener('click', event => {
+        event.preventDefault();
+
+        if (syncing) {
+            return;
+        }
+
+        feedback.hidden = false;
+        setButtonLoadingState(true);
+        setProgress(0, 'Preparando sincronizacion...');
+
+        activeToken = buildSyncToken();
+        startPolling(activeToken);
+        const separator = syncButton.href.includes('?') ? '&' : '?';
+        frame.src = `${syncButton.href}${separator}mode=iframe&token=${encodeURIComponent(activeToken)}&ts=${Date.now()}`;
+    });
+
+    window.addEventListener('message', event => {
+        if (event.origin !== window.location.origin) {
+            return;
+        }
+
+        const payload = event.data || {};
+        if (payload.type !== 'steam-sync-result') {
+            return;
+        }
+
+        if (payload.status === 'success' || payload.status === 'error') {
+            finishSync(payload.status, payload.message || 'La sincronizacion no pudo completarse.');
+        }
+    });
+});
+</script>
+<?php endif; ?>
 
 </body>
 </html>

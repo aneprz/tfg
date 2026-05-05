@@ -50,10 +50,10 @@ function renderRank(rank) {
     if (nextLabel) {
         setText(
             'rankCopy',
-            `${formatInteger(currentPoints)} pts acumulados. Te faltan ${formatInteger(pointsToNext)} para ${nextLabel}.`
+            `${formatInteger(currentPoints)} pts actuales. Te faltan ${formatInteger(pointsToNext)} para ${nextLabel}.`
         );
     } else {
-        setText('rankCopy', `${formatInteger(currentPoints)} pts acumulados. Ya estas en el rango mas alto.`);
+        setText('rankCopy', `${formatInteger(currentPoints)} pts actuales. Ya estas en el rango mas alto.`);
     }
 
     const bar = document.getElementById('rankBar');

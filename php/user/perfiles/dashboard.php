@@ -14,6 +14,7 @@ if (!isset($_SESSION['tag'])) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard avanzado - SalsaBox</title>
 
+<link rel="icon" href="../../../media/logoPlatino.png">
 <link rel="stylesheet" href="../../../estilos/estilos_perfilSesion.css?v=<?php echo time(); ?>">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>

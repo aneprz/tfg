@@ -203,6 +203,69 @@ body {
     transform: scale(1.04);
 }
 
+.btn-sync-steam.is-loading {
+    background-color: rgba(224, 190, 0, 0.16);
+    border-color: var(--accent-color);
+    color: #f5e693;
+    transform: none;
+}
+
+.steam-sync-feedback {
+    width: min(340px, calc(100% - 48px));
+    margin: 18px auto 0;
+    padding: 14px 16px;
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(224, 190, 0, 0.28);
+    border-radius: 12px;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.steam-sync-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    color: #f6f2c9;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.steam-sync-track {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid rgba(224, 190, 0, 0.2);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.steam-sync-fill {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #b89400 0%, #e0be00 55%, #f5d84c 100%);
+    box-shadow: 0 0 14px rgba(224, 190, 0, 0.35);
+    transition: width 0.2s ease;
+}
+
+.steam-sync-copy {
+    margin: 10px 0 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.steam-sync-frame {
+    width: 0;
+    height: 0;
+    border: 0;
+    visibility: hidden;
+    position: absolute;
+}
+
 /* =========================
    DASHBOARD FULL SCREEN MODE
    ========================= */

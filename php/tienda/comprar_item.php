@@ -1,6 +1,7 @@
 <?php
 session_start();
 require '../../db/conexiones.php';
+require_once __DIR__ . '/../user/perfiles/UserProgressService.php';
 
 if (!isset($_SESSION['id_usuario'])) {
     header("Location: ../sesiones/login/login.php");
@@ -23,7 +24,7 @@ try {
         throw new Exception("Item no existe");
     }
 
-    $precio = mysqli_fetch_assoc($res)['precio'];
+    $precio = (int) (mysqli_fetch_assoc($res)['precio'] ?? 0);
 
     // Usuario
     $res = mysqli_query($conexion, "
@@ -47,17 +48,14 @@ try {
     }
 
     // Restar puntos
-    mysqli_query($conexion, "
-    UPDATE Usuario
-    SET puntos_actuales = puntos_actuales - $precio
-    WHERE id_usuario = $id_usuario
-    ");
-
-    // Movimiento
-    mysqli_query($conexion, "
-    INSERT INTO Movimientos_Puntos (id_usuario, puntos, tipo, descripcion)
-    VALUES ($id_usuario, -$precio, 'compra', 'Compra de item')
-    ");
+    UserProgressService::applyPointDelta($conexion, (int) $id_usuario, -$precio);
+    UserProgressService::registerPointMovement(
+        $conexion,
+        (int) $id_usuario,
+        -$precio,
+        'compra',
+        'Compra de item'
+    );
 
     mysqli_commit($conexion);
 

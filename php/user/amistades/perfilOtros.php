@@ -15,7 +15,7 @@ if ($id_sesion == $id_objetivo) {
     exit();
 }
 
-$query = $conexion->prepare("SELECT gameTag, biografia, avatar FROM Usuario WHERE id_usuario = ?");
+$query = $conexion->prepare("SELECT gameTag, biografia, avatar, puntos_actuales FROM Usuario WHERE id_usuario = ?");
 $query->bind_param("i", $id_objetivo);
 $query->execute();
 $Usuario = $query->get_result()->fetch_assoc();
@@ -47,11 +47,7 @@ $q_juegos->execute();
 $total_juegos = (int)$q_juegos->get_result()->fetch_assoc()['total'];
 $q_juegos->close();
 
-$q_puntos = $conexion->prepare("SELECT SUM(l.puntos_logro) as total FROM Logros_Usuario lu JOIN Logros l ON lu.id_logro = l.id_logro WHERE lu.id_usuario = ?");
-$q_puntos->bind_param("i", $id_objetivo);
-$q_puntos->execute();
-$total_puntos = (int)($q_puntos->get_result()->fetch_assoc()['total'] ?? 0);
-$q_puntos->close();
+$total_puntos = (int) ($Usuario['puntos_actuales'] ?? 0);
 
 $q_relacion = $conexion->prepare("SELECT id_usuario, estado FROM Amigos WHERE (id_usuario = ? AND id_amigo = ?) OR (id_usuario = ? AND id_amigo = ?)");
 $q_relacion->bind_param("iiii", $id_sesion, $id_objetivo, $id_objetivo, $id_sesion);
