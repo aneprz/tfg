@@ -166,12 +166,12 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <div class="ver-contenido" onclick="verProbabilidades(3)" style="cursor: pointer;">Ver contenido posible</div>
         </div>
 
-        <!-- CAJA TEMÁTICA -->
-        <div class="caja-item caja-horror">
+       <!-- CAJA DE MARCOS -->
+        <div class="caja-item caja-marcos">
             <div class="caja-hueco">
-                <img src="../../media/caja_terror.png" alt="Caja Terror" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja-horror.png'">
+                <img src="../../media/caja_marcos.png" alt="Caja Marcos" class="caja-imagen" onerror="this.onerror=null; this.src='../../media/caja_indie.png'">
             </div>
-            <div class="caja-titulo">Salsa Horror</div>
+            <div class="caja-titulo">Salsa Enmarcada</div>
             <div class="caja-precio">300 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(4)">Abrir Caja</button>
             <div class="ver-contenido" onclick="verProbabilidades(4)" style="cursor: pointer;">Ver contenido posible</div>

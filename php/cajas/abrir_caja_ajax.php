@@ -87,13 +87,13 @@ try {
         $stmtPuntos->execute();
         $mensajePremio = "¡Has ganado " . $premioGanado['puntos_premio'] . " puntos extra!";
 
-    } elseif ($premioGanado['tipo_premio'] === 'avatar') {
+    } elseif ($premioGanado['tipo_premio'] === 'avatar' || $premioGanado['tipo_premio'] === 'marco') {
         // Lo metemos en la tabla de usuario_items (Inventario)
         $idItem = $premioGanado['id_item'];
         $stmtItem = $conexion->prepare("INSERT IGNORE INTO usuario_items (id_usuario, id_item, equipado) VALUES (?, ?, 0)");
         $stmtItem->bind_param("ii", $idUsuario, $idItem);
         $stmtItem->execute();
-        $mensajePremio = "¡Has conseguido el avatar exclusivo!";
+        $mensajePremio = "¡Has conseguido un nuevo cosmético!";
 
     } elseif ($premioGanado['tipo_premio'] === 'juego') {
         // Lo metemos en la tabla de biblioteca
