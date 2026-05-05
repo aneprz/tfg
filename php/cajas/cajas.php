@@ -54,6 +54,12 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         .ruleta-item-track span { font-size: 0.9rem; font-weight: bold; color: #aaa; }
         .premio-oro span { color: #f0c330; } 
         .mensaje-premio { font-size: 1.5rem; color: #f0c330; font-weight: bold; min-height: 35px; }
+        /* RAREZAS DE LA RULETA */
+        .rareza-gris { border-bottom: 4px solid #888; box-shadow: inset 0 -20px 20px -20px rgba(136,136,136,0.8); }
+        .rareza-azul { border-bottom: 4px solid #4aa3f0; box-shadow: inset 0 -20px 20px -20px rgba(74,163,240,0.8); }
+        .rareza-morado { border-bottom: 4px solid #c724b1; box-shadow: inset 0 -20px 20px -20px rgba(199,36,177,0.8); }
+        .rareza-dorado { border-bottom: 4px solid #f0c330; box-shadow: inset 0 -20px 20px -20px rgba(240,195,48,0.8); }
+        .rareza-dorado span { color: #f0c330 !important; text-shadow: 0 0 5px rgba(240,195,48,0.5); }
     </style>
 </head>
 
@@ -135,7 +141,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <div class="caja-titulo">Salsa Indie</div>
             <div class="caja-precio">150 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(1)">Abrir Caja</button>
-            <div class="ver-contenido">Ver contenido posible</div>
+            <div class="ver-contenido" onclick="verProbabilidades(1)">Ver contenido posible</div>
         </div>
 
         <!-- CAJA ÉPICA -->
@@ -189,7 +195,19 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         <button id="btn-cerrar-modal" style="display: none;" onclick="cerrarRuleta()">Cerrar y recoger</button>
     </div>
 </div>
+<!-- MODAL PROBABILIDADES -->
+<div id="modal-probabilidades" class="modal-overlay" style="display: none;">
+    <div class="modal-box" style="width: 500px;">
+        <h2>Contenido de la Caja</h2>
+        <p style="color: #aaa; margin-bottom: 20px;">Probabilidades auditadas y garantizadas.</p>
+        
+        <ul id="lista-probabilidades" style="list-style: none; padding: 0; margin: 0; text-align: left;">
+            <!-- Aquí se inyectarán los premios por JavaScript -->
+        </ul>
 
+        <button id="btn-cerrar-prob" style="background: #333; color: white; margin-top: 20px;" onclick="cerrarProbabilidades()">Cerrar</button>
+    </div>
+</div>
 <footer>
     <p>&copy; 2026 SalsaBox. Creado para los gamers.</p>
 </footer>
@@ -204,7 +222,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     }
 
     // EL NUEVO MOTOR JAVASCRIPT DE LA RULETA
-    function abrirCaja(idCaja) {
+function abrirCaja(idCaja) {
         <?php if (!isset($_SESSION['id_usuario'])): ?>
             alert("¡Debes iniciar sesión para abrir cajas!");
             window.location.href = "../sesiones/login/login.php";
@@ -242,18 +260,56 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                 const indexGanador = 60; 
                 const anchoItem = 140; 
 
+                // Lógica de colores de rareza
+                let claseGanador = 'rareza-gris'; 
+                if (data.tipo_premio === 'avatar') {
+                    claseGanador = 'rareza-morado';
+                } else if (data.tipo_premio === 'puntos') {
+                    if (data.puntos_premio <= 100) claseGanador = 'rareza-gris';
+                    else if (data.puntos_premio <= 500) claseGanador = 'rareza-azul';
+                    else claseGanador = 'rareza-dorado';
+                }
+
+                // Aseguramos imagen ganadora
+                let imgGanador = data.imagen_premio ? '../../media/' + data.imagen_premio : '../../media/logoPlatino.png';
+                
+                // AQUÍ EL CAMBIO: Si son puntos, forzamos que el texto sea el número. Si es otra cosa, su nombre real.
+                let textoGanador = data.tipo_premio === 'puntos' ? data.puntos_premio + ' Puntos' : data.nombre_premio;
+
                 for (let i = 0; i < totalItems; i++) {
                     let div = document.createElement('div');
-                    div.className = 'ruleta-item-track';
                     
                     if (i === indexGanador) {
-                        div.classList.add('premio-oro');
-                        div.innerHTML = `<img src="../../media/logoPlatino.png"><span>PREMIO</span>`;
+                        div.className = `ruleta-item-track ${claseGanador}`;
+                        // Inyectamos el texto limpio
+                        div.innerHTML = `<img src="${imgGanador}"><span>${textoGanador}</span>`;
                     } else {
-                        let esJuego = Math.random() > 0.8;
-                        div.innerHTML = esJuego 
-                            ? `<img src="../../media/bote_indie.png" style="filter: grayscale(100%); opacity: 0.5;"><span>Juego</span>` 
-                            : `<img src="../../media/logoPlatino.png" style="filter: grayscale(100%); opacity: 0.5;"><span>Puntos</span>`;
+                        // RELLENO VISUAL (El teatro de la ruleta)
+                        let random = Math.random() * 100;
+                        let claseFalsa, imgFalsa, txtFalso;
+
+                        if (random < 50) { 
+                            claseFalsa = 'rareza-gris'; 
+                            imgFalsa = '../../media/logoPlatino.png'; 
+                            txtFalso = '50 Puntos'; 
+                        } else if (random < 80) { 
+                            claseFalsa = 'rareza-azul'; 
+                            imgFalsa = '../../media/logoPlatino.png'; 
+                            txtFalso = '250 Puntos'; // <--- AQUÍ SUBES LOS PUNTOS AL NÚMERO QUE QUIERAS
+                        } else if (random < 98) { 
+                            claseFalsa = 'rareza-morado'; 
+                            // <--- AQUÍ CAMBIAS LA RUTA POR TUS AVATARES REALES
+                            let randomImg = Math.floor(Math.random() * 3) + 1; 
+                            imgFalsa = '../../media/premiosIndie/' + randomImg + '.png'; 
+                            txtFalso = 'Avatar Exclusivo';
+                        } else { 
+                            claseFalsa = 'rareza-dorado'; 
+                            imgFalsa = '../../media/logoPlatino.png'; 
+                            txtFalso = '1200 Puntos'; 
+                        }
+
+                        div.className = `ruleta-item-track ${claseFalsa}`;
+                        div.innerHTML = `<img src="${imgFalsa}" style="opacity: 0.7;"><span>${txtFalso}</span>`;
                     }
                     pista.appendChild(div);
                 }
@@ -264,7 +320,6 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                 let distancia = (indexGanador * anchoItem); 
                 distancia = distancia - (anchoVentana / 2);
                 distancia = distancia + (anchoItem / 2);
-                
                 const randomOffset = Math.floor(Math.random() * 100) - 50;
                 distancia = distancia + randomOffset;
 
@@ -273,7 +328,8 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
                 setTimeout(() => {
                     titulo.innerText = "¡Resultado!";
-                    mensaje.innerText = data.mensaje;
+                    // Mensaje final también con el texto limpio
+                    mensaje.innerText = `¡Has conseguido: ${textoGanador}!`;
                     saldo.innerText = "Tu nuevo saldo: " + data.nuevo_saldo + " Puntos";
                     btnCerrar.style.display = 'block';
                 }, 6000); 
@@ -294,6 +350,56 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     function cerrarRuleta() {
         document.getElementById('modal-ruleta').style.display = 'none';
         location.reload(); 
+    }
+function verProbabilidades(idCaja) {
+        const modal = document.getElementById('modal-probabilidades');
+        const lista = document.getElementById('lista-probabilidades');
+        
+        modal.style.display = 'flex';
+        lista.innerHTML = '<p style="text-align: center;">Cargando probabilidades...</p>';
+
+        fetch('ver_probabilidades_ajax.php?id_caja=' + idCaja)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                lista.innerHTML = ''; 
+                
+                data.premios.forEach(premio => {
+                    // AQUÍ EL CAMBIO PARA EL MODAL: Muestra directamente la cantidad de puntos
+                    let nombre = premio.tipo_premio === 'puntos' ? premio.puntos_premio + ' Puntos' : premio.nombre_premio;
+
+                    let rutaImagen = premio.imagen_premio ? '../../media/' + premio.imagen_premio : '../../media/logoPlatino.png';
+                    
+                    // Colores también en la lista de probabilidades
+                    let colorRareza = '#888';
+                    if (premio.tipo_premio === 'avatar') colorRareza = '#c724b1';
+                    else if (premio.tipo_premio === 'puntos' && premio.puntos_premio > 100 && premio.puntos_premio <= 500) colorRareza = '#4aa3f0';
+                    else if (premio.tipo_premio === 'puntos' && premio.puntos_premio > 500) colorRareza = '#f0c330';
+
+                    lista.innerHTML += `
+                        <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #333;">
+                            <div style="display: flex; align-items: center;">
+                                <img src="${rutaImagen}" style="width: 40px; height: 40px; object-fit: contain; margin-right: 15px; border-radius: 5px; background: #222; padding: 5px; border-bottom: 2px solid ${colorRareza};">
+                                <div>
+                                    <span style="font-weight: bold; color: #fff; display: block;">${nombre}</span>
+                                    <span style="font-size: 0.8rem; color: ${colorRareza}; text-transform: uppercase; font-weight: bold;">${premio.tipo_premio}</span>
+                                </div>
+                            </div>
+                            <div style="color: #f0c330; font-weight: bold; font-size: 1.1rem;">
+                                ${parseFloat(premio.probabilidad)}%
+                            </div>
+                        </li>
+                    `;
+                });
+            } else {
+                lista.innerHTML = '<p style="color: #ff4444; text-align: center;">Error al cargar el contenido.</p>';
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+
+    function cerrarProbabilidades() {
+        document.getElementById('modal-probabilidades').style.display = 'none';
     }
 </script>
 

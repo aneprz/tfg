@@ -43,13 +43,13 @@ try {
         throw new Exception("No tienes puntos suficientes. Cuesta " . $caja['precio'] . " y tienes " . $usuario['puntos']);
     }
 
-    // 4. Cobramos la caja
-    $nuevoSaldo = $usuario['puntos'] - $caja['precio'];
+    // 4. COBRAMOS LA CAJA (Restamos el precio al saldo actual)
+    $saldoDespuesDeCobro = $usuario['puntos'] - $caja['precio'];
     $stmtCobro = $conexion->prepare("UPDATE Usuario SET puntos = ? WHERE id_usuario = ?");
-    $stmtCobro->bind_param("ii", $nuevoSaldo, $idUsuario);
+    $stmtCobro->bind_param("ii", $saldoDespuesDeCobro, $idUsuario);
     $stmtCobro->execute();
 
-    // 5. LA RULETA MATEMÁTICA (RNG)
+    // 5. LA RULETA MATEMÁTICA (RNG) - ¡Primero decidimos qué toca!
     $stmtPremios = $conexion->prepare("SELECT * FROM Recompensa_Caja WHERE id_caja = ?");
     $stmtPremios->bind_param("i", $idCaja);
     $stmtPremios->execute();
@@ -72,29 +72,50 @@ try {
         }
     }
 
-    // Por si las probabilidades no suman 100 exacto por algún decimal, damos el último
+    // Por si las probabilidades no suman 100 exacto, damos el último
     if (!$premioGanado) { $premioGanado = end($premios); }
 
-    // 6. ENTREGAMOS EL PREMIO
+    // 6. ENTREGAMOS EL PREMIO (Ahora sí sabemos qué es)
+    $saldoFinal = $saldoDespuesDeCobro;
+    $mensajePremio = "";
+
     if ($premioGanado['tipo_premio'] === 'puntos') {
-        $saldoFinal = $nuevoSaldo + $premioGanado['puntos_premio'];
-        $conexion->query("UPDATE Usuario SET puntos = $saldoFinal WHERE id_usuario = $idUsuario");
+        // Le sumamos los puntos ganados al nuevo saldo
+        $saldoFinal += $premioGanado['puntos_premio'];
+        $stmtPuntos = $conexion->prepare("UPDATE Usuario SET puntos = ? WHERE id_usuario = ?");
+        $stmtPuntos->bind_param("ii", $saldoFinal, $idUsuario);
+        $stmtPuntos->execute();
         $mensajePremio = "¡Has ganado " . $premioGanado['puntos_premio'] . " puntos extra!";
-    } else if ($premioGanado['tipo_premio'] === 'juego') {
-        // Aquí haríamos el INSERT en una tabla de 'inventario_usuario'
+
+    } elseif ($premioGanado['tipo_premio'] === 'avatar') {
+        // Lo metemos en la tabla de usuario_items (Inventario)
+        $idItem = $premioGanado['id_item'];
+        $stmtItem = $conexion->prepare("INSERT IGNORE INTO usuario_items (id_usuario, id_item, equipado) VALUES (?, ?, 0)");
+        $stmtItem->bind_param("ii", $idUsuario, $idItem);
+        $stmtItem->execute();
+        $mensajePremio = "¡Has conseguido el avatar exclusivo!";
+
+    } elseif ($premioGanado['tipo_premio'] === 'juego') {
+        // Lo metemos en la tabla de biblioteca
+        $idJuego = $premioGanado['id_videojuego'];
+        $stmtJuego = $conexion->prepare("INSERT IGNORE INTO biblioteca (id_usuario, id_videojuego) VALUES (?, ?)");
+        $stmtJuego->bind_param("ii", $idUsuario, $idJuego);
+        $stmtJuego->execute();
         $mensajePremio = "¡Te ha tocado un juego top!";
     }
 
-    // 7. CONFIRMAMOS LA TRANSACCIÓN (Aquí se guarda todo en base de datos)
+    // 7. CONFIRMAMOS LA TRANSACCIÓN
     $conexion->commit();
 
-    // Devolvemos el resultado al Front-end para que arranque la animación
+    // Devolvemos el resultado al Front-end con todos los datos visuales listos para la ruleta
     echo json_encode([
         'status' => 'success',
-        'nuevo_saldo' => $nuevoSaldo,
-        'premio_id' => $premioGanado['id_recompensa'],
+        'nuevo_saldo' => $saldoFinal, // Importante: Enviamos el saldo con el cobro hecho y el premio sumado (si aplica)
         'mensaje' => $mensajePremio,
-        'tirada_interna' => $tirada // Solo para que tú depures
+        'tipo_premio' => $premioGanado['tipo_premio'],
+        'puntos_premio' => $premioGanado['puntos_premio'],
+        'nombre_premio' => $premioGanado['nombre_premio'] ?? ($premioGanado['puntos_premio'] . ' Pts'),
+        'imagen_premio' => $premioGanado['imagen_premio'] ?? 'logoPlatino.png'
     ]);
 
 } catch (Exception $e) {
