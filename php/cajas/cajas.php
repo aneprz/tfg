@@ -141,7 +141,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <div class="caja-titulo">Salsa Indie</div>
             <div class="caja-precio">150 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(1)">Abrir Caja</button>
-            <div class="ver-contenido" onclick="verProbabilidades(1)">Ver contenido posible</div>
+            <div class="ver-contenido" onclick="verProbabilidades(1)" style="cursor: pointer;">Ver contenido posible</div>
         </div>
 
         <!-- CAJA ÉPICA -->
@@ -152,7 +152,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <div class="caja-titulo">Salsa Triple A</div>
             <div class="caja-precio">500 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(2)">Abrir Caja</button>
-            <div class="ver-contenido">Ver contenido posible</div>
+            <div class="ver-contenido" onclick="verProbabilidades(2)" style="cursor: pointer;">Ver contenido posible</div>
         </div>
 
         <!-- CAJA LEGENDARIA -->
@@ -163,7 +163,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <div class="caja-titulo">Salsa Goty</div>
             <div class="caja-precio">1200 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(3)">Abrir Caja</button>
-            <div class="ver-contenido">Ver contenido posible</div>
+            <div class="ver-contenido" onclick="verProbabilidades(3)" style="cursor: pointer;">Ver contenido posible</div>
         </div>
 
         <!-- CAJA TEMÁTICA -->
@@ -174,10 +174,8 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <div class="caja-titulo">Salsa Horror</div>
             <div class="caja-precio">300 Puntos</div>
             <button class="boton-abrir" onclick="abrirCaja(4)">Abrir Caja</button>
-            <div class="ver-contenido">Ver contenido posible</div>
+            <div class="ver-contenido" onclick="verProbabilidades(4)" style="cursor: pointer;">Ver contenido posible</div>
         </div>
-
-    </div>
 </main>
 
 <!-- NUEVO MODAL RULETA ESTILO CS:GO -->
@@ -260,14 +258,24 @@ function abrirCaja(idCaja) {
                 const indexGanador = 60; 
                 const anchoItem = 140; 
 
-                // Lógica de colores de rareza
+                // Lógica inteligente de colores según la caja a la que juegues
                 let claseGanador = 'rareza-gris'; 
                 if (data.tipo_premio === 'avatar') {
                     claseGanador = 'rareza-morado';
                 } else if (data.tipo_premio === 'puntos') {
-                    if (data.puntos_premio <= 100) claseGanador = 'rareza-gris';
-                    else if (data.puntos_premio <= 500) claseGanador = 'rareza-azul';
-                    else claseGanador = 'rareza-dorado';
+                    if (idCaja == 3) { // LÍMITES GOTY
+                        if (data.puntos_premio <= 500) claseGanador = 'rareza-gris';
+                        else if (data.puntos_premio <= 3000) claseGanador = 'rareza-azul';
+                        else claseGanador = 'rareza-dorado';
+                    } else if (idCaja == 2) { // LÍMITES TRIPLE A
+                        if (data.puntos_premio <= 200) claseGanador = 'rareza-gris';
+                        else if (data.puntos_premio <= 1000) claseGanador = 'rareza-azul';
+                        else claseGanador = 'rareza-dorado';
+                    } else { // LÍMITES INDIE (Por defecto)
+                        if (data.puntos_premio <= 100) claseGanador = 'rareza-gris';
+                        else if (data.puntos_premio <= 500) claseGanador = 'rareza-azul';
+                        else claseGanador = 'rareza-dorado';
+                    }
                 }
 
                 // Aseguramos imagen ganadora
@@ -287,27 +295,54 @@ function abrirCaja(idCaja) {
                         // RELLENO VISUAL (El teatro de la ruleta)
                         let random = Math.random() * 100;
                         let claseFalsa, imgFalsa, txtFalso;
-
-                        if (random < 50) { 
-                            claseFalsa = 'rareza-gris'; 
-                            imgFalsa = '../../media/logoPlatino.png'; 
-                            txtFalso = '50 Puntos'; 
-                        } else if (random < 80) { 
-                            claseFalsa = 'rareza-azul'; 
-                            imgFalsa = '../../media/logoPlatino.png'; 
-                            txtFalso = '250 Puntos'; // <--- AQUÍ SUBES LOS PUNTOS AL NÚMERO QUE QUIERAS
-                        } else if (random < 98) { 
-                            claseFalsa = 'rareza-morado'; 
-                            // <--- AQUÍ CAMBIAS LA RUTA POR TUS AVATARES REALES
-                            let randomImg = Math.floor(Math.random() * 3) + 1; 
-                            imgFalsa = '../../media/premiosIndie/' + randomImg + '.png'; 
-                            txtFalso = 'Avatar Exclusivo';
+                        if (idCaja == 3) { // SI ES LA GOTY
+                            if (random < 50) { 
+                                claseFalsa = 'rareza-gris'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '400 Puntos'; 
+                            } else if (random < 80) { 
+                                claseFalsa = 'rareza-azul'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '1800 Puntos'; 
+                            } else if (random < 98) { 
+                                claseFalsa = 'rareza-morado'; 
+                                let randomImg = Math.floor(Math.random() * 5) + 1; 
+                                imgFalsa = '../../media/premiosGoty/' + randomImg + '.png'; 
+                                txtFalso = 'Avatar LEGENDARIO';
+                            } else { 
+                                claseFalsa = 'rareza-dorado'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '10000 Pts'; 
+                            }
+                        } else if (idCaja == 2) { // SI ES LA TRIPLE A
+                            if (random < 50) { 
+                                claseFalsa = 'rareza-gris'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '200 Puntos'; 
+                            } else if (random < 80) { 
+                                claseFalsa = 'rareza-azul'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '750 Puntos'; 
+                            } else if (random < 98) { 
+                                claseFalsa = 'rareza-morado'; 
+                                let randomImg = Math.floor(Math.random() * 5) + 1; // Del 1 al 5
+                                imgFalsa = '../../media/premiosTripleA/' + randomImg + '.png'; 
+                                txtFalso = 'Avatar ÉPICO';
+                            } else { 
+                                claseFalsa = 'rareza-dorado'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '3000 Puntos'; 
+                            }
                         } else { 
-                            claseFalsa = 'rareza-dorado'; 
-                            imgFalsa = '../../media/logoPlatino.png'; 
-                            txtFalso = '1200 Puntos'; 
-                        }
+                            if (random < 50) { 
+                                claseFalsa = 'rareza-gris'; 
+                                imgFalsa = '../../media/logoPlatino.png'; 
+                                txtFalso = '50 Puntos'; 
+                            } else if (random < 80) { 
+                                claseFalsa = 'rareza-azul'; 
+                                imgFalsa = '../../media/logoPlatino.png'; 
+                                txtFalso = '250 Puntos'; 
+                            } else if (random < 98) { 
+                                claseFalsa = 'rareza-morado'; 
+                                let randomImg = Math.floor(Math.random() * 3) + 1; // Del 1 al 3
+                                imgFalsa = '../../media/premiosIndie/' + randomImg + '.png'; 
+                                txtFalso = 'Avatar Exclusivo';
+                            } else { 
+                                claseFalsa = 'rareza-dorado'; 
+                                imgFalsa = '../../media/logoPlatino.png'; 
+                                txtFalso = '1200 Puntos'; 
+                            }
+                        } // <--- ESTA ES LA LLAVE QUE TE FALTABA CERRAR AQUÍ
 
+                        // Esto tiene que estar FUERA del if/else para que se aplique a TODAS las cajas
                         div.className = `ruleta-item-track ${claseFalsa}`;
                         div.innerHTML = `<img src="${imgFalsa}" style="opacity: 0.7;"><span>${txtFalso}</span>`;
                     }
@@ -371,10 +406,21 @@ function verProbabilidades(idCaja) {
                     let rutaImagen = premio.imagen_premio ? '../../media/' + premio.imagen_premio : '../../media/logoPlatino.png';
                     
                     // Colores también en la lista de probabilidades
-                    let colorRareza = '#888';
-                    if (premio.tipo_premio === 'avatar') colorRareza = '#c724b1';
-                    else if (premio.tipo_premio === 'puntos' && premio.puntos_premio > 100 && premio.puntos_premio <= 500) colorRareza = '#4aa3f0';
-                    else if (premio.tipo_premio === 'puntos' && premio.puntos_premio > 500) colorRareza = '#f0c330';
+                    let colorRareza = '#888'; // Gris por defecto
+                    if (premio.tipo_premio === 'avatar') {
+                        colorRareza = '#c724b1'; // Morado
+                    } else if (premio.tipo_premio === 'puntos') {
+                        if (idCaja == 3) { // GOTY
+                            if (premio.puntos_premio > 500 && premio.puntos_premio <= 3000) colorRareza = '#4aa3f0'; 
+                            else if (premio.puntos_premio > 3000) colorRareza = '#f0c330'; 
+                        } else if (idCaja == 2) { // TRIPLE A
+                            if (premio.puntos_premio > 200 && premio.puntos_premio <= 1000) colorRareza = '#4aa3f0'; // Azul
+                            else if (premio.puntos_premio > 1000) colorRareza = '#f0c330'; // Dorado
+                        } else { // INDIE
+                            if (premio.puntos_premio > 100 && premio.puntos_premio <= 500) colorRareza = '#4aa3f0'; // Azul
+                            else if (premio.puntos_premio > 500) colorRareza = '#f0c330'; // Dorado
+                        }
+                    }
 
                     lista.innerHTML += `
                         <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #333;">
