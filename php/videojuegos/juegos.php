@@ -143,6 +143,11 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
     </div>
 
+    <!-- Botón Biblioteca -->
+    <button id="btn-biblioteca" class="btn-biblioteca" style="background: #f0c330; color: #000; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-right: 10px; margin-top: 30px;">
+        Ver Mi Biblioteca
+    </button>
+
 </div>
 
 
@@ -251,7 +256,126 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 </script>
-<script src="../../js/notificaciones.js"></script>
 
+<script src="../../js/notificaciones.js"></script>
+<!-- Modal Biblioteca -->
+<div id="modal-biblioteca" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #1a1a1a; padding: 25px; border-radius: 15px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; border: 1px solid #f0c330;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: #f0c330; margin: 0;">📚 Mi Biblioteca</h2>
+            <button id="cerrar-modal" style="background: none; border: none; color: #f0c330; font-size: 24px; cursor: pointer;">✖</button>
+        </div>
+        <div id="contenido-biblioteca" style="color: white;">
+            <p style="text-align: center; padding: 40px;">Cargando tus juegos...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// Modal biblioteca
+const modalBiblioteca = document.getElementById('modal-biblioteca');
+const btnBiblioteca = document.getElementById('btn-biblioteca');
+const cerrarModal = document.getElementById('cerrar-modal');
+
+if (btnBiblioteca) {
+    btnBiblioteca.addEventListener('click', function() {
+        modalBiblioteca.style.display = 'flex';
+        cargarBiblioteca();
+    });
+}
+
+if (cerrarModal) {
+    cerrarModal.addEventListener('click', function() {
+        modalBiblioteca.style.display = 'none';
+    });
+}
+
+// Cerrar al hacer clic fuera
+window.addEventListener('click', function(e) {
+    if (e.target === modalBiblioteca) {
+        modalBiblioteca.style.display = 'none';
+    }
+});
+
+function cargarBiblioteca() {
+    const contenido = document.getElementById('contenido-biblioteca');
+    contenido.innerHTML = '<p style="text-align: center; padding: 40px;">Cargando tus juegos...</p>';
+    
+    fetch('obtener_biblioteca.php')
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                contenido.innerHTML = '<p style="text-align: center; color: #ff6666;">Error al cargar tu biblioteca</p>';
+                return;
+            }
+            
+            if (data.length === 0) {
+                contenido.innerHTML = '<p style="text-align: center; color: #888;">No tienes juegos en tu biblioteca. ¡Explora y añade algunos!</p>';
+                return;
+            }
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Portada</th>
+                            <th>Título</th>
+                            <th>Estado</th>
+                            <th>Puntuación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            data.forEach(juego => {
+                const urlJuego = `juego.php?id=${juego.id_videojuego}`;
+                const puntuacion5 = juego.puntuacion ? (juego.puntuacion / 2) : 0;
+                const porcentaje = juego.puntuacion ? (juego.puntuacion / 10) * 100 : 0;
+                
+                html += `
+                    <tr data-href="${urlJuego}" style="cursor: pointer;">
+                        <td>
+                            <img src="../../media/${juego.portada}" class="portada" alt="${juego.titulo}">
+                        </td>
+                        <td style="font-weight: bold; color: #f0c330;">
+                            ${juego.titulo}
+                        </td>
+                        <td>
+                            <span class="status-badge ${juego.estado}">${juego.estado}</span>
+                        </td>
+                        <td>
+                            ${juego.puntuacion ? `
+                                <span class="estrellas">
+                                    <span class="relleno" style="width: ${porcentaje}%"></span>
+                                </span>
+                            ` : 'Sin puntuar'}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            contenido.innerHTML = html;
+            
+            // Añadir evento de clic a las filas para ir al juego
+            document.querySelectorAll('#contenido-biblioteca tr[data-href]').forEach(function(row) {
+                row.addEventListener('click', function(e) {
+                    if (e.target && e.target.closest && e.target.closest('a, button, input, textarea, select, label')) {
+                        return;
+                    }
+                    window.location.href = row.getAttribute('data-href');
+                });
+            });
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            contenido.innerHTML = '<p style="text-align: center; color: #ff6666;">Error al cargar tu biblioteca</p>';
+        });
+}
+</script>
 </body>
 </html>
