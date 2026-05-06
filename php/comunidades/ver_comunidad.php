@@ -131,10 +131,12 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
     <div class="layout-comunidad">
         <aside class="sidebar-canales">
-            <h3># Canales</h3>
-            <nav class="lista-canales">
-                <a href="#" class="canal activo"><span>#</span> general</a>
-                <a href="#" class="canal"><span>#</span> clips-y-capturas</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0;"># Canales</h3>
+                <button id="btn-nuevo-canal" style="background: none; border: none; color: #f0c330; font-size: 1.2rem; cursor: pointer;">+</button>
+            </div>
+            <nav class="lista-canales" id="lista-canales">
+                <a href="#" class="canal activo" data-canal="todos"><span>#</span> todos</a>
             </nav>
         </aside>
 
@@ -165,7 +167,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
 
             <div class="input-post">
     <?php if ($esMiembro): ?>
-        <form action="guardar_post.php" method="POST">
+        <form>
             <input type="hidden" name="id_comunidad" value="<?php echo $id_comunidad; ?>">
             <textarea name="contenido" placeholder="Escribe un mensaje..." required></textarea>
             <div class="input-acciones">
@@ -316,6 +318,118 @@ document.addEventListener('click', function(e) {
             btn.disabled = false;
         });
 });
+</script>
+<script>
+const idComunidad = <?php echo $id_comunidad; ?>;
+let canalActual = 'todos';
+
+function cargarCanales() {
+    fetch(`obtener_canales.php?id_comunidad=${idComunidad}`)
+        .then(res => res.json())
+        .then(data => {
+            const lista = document.getElementById('lista-canales');
+            const canalesExistentes = lista.querySelectorAll('.canal:not(.canal-todos)');
+            canalesExistentes.forEach(c => c.remove());
+            
+            data.forEach(canal => {
+                const canalEl = document.createElement('a');
+                canalEl.href = '#';
+                canalEl.className = 'canal';
+                canalEl.dataset.canal = canal.nombre_canal;
+                canalEl.innerHTML = `<span>#</span> ${canal.nombre_canal}`;
+                canalEl.onclick = (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.canal').forEach(c => c.classList.remove('activo'));
+                    canalEl.classList.add('activo');
+                    canalActual = canal.nombre_canal;
+                    cargarMensajes(canal.nombre_canal);
+                };
+                lista.appendChild(canalEl);
+            });
+        });
+}
+
+function cargarMensajes(canal) {
+    const feed = document.getElementById('chat-feed');
+    feed.innerHTML = '<p style="text-align:center; padding:20px;">Cargando mensajes...</p>';
+    
+    fetch(`obtener_post_ajax.php?id=${idComunidad}&canal=${canal}`)
+        .then(res => res.text())
+        .then(html => {
+            feed.innerHTML = html;
+            feed.scrollTop = feed.scrollHeight;
+        });
+}
+
+// Crear nuevo canal
+document.getElementById('btn-nuevo-canal').onclick = () => {
+    const nombre = prompt('Nombre del nuevo canal:');
+    if (nombre && nombre.trim()) {
+        fetch('crear_canal.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `id_comunidad=${idComunidad}&nombre=${encodeURIComponent(nombre.trim())}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                cargarCanales();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        });
+    }
+};
+
+// Enviar mensaje
+const formPost = document.querySelector('.input-post form');
+if (formPost) {
+    formPost.onsubmit = function(e) {
+        e.preventDefault();
+        const textarea = this.querySelector('textarea');
+        const contenido = textarea.value.trim();
+        if (!contenido) return;
+        
+        // Obtener el canal seleccionado
+        let idCanal = 0;
+        if (canalActual !== 'todos') {
+            const canalEl = document.querySelector(`.canal[data-canal="${canalActual}"]`);
+            if (canalEl) {
+                // Necesitamos el id_canal, lo obtenemos de los datos
+                fetch(`obtener_canales.php?id_comunidad=${idComunidad}`)
+                    .then(res => res.json())
+                    .then(canales => {
+                        const canalData = canales.find(c => c.nombre_canal === canalActual);
+                        const idCanalEnvio = canalData ? canalData.id_canal : 0;
+                        enviarMensaje(contenido, idCanalEnvio);
+                    });
+                return;
+            }
+        }
+        enviarMensaje(contenido, 0);
+    };
+}
+
+function enviarMensaje(contenido, idCanal) {
+    fetch('guardar_post_ajax.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `id_comunidad=${idComunidad}&contenido=${encodeURIComponent(contenido)}&id_canal=${idCanal}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const textarea = document.querySelector('.input-post textarea');
+            textarea.value = '';
+            cargarMensajes(canalActual);
+        } else {
+            alert('Error al enviar mensaje');
+        }
+    });
+}
+
+cargarCanales();
+cargarMensajes('todos');
 </script>
 
     <script src="../../js/comunidades.js"></script>

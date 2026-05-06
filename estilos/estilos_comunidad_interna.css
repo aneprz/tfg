@@ -629,3 +629,61 @@ body.body-comunidad {
         margin-bottom: 0 !important;
     }
 }
+
+/* Canales */
+.btn-nuevo-canal {
+    background: none;
+    border: none;
+    color: #f0c330;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: 10px;
+    padding: 0 5px;
+}
+.lista-canales {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.canal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: #9ab;
+    text-decoration: none;
+    transition: 0.2s;
+}
+.canal:hover, .canal.activo {
+    background-color: #2c3440;
+    color: #fff;
+}
+.canal span:first-child {
+    margin-right: 8px;
+    color: #5c6370;
+}
+.eliminar-canal {
+    background: none;
+    border: none;
+    color: #ff4d4d;
+    cursor: pointer;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.canal:hover .eliminar-canal {
+    opacity: 1;
+}
+.modal-crear-canal .modal-content {
+    max-width: 350px;
+}
+.modal-crear-canal input {
+    width: 100%;
+    padding: 10px;
+    margin: 15px 0;
+    background: #2c3440;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: white;
+}
