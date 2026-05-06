@@ -259,8 +259,9 @@ function abrirCaja(idCaja) {
                 const anchoItem = 140; 
 
                 // Lógica inteligente de colores según la caja a la que juegues
+                // Lógica inteligente de colores según la caja a la que juegues
                 let claseGanador = 'rareza-gris'; 
-                if (data.tipo_premio === 'avatar') {
+                if (data.tipo_premio === 'avatar' || data.tipo_premio === 'marco') {
                     claseGanador = 'rareza-morado';
                 } else if (data.tipo_premio === 'puntos') {
                     if (idCaja == 3) { // LÍMITES GOTY
@@ -295,7 +296,13 @@ function abrirCaja(idCaja) {
                         // RELLENO VISUAL (El teatro de la ruleta)
                         let random = Math.random() * 100;
                         let claseFalsa, imgFalsa, txtFalso;
-                        if (idCaja == 3) { // SI ES LA GOTY
+                        if (idCaja == 4) { // SI ES LA DE MARCOS
+                            claseFalsa = 'rareza-morado'; 
+                            // Como tienes 54 marcos y se llaman 1.png, 2.png, etc...
+                            let randomImg = Math.floor(Math.random() * 54) + 1; 
+                            imgFalsa = '../../media/marcos/' + randomImg + '.png'; 
+                            txtFalso = 'Marco Exclusivo';
+                        } else if (idCaja == 3) { // SI ES LA GOTY
                             if (random < 50) { 
                                 claseFalsa = 'rareza-gris'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '400 Puntos'; 
                             } else if (random < 80) { 
@@ -405,9 +412,9 @@ function verProbabilidades(idCaja) {
 
                     let rutaImagen = premio.imagen_premio ? '../../media/' + premio.imagen_premio : '../../media/logoPlatino.png';
                     
-                    // Colores también en la lista de probabilidades
-                    let colorRareza = '#888'; // Gris por defecto
-                    if (premio.tipo_premio === 'avatar') {
+                    // Colores en la lista de probabilidades
+                    let colorRareza = '#888'; // Gris
+                    if (premio.tipo_premio === 'avatar' || premio.tipo_premio === 'marco') {
                         colorRareza = '#c724b1'; // Morado
                     } else if (premio.tipo_premio === 'puntos') {
                         if (idCaja == 3) { // GOTY
