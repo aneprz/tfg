@@ -136,7 +136,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                 <button id="btn-nuevo-canal" style="background: none; border: none; color: #f0c330; font-size: 1.2rem; cursor: pointer;">+</button>
             </div>
             <nav class="lista-canales" id="lista-canales">
-                <a href="#" class="canal activo" data-canal="todos"><span>#</span> todos</a>
+                <a href="#" class="canal activo" data-canal="todos"># general</a>
             </nav>
         </aside>
 
@@ -336,7 +336,7 @@ function cargarCanales() {
                 canalEl.href = '#';
                 canalEl.className = 'canal';
                 canalEl.dataset.canal = canal.nombre_canal;
-                canalEl.innerHTML = `<span>#</span> ${canal.nombre_canal}`;
+                canalEl.innerHTML = `#${canal.nombre_canal}`;
                 canalEl.onclick = (e) => {
                     e.preventDefault();
                     document.querySelectorAll('.canal').forEach(c => c.classList.remove('activo'));
