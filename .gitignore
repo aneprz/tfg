@@ -4,5 +4,3 @@
 
 # claves API
 API/credenciales.php
-db/conexiones.php
-phinx.php
