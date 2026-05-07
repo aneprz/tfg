@@ -142,7 +142,65 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         .rareza-morado { border-bottom: 4px solid #c724b1; box-shadow: inset 0 -20px 20px -20px rgba(199,36,177,0.8); }
         .rareza-dorado { border-bottom: 4px solid #f0c330; box-shadow: inset 0 -20px 20px -20px rgba(240,195,48,0.8); }
         .rareza-dorado span { color: #f0c330 !important; text-shadow: 0 0 5px rgba(240,195,48,0.5); }
-        
+        /* =========================================================
+   MODAL DE PROBABILIDADES (Responsive + Scroll)
+   ========================================================= */
+
+/* 1. El fondo oscuro que tapa la pantalla */
+#modal-probabilidades {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    /* Usamos flexbox para centrar la caja en la pantalla */
+    display: none; /* Se cambia a flex por JS */
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Margen de seguridad para móviles */
+    box-sizing: border-box;
+}
+
+/* 2. La caja del modal (Busca la clase que uses en tu HTML para la caja blanca/gris, si no tiene clase, ponle .modal-caja-interna y añádela al HTML) */
+#modal-probabilidades > div {
+    background-color: #1a1c23;
+    border: 2px solid #2d313d;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 450px; /* En PC medirá 450px, en móvil encogerá hasta el 100% */
+    padding: 25px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+}
+
+/* 3. LA MAGIA DEL SCROLL EN LA LISTA */
+#lista-probabilidades {
+    list-style: none;
+    margin: 15px 0;
+    padding: 0;
+    padding-right: 10px; /* Deja espacio a la derecha para que no se pegue la barra */
+    max-height: 50vh; /* NUNCA medirá más del 50% del alto de la pantalla del usuario */
+    overflow-y: auto; /* Activa el scroll vertical automáticamente si se pasa de altura */
+}
+
+/* 4. ESTILIZAR LA BARRA DE SCROLL (Diseño AAA) */
+#lista-probabilidades::-webkit-scrollbar {
+    width: 6px;
+}
+#lista-probabilidades::-webkit-scrollbar-track {
+    background: #111; 
+    border-radius: 10px;
+}
+#lista-probabilidades::-webkit-scrollbar-thumb {
+    background: #4aa3f0; 
+    border-radius: 10px;
+}
+#lista-probabilidades::-webkit-scrollbar-thumb:hover {
+    background: #f0c330; 
+}
     </style>
 </head>
 
