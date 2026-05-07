@@ -57,6 +57,7 @@ body.body-comunidad {
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 90%;
     background-color: #14181c;
     position: relative;
     overflow: hidden;
@@ -539,13 +540,6 @@ body.body-comunidad {
         display: none !important;
     }
     
-    /* El muro (feed) ocupa todo el ancho */
-    .muro-comunidad {
-        order: 1 !important;
-        width: 100% !important;
-        height: auto !important;
-        overflow: visible !important;
-    }
     
     /* Banner más pequeño */
     .banner-top {
