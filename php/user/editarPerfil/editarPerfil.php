@@ -26,6 +26,16 @@ $stmtAvatares = $conexion->prepare("
 $stmtAvatares->bind_param("i", $id);
 $stmtAvatares->execute();
 $avataresDesbloqueados = $stmtAvatares->get_result()->fetch_all(MYSQLI_ASSOC);
+// 3. Sacamos su inventario de marcos
+$stmtMarcos = $conexion->prepare("
+    SELECT t.nombre, t.imagen 
+    FROM usuario_items ui 
+    JOIN tienda_items t ON ui.id_item = t.id_item 
+    WHERE ui.id_usuario = ? AND t.tipo = 'marco'
+");
+$stmtMarcos->bind_param("i", $id);
+$stmtMarcos->execute();
+$marcosDesbloqueados = $stmtMarcos->get_result()->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -88,6 +98,34 @@ $avataresDesbloqueados = $stmtAvatares->get_result()->fetch_all(MYSQLI_ASSOC);
             <?php else: ?>
                 <div style="background: #1a1c23; padding: 15px; border-radius: 5px; border: 1px dashed #444; color: #888; display: inline-block;">
                     Aún no has desbloqueado ningún avatar. ¡Prueba suerte en las cajas!
+                </div>
+            <?php endif; ?>
+        </div>
+        <br><hr style="border-color: #333;"><br>
+
+        <div>
+            <label style="font-size: 1.2rem; color: #4aa3f0; font-weight: bold;">Tus Marcos Exclusivos</label><br>
+            <p style="font-size: 0.85rem; color: #888;">Decora tu foto de perfil con un marco.</p>
+            
+            <?php if(count($marcosDesbloqueados) > 0): ?>
+                <div class="grid-avatares">
+                    <label class="avatar-label">
+                        <input type="radio" name="marco_inventario" value="NULL" class="avatar-radio" checked>
+                        <div class="avatar-img" style="display:flex; align-items:center; justify-content:center; color:#aaa; font-size:24px;">✖</div>
+                        <span class="avatar-nombre">Sin Marco</span>
+                    </label>
+
+                    <?php foreach($marcosDesbloqueados as $marco): ?>
+                        <label class="avatar-label">
+                            <input type="radio" name="marco_inventario" value="<?php echo htmlspecialchars($marco['imagen']); ?>" class="avatar-radio">
+                            <img src="../../../media/<?php echo htmlspecialchars($marco['imagen']); ?>" class="avatar-img">
+                            <span class="avatar-nombre"><?php echo htmlspecialchars($marco['nombre']); ?></span>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div style="background: #1a1c23; padding: 15px; border-radius: 5px; border: 1px dashed #444; color: #888; display: inline-block;">
+                    No tienes ningún marco. ¡Abre cajas para conseguir uno!
                 </div>
             <?php endif; ?>
         </div>
