@@ -13,6 +13,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salsabox - Cajas Misteriosas</title>
+    <link rel="stylesheet" href="../../estilos/estilos_tienda.css">
 
     <link rel="stylesheet" href="../../estilos/estilos_index.css">
     <link rel="icon" href="../../media/logoPlatino.png">
@@ -218,8 +219,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <li><a href="../videojuegos/juegos.php">Juegos</a></li>
             <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
             <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
-            <li><a href="../tienda/tienda.php">Tienda</a></li>
-            <li><a href="cajas.php" class="activo">Cajas</a></li>
+            <li><a href="tienda.php" class="activo">Tienda</a></li>
             <li><a href="../logros/logros.php">Logros</a></li>
             <li><a href="../ranking/ranking.php">Ranking</a></li>
             <?php if ($admin): ?>
@@ -263,6 +263,13 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         </div>
     <?php endif; ?>
 </header>
+<div class="subnav">
+    <div class="subnav-container">
+        <a href="../tienda/tienda.php" class="subnav-link">Tienda</a>
+        <a href="../tienda/inventario.php" class="subnav-link">Inventario</a>
+        <a href="cajas.php" class="subnav-link activo">Cajas</a>
+    </div>
+</div>
 
 <div class="central">
     <h1>Cajas de Botín</h1>

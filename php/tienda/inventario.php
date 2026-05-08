@@ -119,7 +119,7 @@ ORDER BY ti.tipo, ui.equipado DESC
     <div class="subnav-container">
         <a href="tienda.php" class="subnav-link">Tienda</a>
         <a href="inventario.php" class="subnav-link activo">Inventario</a>
-        <a href="tienda_lootboxes.php" class="subnav-link">Cajas</a>
+        <a href="../cajas/cajas.php" class="subnav-link">Cajas</a>
     </div>
 </div>
 

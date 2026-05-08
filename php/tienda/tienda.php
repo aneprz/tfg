@@ -65,7 +65,6 @@ if (isset($_SESSION['id_usuario'])) {
             <li><a href="../jugadores/jugadores.php">Jugadores</a></li>
             <li><a href="../comunidades/comunidades.php">Comunidades</a></li>
             <li><a href="../tienda/tienda.php" class="activo">Tienda</a></li>
-            <li><a href="../cajas/cajas.php">Cajas</a></li>
             <li><a href="../logros/logros.php">Logros</a></li>
             <li><a href="../ranking/ranking.php">Ranking</a></li>
 
@@ -143,7 +142,7 @@ if (isset($_SESSION['id_usuario'])) {
 
         <a href="inventario.php" class="subnav-link">Inventario</a>
 
-        <a href="tienda_lootboxes.php" class="subnav-link">Cajas</a>
+        <a href="../cajas/cajas.php" class="subnav-link">Cajas</a>
 
     </div>
 
