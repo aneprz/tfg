@@ -135,16 +135,18 @@ $marcosDesbloqueados = $stmtMarcos->get_result()->fetch_all(MYSQLI_ASSOC);
         <div>
             <label style="color: #fff;">O sube una foto desde tu PC:</label><br>
             <?php $fotoActual = !empty($user['avatar']) ? $user['avatar'] : '../../../media/perfil_default.jpg'; ?>
-            <div style="display: flex; align-items: center; gap: 15px; margin-top: 10px;">
-                <img src="../../../media/<?php echo htmlspecialchars($fotoActual); ?>" width="60" style="border-radius: 50%; object-fit: cover; height: 60px;">
+            <div class="foto-pc-wrapper">
+                <img src="../../../media/<?php echo htmlspecialchars($fotoActual); ?>" alt="Tu foto actual">
                 <input type="file" name="avatar_archivo" accept="image/*">
             </div>
         </div>
 
         <br><br>
 
-        <button type="submit" style="background: #f0c330; color: #000; font-weight: bold; padding: 10px 20px; border: none; cursor: pointer;">Guardar Cambios</button>
-        <a href="../perfiles/perfilSesion.php" style="margin-left: 15px; color: #aaa;">Cancelar</a>
+        <div class="acciones-wrapper">
+            <button type="submit" class="btn-guardar">Guardar Cambios</button>
+            <a href="../perfiles/perfilSesion.php" class="btn-cancelar">Cancelar</a>
+        </div>
     </form>
 </body>
 </html>
