@@ -43,7 +43,7 @@ if (empty($banner_db)) {
 $esMiembro = false;
 if (isset($_SESSION['id_usuario'])) {
     $id_user = (int)$_SESSION['id_usuario'];
-    $check = mysqli_query($conexion, "SELECT 1 FROM miembro_comunidad WHERE id_comunidad = $id_comunidad AND id_usuario = $id_user");
+    $check = mysqli_query($conexion, "SELECT 1 FROM Miembro_Comunidad WHERE id_comunidad = $id_comunidad AND id_usuario = $id_user");
     if ($check && mysqli_num_rows($check) > 0) {
         $esMiembro = true;
     }
@@ -208,7 +208,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         <ul class="lista-miembros-modal" id="lista-miembros-modal">
             <?php
             $sqlMiembros = "SELECT u.id_usuario, u.gameTag, u.avatar 
-                            FROM miembro_comunidad mc 
+                            FROM Miembro_Comunidad mc 
                             JOIN Usuario u ON mc.id_usuario = u.id_usuario 
                             WHERE mc.id_comunidad = $id_comunidad
                             ORDER BY u.gameTag ASC";
@@ -226,7 +226,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                     
                     // Obtener estado de amistad
                     $estado_amistad = '';
-                    $sqlAmistad = "SELECT estado FROM amigos WHERE 
+                    $sqlAmistad = "SELECT estado FROM Amigos WHERE 
                                    (id_usuario = $id_sesion_actual AND id_amigo = $id_miembro) OR 
                                    (id_usuario = $id_miembro AND id_amigo = $id_sesion_actual)";
                     $resAmistad = mysqli_query($conexion, $sqlAmistad);
@@ -249,7 +249,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
                         echo '<span class="badge-amigo" style="color: #28a745; font-weight: bold;">Amigos ✓</span>';
                     } elseif ($estado_amistad === 'pendiente') {
                         // Verificar quién envió la solicitud
-                        $sqlSolicitante = "SELECT id_usuario FROM amigos WHERE 
+                        $sqlSolicitante = "SELECT id_usuario FROM Amigos WHERE 
                                            (id_usuario = $id_sesion_actual AND id_amigo = $id_miembro) OR 
                                            (id_usuario = $id_miembro AND id_amigo = $id_sesion_actual) AND estado = 'pendiente'";
                         $resSolic = mysqli_query($conexion, $sqlSolicitante);

@@ -6,9 +6,9 @@ $id_comunidad = (int)$_GET['id'];
 $miId = isset($_SESSION['id_usuario']) ? (int)$_SESSION['id_usuario'] : 0;
 
 $sql = "SELECT u.id_usuario, u.gameTag, u.avatar, a.estado, a.id_usuario AS solicitante
-        FROM miembro_comunidad mc 
+        FROM Miembro_Comunidad mc 
         JOIN Usuario u ON mc.id_usuario = u.id_usuario 
-        LEFT JOIN amigos a ON (
+        LEFT JOIN Amigos a ON (
             (a.id_usuario = $miId AND a.id_amigo = u.id_usuario) OR 
             (a.id_usuario = u.id_usuario AND a.id_amigo = $miId)
         )

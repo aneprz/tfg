@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['id_usuario'])) {
     $contenido = mysqli_real_escape_string($conexion, $_POST['contenido']);
 
     if (!empty($contenido)) {
-        $sql = "INSERT INTO post (id_comunidad, id_usuario, contenido, fecha_publicacion) 
+        $sql = "INSERT INTO Post (id_comunidad, id_usuario, contenido, fecha_publicacion) 
                 VALUES ($id_comunidad, $id_usuario, '$contenido', NOW())";
         
         if (mysqli_query($conexion, $sql)) {

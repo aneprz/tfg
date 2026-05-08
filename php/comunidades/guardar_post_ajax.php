@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['id_usuario'])) {
 
     if (!empty($contenido)) {
         // Usamos minúsculas 'post' para ser consistentes
-        $sql = "INSERT INTO post (id_comunidad, id_usuario, contenido, fecha_publicacion) 
+        $sql = "INSERT INTO Post (id_comunidad, id_usuario, contenido, fecha_publicacion) 
                 VALUES ($id_comunidad, $id_usuario, '$contenido', NOW())";
         
         if (mysqli_query($conexion, $sql)) {
