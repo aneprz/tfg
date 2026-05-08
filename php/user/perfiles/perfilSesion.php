@@ -55,7 +55,7 @@ while ($item = $result->fetch_assoc()) {
    ========================= */
 
 $stmt = $conexion->prepare("
-    SELECT biografia, avatar, puntos_actuales 
+    SELECT biografia, avatar, marco_avatar, puntos_actuales 
     FROM Usuario 
     WHERE id_usuario = ?
 ");
@@ -65,6 +65,7 @@ $user = $stmt->get_result()->fetch_assoc();
 
 $biografia = $user['biografia'] ?? '';
 $puntos_actuales = $user['puntos_actuales'] ?? 0;
+$marco_guardado = $user['marco_avatar'] ?? null;
 $steamVinculado = isset($_SESSION["steamid"]) && !empty($_SESSION["steamid"]);
 
 /* =========================
@@ -103,12 +104,12 @@ if ($avatar_item) {
         <div class="perfil-header">
 
             <!-- AVATAR + MARCO -->
-            <div class="avatar-grande">
+            <div class="avatar-grande" style="position: relative; width: 150px; height: 150px; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
 
-                <img src="<?php echo htmlspecialchars($img); ?>" class="avatar-img">
+                <img src="<?php echo htmlspecialchars($img); ?>" class="avatar-img" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;">
 
-                <?php if($marco): ?>
-                    <img src="../../../media/<?php echo htmlspecialchars($marco); ?>" class="marco-img">
+                <?php if($marco_guardado): ?>
+                    <img src="../../../media/<?php echo htmlspecialchars($marco_guardado); ?>" class="marco-img" style="position: absolute; top: -10%; left: -10%; width: 120%; height: 120%; z-index: 10; pointer-events: none;">
                 <?php endif; ?>
 
             </div>

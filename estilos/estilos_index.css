@@ -790,4 +790,121 @@ main {
         width: 260px;
         right: -30px;
     }
+
+    /* ========== NOTIFICACIONES RESPONSIVE MEJORADO ========== */
+
+@media (max-width: 768px) {
+    /* Contenedor de notificaciones */
+    .notif-wrapper {
+        position: static;
+    }
+    
+    /* Dropdown ocupa casi toda la pantalla en móvil */
+    #notif-dropdown {
+        position: fixed;
+        top: 60px;
+        left: 10px;
+        right: 10px;
+        width: auto;
+        max-width: none;
+        min-width: auto;
+        max-height: 80vh;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+    
+    /* Header del dropdown fijo dentro del dropdown */
+    .notif-header {
+        padding: 12px 15px;
+        font-size: 14px;
+        position: sticky;
+        top: 0;
+        background: #1a1a1a;
+        z-index: 5;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .notif-header button {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+    
+    /* Lista de notificaciones con scroll */
+    #notif-list {
+        max-height: calc(80vh - 55px);
+        overflow-y: auto;
+    }
+    
+    /* Items de notificaciones más grandes para dedos */
+    #notif-list li a {
+        padding: 14px 15px;
+    }
+    
+    #notif-list li a div {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    
+    #notif-list li a small {
+        font-size: 11px;
+    }
+    
+    /* Badge más visible */
+    #notif-badge {
+        top: -8px;
+        right: -12px;
+        font-size: 10px;
+        padding: 2px 6px;
+        min-width: 18px;
+        height: 18px;
+        border: 2px solid #14181c;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+    #notif-dropdown {
+        top: 55px;
+        left: 8px;
+        right: 8px;
+        border-radius: 10px;
+    }
+    
+    .notif-header {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+    
+    .notif-header button {
+        font-size: 11px;
+        padding: 4px 10px;
+    }
+    
+    #notif-list li a {
+        padding: 12px;
+    }
+    
+    #notif-list li a div {
+        font-size: 13px;
+    }
+    
+    #notif-list li a small {
+        font-size: 10px;
+    }
+}
+
+/* Escritorio: mantener comportamiento original */
+@media (min-width: 769px) {
+    .notif-wrapper {
+        position: relative;
+    }
+    
+    #notif-dropdown {
+        position: absolute;
+        right: 0;
+        top: 45px;
+        left: auto;
+        width: 300px;
+    }
+}
 }

@@ -13,8 +13,11 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    /* EL ARREGLO DEL SCROLL: min-height permite que crezca si el contenido es largo */
+    min-height: 100vh;
     margin: 0;
+    padding: 30px 15px; /* Margen para que no toque los bordes del móvil */
+    box-sizing: border-box;
 }
 
 form {
@@ -23,8 +26,9 @@ form {
     border-radius: 8px;
     box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
     width: 100%;
-    max-width: 400px;
+    max-width: 550px; /* Lo hacemos más ancho para que la cuadrícula respire */
     border-left: 4px solid var(--accent-color);
+    box-sizing: border-box;
 }
 
 h2 {
@@ -55,6 +59,7 @@ textarea {
     color: white;
     box-sizing: border-box;
     transition: border 0.3s;
+    font-family: 'Segoe UI', sans-serif;
 }
 
 input:focus, textarea:focus {
@@ -62,9 +67,76 @@ input:focus, textarea:focus {
     border-color: var(--accent-color);
 }
 
-button {
-    width: 100%;
-    padding: 12px;
+textarea { resize: vertical; /* Mejor vertical que bloqueado por si escriben mucho */ }
+
+/* ESTILOS DE LA CUADRÍCULA DE AVATARES Y MARCOS */
+.grid-avatares { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 15px; 
+    margin-top: 15px; 
+}
+
+.avatar-label { 
+    cursor: pointer; 
+    text-align: center; 
+    width: 80px; 
+}
+
+.avatar-radio { display: none; }
+
+.avatar-img { 
+    width: 70px; 
+    height: 70px; 
+    border-radius: 10px; 
+    border: 3px solid transparent; 
+    background: #222; 
+    object-fit: contain; 
+    padding: 5px; 
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.avatar-radio:checked + .avatar-img { 
+    border-color: #f0c330; 
+    background: #333; 
+    transform: scale(1.05); 
+    box-shadow: 0 0 15px rgba(240, 195, 48, 0.3);
+}
+
+.avatar-nombre { 
+    font-size: 0.75rem; 
+    color: #aaa; 
+    display: block; 
+    margin-top: 8px; 
+    line-height: 1.2; 
+}
+
+/* LA ZONA DE FOTO DE PC Y BOTONES FINALES */
+.foto-pc-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.foto-pc-wrapper img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #333;
+}
+
+.acciones-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+}
+
+.btn-guardar {
+    padding: 12px 25px;
     background-color: var(--accent-color);
     color: #000;
     border: none;
@@ -73,27 +145,66 @@ button {
     cursor: pointer;
     text-transform: uppercase;
     transition: all 0.3s;
-    margin-top: 10px;
+    margin: 0;
 }
 
-button:hover {
+.btn-guardar:hover {
     background-color: #bfa200;
     transform: translateY(-2px);
 }
 
-a {
-    display: block;
-    text-align: center;
-    margin-top: 15px;
+.btn-cancelar {
     color: var(--text-muted);
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    margin: 0;
+    transition: color 0.2s;
 }
 
-a:hover {
+.btn-cancelar:hover {
     color: var(--text-main);
 }
 
-textarea {
-    resize: none;
+
+/* =========================================================
+   📱 RESPONSIVE: MAGIA PARA MÓVILES (Pantallas < 768px)
+   ========================================================= */
+@media (max-width: 768px) {
+    form {
+        padding: 20px 15px; /* Menos padding lateral para aprovechar pantalla */
+    }
+
+    /* Centramos la cuadrícula de avatares para que no quede coja */
+    .grid-avatares {
+        justify-content: center;
+    }
+
+    /* Colapsamos la zona de subir archivo */
+    .foto-pc-wrapper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .foto-pc-wrapper input {
+        width: 100%;
+    }
+
+    /* Apilamos los botones uno encima de otro */
+    .acciones-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .btn-guardar {
+        width: 100%;
+        text-align: center;
+    }
+
+    .btn-cancelar {
+        text-align: center;
+        width: 100%;
+        padding: 10px 0;
+    }
 }
