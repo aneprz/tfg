@@ -2,7 +2,7 @@
 session_start();
 require '../../db/conexiones.php';
 
-$id_usuario = $_SESSION['id_usuario'];
+$id_usuario = (int)$_SESSION['id_usuario'];
 $id_item = (int) $_POST['id_item'];
 
 mysqli_begin_transaction($conexion);
@@ -15,6 +15,7 @@ try {
     ");
 
     $item = mysqli_fetch_assoc($res);
+    if (!$item) throw new Exception("Item no encontrado");
     $tipo = $item['tipo'];
 
     // Desequipar SOLO este item
@@ -25,17 +26,18 @@ try {
         AND id_item = $id_item
     ");
 
-    // Limpiar en tabla Usuario
+    // Limpiar en tabla Usuario (AHORA SÍ, BORRANDO TAMBIÉN LAS RUTAS)
     if ($tipo === 'avatar') {
+        // Ponemos el avatar en vacío para que el perfil cargue la imagen por defecto (perfil_default.jpg)
         mysqli_query($conexion, "
-            UPDATE Usuario SET avatar_activo = NULL 
+            UPDATE Usuario SET avatar_activo = NULL, avatar = '' 
             WHERE id_usuario = $id_usuario
         ");
     }
 
     if ($tipo === 'marco') {
         mysqli_query($conexion, "
-            UPDATE Usuario SET marco_activo = NULL 
+            UPDATE Usuario SET marco_activo = NULL, marco_avatar = NULL 
             WHERE id_usuario = $id_usuario
         ");
     }
@@ -55,3 +57,4 @@ try {
 
 header("Location: inventario.php");
 exit;
+?>
