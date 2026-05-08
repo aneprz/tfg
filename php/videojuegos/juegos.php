@@ -314,18 +314,8 @@ function cargarBiblioteca() {
                 return;
             }
             
-            let html = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Portada</th>
-                            <th>Título</th>
-                            <th>Estado</th>
-                            <th>Puntuación</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            // --- NUEVO FORMATO DE LISTA RESPONSIVE ---
+            let html = '<div class="lista-biblioteca">';
             
             data.forEach(juego => {
                 const urlJuego = `juego.php?id=${juego.id_videojuego}`;
@@ -333,40 +323,32 @@ function cargarBiblioteca() {
                 const porcentaje = juego.puntuacion ? (juego.puntuacion / 10) * 100 : 0;
                 
                 html += `
-                    <tr data-href="${urlJuego}" style="cursor: pointer;">
-                        <td>
-                            <img src="../../media/${juego.portada}" class="portada" alt="${juego.titulo}">
-                        </td>
-                        <td style="font-weight: bold; color: #f0c330;">
-                            ${juego.titulo}
-                        </td>
-                        <td>
+                    <div class="biblio-item" data-href="${urlJuego}">
+                        <img src="../../media/${juego.portada}" class="biblio-portada" alt="${juego.titulo}">
+                        
+                        <div class="biblio-datos">
+                            <span class="biblio-titulo">${juego.titulo}</span>
                             <span class="status-badge ${juego.estado}">${juego.estado}</span>
-                        </td>
-                        <td>
+                        </div>
+                        
+                        <div class="biblio-puntuacion">
                             ${juego.puntuacion ? `
                                 <span class="estrellas">
                                     <span class="relleno" style="width: ${porcentaje}%"></span>
                                 </span>
-                            ` : 'Sin puntuar'}
-                        </td>
-                    </tr>
+                            ` : '<span style="color:#888; font-size:0.8rem;">Sin puntuar</span>'}
+                        </div>
+                    </div>
                 `;
             });
             
-            html += `
-                    </tbody>
-                </table>
-            `;
+            html += '</div>';
             
             contenido.innerHTML = html;
             
-            // Añadir evento de clic a las filas para ir al juego
-            document.querySelectorAll('#contenido-biblioteca tr[data-href]').forEach(function(row) {
+            // Añadir evento de clic (Este bloque se queda igual)
+            document.querySelectorAll('#contenido-biblioteca .biblio-item').forEach(function(row) {
                 row.addEventListener('click', function(e) {
-                    if (e.target && e.target.closest && e.target.closest('a, button, input, textarea, select, label')) {
-                        return;
-                    }
                     window.location.href = row.getAttribute('data-href');
                 });
             });
