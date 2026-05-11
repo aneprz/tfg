@@ -8,20 +8,23 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Recogemos los datos básicos
     $nombre = $_POST['nombre'];
     $precio = (int)$_POST['precio'];
     $color_neon = $_POST['color_neon'];
     $cosmeticos = $_POST['cosmeticos'] ?? [];
 
-    // Recogemos las variables calculadas de los puntos
-    $pts_consuelo = (int)$_POST['pts_consuelo'];
+    // ==============================================================
+    // LA REGLA DE ORO: El servidor calcula los puntos, no el navegador
+    // ==============================================================
+    $pts_consuelo = (int)round($precio * 0.50);
+    $pts_ganancia = (int)round($precio * 1.50);
+    $pts_jackpot  = (int)round($precio * 7.00);
+
+    // Las probabilidades sí las seguimos cogiendo del formulario
     $prob_consuelo = (int)$_POST['prob_consuelo'];
-    
-    $pts_ganancia = (int)$_POST['pts_ganancia'];
     $prob_ganancia = (int)$_POST['prob_ganancia'];
-    
-    $pts_jackpot = (int)$_POST['pts_jackpot'];
-    $prob_jackpot = (int)$_POST['prob_jackpot'];
+    $prob_jackpot  = (int)$_POST['prob_jackpot'];
 
     if (empty($nombre) || $precio <= 0 || count($cosmeticos) < 3) {
         die("Faltan datos o no has añadido suficientes cosméticos.");
