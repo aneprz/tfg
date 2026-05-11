@@ -1,7 +1,9 @@
 <?php
 session_start();
 require_once '../../db/conexiones.php';
-
+// Consultar las cajas dinámicas (las de evento)
+$resEventos = mysqli_query($conexion, "SELECT * FROM Tienda_Items WHERE tipo = 'lootbox' AND activo = 1");
+$cajasEvento = mysqli_fetch_all($resEventos, MYSQLI_ASSOC);
 $idUsuarioSesion = isset($_SESSION['id_usuario']) ? (int) $_SESSION['id_usuario'] : 0;
 $admin = ($_SESSION['admin'] ?? false) === true;
 ?>
@@ -336,7 +338,121 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <span class="ver-contenido" onclick="verProbabilidades(4)">Ver contenido posible</span>
         </div>
     </div>
+<?php if (count($cajasEvento) > 0): ?>
+    <div class="seccion-eventos-especiales">
+        <div class="evento-banner-wrapper">
+            <h2 class="titulo-evento-neon">EVENTOS DE TIEMPO LIMITADO</h2>
+        </div>
 
+        <div class="grid-cajas-eventos">
+            <?php foreach ($cajasEvento as $evento): 
+                $color = $evento['color_neon']; 
+                $shadow_low = $color . '33'; 
+                $shadow_mid = $color . '80'; 
+            ?>
+                <div class="caja-item caja-evento-premium" 
+                     style="border-color: <?php echo $color; ?>; --glow-color: <?php echo $shadow_mid; ?>; --glow-color-low: <?php echo $shadow_low; ?>;">
+                    
+                    <div class="caja-hueco">
+                        <img src="../../media/<?php echo $evento['imagen']; ?>" alt="<?php echo htmlspecialchars($evento['nombre']); ?>" class="caja-imagen">
+                    </div>
+                    <div class="caja-info">
+                        <h2 class="caja-titulo"><?php echo htmlspecialchars($evento['nombre']); ?></h2>
+                        <p class="caja-precio"><?php echo $evento['precio']; ?> Puntos</p>
+                    </div>
+                    <div class="caja-footer">
+                        <button class="boton-abrir" 
+                                style="background-color: <?php echo $color; ?>;" 
+                                onclick="abrirCaja(<?php echo $evento['id_item']; ?>)">
+                            ABRIR CAJA
+                        </button>
+                        <span class="ver-contenido" onclick="verProbabilidades(<?php echo $evento['id_item']; ?>)">Ver contenido posible</span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    
+    <style>
+    .seccion-eventos-especiales {
+        /* Un contenedor 100% seguro y centrado */
+        width: 100%;
+        margin-top: 80px;
+        padding: 50px 20px;
+        background: radial-gradient(ellipse at center, #1b2129 0%, transparent 80%);
+        border-top: 1px solid rgba(0, 255, 204, 0.2);
+        border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+        box-sizing: border-box;
+    }
+
+    .grid-cajas-eventos {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 30px;
+        width: 100%;
+        justify-items: center; /* Centra las cajas si hay pocas */
+    }
+
+    .titulo-evento-neon {
+        display: block;
+        text-align: center;
+        font-size: 2.2rem;
+        color: #fff;
+        text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        margin-bottom: 40px;
+        animation: parpadeoNeon 4s infinite;
+    }
+
+    .caja-evento-premium {
+        background-color: #16181f;
+        position: relative;
+        z-index: 1;
+        transition: all 0.3s ease;
+        width: 100%;
+        max-width: 300px; /* Evita que se estiren de más */
+        box-sizing: border-box;
+    }
+
+    /* El efecto cristal arreglado para que deje hacer clic */
+    .caja-evento-premium::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        box-shadow: inset 0 0 40px var(--glow-color-low);
+        opacity: 0.5;
+        transition: opacity 0.3s;
+        pointer-events: none; /* LA CLAVE PARA PODER CLICAR */
+        z-index: 10;
+    }
+
+    .caja-evento-premium:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.8), 0 0 25px var(--glow-color-low);
+        border-color: #fff !important;
+    }
+
+    .caja-evento-premium:hover .caja-imagen {
+        filter: drop-shadow(0px 0px 20px var(--glow-color));
+        transform: scale(1.1);
+    }
+
+    @keyframes parpadeoNeon {
+        0%, 100% { opacity: 1; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
+        50% { opacity: 0.8; text-shadow: 0 0 5px #00ffcc; }
+        52% { opacity: 1; text-shadow: 0 0 15px #00ffcc, 0 0 25px #00ffcc; }
+        54% { opacity: 0.7; text-shadow: none; }
+        55% { opacity: 1; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .titulo-evento-neon { font-size: 1.5rem; letter-spacing: 2px; }
+        .seccion-eventos-especiales { padding: 30px 10px; margin-top: 40px; }
+    }
+</style>
+<?php endif; ?>
 </div>
 </main>
 
@@ -507,8 +623,12 @@ $listaArchivosReales = array_values(array_diff(scandir($directorioFisicoMarcos),
                                 imgFalsa = '../../media/premiosIndie/' + randomImg + '.png'; 
                                 txtFalso = 'Avatar Exclusivo';
                             } else { 
-                                claseFalsa = 'rareza-dorado'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '1200 Puntos'; 
-                            }
+    // LÓGICA PARA CUALQUIER CAJA DE EVENTO (Dinámica)
+    claseFalsa = 'rareza-azul'; // Color base para el teatro
+    // Usamos el logo del juego como relleno visual para no complicarnos
+    imgFalsa = '../../media/logoPlatino.png'; 
+    txtFalso = 'SalsaBox Loot'; 
+}
                         } 
 
                         div.className = `ruleta-item-track ${claseFalsa}`;

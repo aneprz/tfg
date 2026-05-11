@@ -2,10 +2,8 @@
 session_start();
 require_once '../../db/conexiones.php';
 
-// Le decimos al navegador que vamos a escupir JSON, no HTML
 header('Content-Type: application/json');
 
-// 1. Validaciones básicas de seguridad
 if (!isset($_SESSION['id_usuario'])) {
     echo json_encode(['status' => 'error', 'mensaje' => 'Debes iniciar sesión.']);
     exit;
@@ -20,20 +18,30 @@ $idUsuario = (int) $_SESSION['id_usuario'];
 $idCaja = (int) $_POST['id_caja'];
 
 try {
-    // 2. INICIAMOS TRANSACCIÓN (Súper importante para que no haya bugs de dinero infinito)
     $conexion->begin_transaction();
 
-    // 3. Bloqueamos al usuario y comprobamos saldo (FOR UPDATE evita compras dobles simultáneas)
+    // 1. Bloqueamos al usuario y comprobamos saldo
     $stmtUsu = $conexion->prepare("SELECT puntos FROM Usuario WHERE id_usuario = ? FOR UPDATE");
     $stmtUsu->bind_param("i", $idUsuario);
     $stmtUsu->execute();
     $usuario = $stmtUsu->get_result()->fetch_assoc();
     
-    // Obtenemos el precio de la caja
-    $stmtCaja = $conexion->prepare("SELECT precio, nombre FROM Caja WHERE id_caja = ?");
+    // 2. BUSCAR LA CAJA (Sistema Híbrido)
+    // Primero buscamos en el sistema nuevo (Tienda_Items)
+    $stmtCaja = $conexion->prepare("SELECT precio, nombre FROM Tienda_Items WHERE id_item = ? AND tipo = 'lootbox' AND activo = 1");
     $stmtCaja->bind_param("i", $idCaja);
     $stmtCaja->execute();
     $caja = $stmtCaja->get_result()->fetch_assoc();
+    $esSistemaNuevo = true;
+
+    // Si no aparece en el sistema nuevo, buscamos en el antiguo por si acaso
+    if (!$caja) {
+        $stmtCajaOld = $conexion->prepare("SELECT precio, nombre FROM Caja WHERE id_caja = ?");
+        $stmtCajaOld->bind_param("i", $idCaja);
+        $stmtCajaOld->execute();
+        $caja = $stmtCajaOld->get_result()->fetch_assoc();
+        $esSistemaNuevo = false;
+    }
 
     if (!$caja) {
         throw new Exception("Esta caja no existe.");
@@ -43,14 +51,25 @@ try {
         throw new Exception("No tienes puntos suficientes. Cuesta " . $caja['precio'] . " y tienes " . $usuario['puntos']);
     }
 
-    // 4. COBRAMOS LA CAJA (Restamos el precio al saldo actual)
+    // 3. COBRAMOS LA CAJA
     $saldoDespuesDeCobro = $usuario['puntos'] - $caja['precio'];
     $stmtCobro = $conexion->prepare("UPDATE Usuario SET puntos = ? WHERE id_usuario = ?");
     $stmtCobro->bind_param("ii", $saldoDespuesDeCobro, $idUsuario);
     $stmtCobro->execute();
 
-    // 5. LA RULETA MATEMÁTICA (RNG) - ¡Primero decidimos qué toca!
-    $stmtPremios = $conexion->prepare("SELECT * FROM Recompensa_Caja WHERE id_caja = ?");
+    // 4. OBTENER RECOMPENSAS
+    if ($esSistemaNuevo) {
+        // Consulta para el sistema dinámico (unimos con Tienda_Items para saber qué es cada premio)
+        $sql = "SELECT ti.id_item, ti.nombre, ti.tipo, ti.imagen, ti.precio as puntos_valor, lr.probabilidad 
+                FROM lootbox_recompensas lr 
+                JOIN Tienda_Items ti ON lr.id_item = ti.id_item 
+                WHERE lr.id_lootbox = ?";
+        $stmtPremios = $conexion->prepare($sql);
+    } else {
+        // Consulta para tu sistema antiguo
+        $stmtPremios = $conexion->prepare("SELECT * FROM Recompensa_Caja WHERE id_caja = ?");
+    }
+    
     $stmtPremios->bind_param("i", $idCaja);
     $stmtPremios->execute();
     $premios = $stmtPremios->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -59,66 +78,66 @@ try {
         throw new Exception("La caja está vacía, contacta con el administrador.");
     }
 
-    // Generamos un número aleatorio entre 0.00 y 100.00
+    // 5. RNG (La Tirada)
     $tirada = mt_rand(0, 10000) / 100; 
     $acumulado = 0;
     $premioGanado = null;
 
-    foreach ($premios as $premio) {
-        $acumulado += (float) $premio['probabilidad'];
+    foreach ($premios as $p) {
+        $acumulado += (float) $p['probabilidad'];
         if ($tirada <= $acumulado) {
-            $premioGanado = $premio;
+            $premioGanado = $p;
             break;
         }
     }
-
-    // Por si las probabilidades no suman 100 exacto, damos el último
     if (!$premioGanado) { $premioGanado = end($premios); }
 
-    // 6. ENTREGAMOS EL PREMIO (Ahora sí sabemos qué es)
+    // 6. ENTREGAR EL PREMIO
     $saldoFinal = $saldoDespuesDeCobro;
     $mensajePremio = "";
+    
+    // Normalizamos los nombres de las columnas para que funcionen con ambos sistemas
+    $tipo = $premioGanado['tipo'] ?? $premioGanado['tipo_premio'];
+    $puntosValor = (int)($premioGanado['puntos_valor'] ?? $premioGanado['puntos_premio'] ?? 0);
+    $idItem = $premioGanado['id_item'] ?? null;
+    $nombrePremio = $premioGanado['nombre'] ?? $premioGanado['nombre_premio'] ?? ($puntosValor . ' Pts');
+    $imagenPremio = $premioGanado['imagen'] ?? $premioGanado['imagen_premio'] ?? 'logoPlatino.png';
 
-    if ($premioGanado['tipo_premio'] === 'puntos') {
-        // Le sumamos los puntos ganados al nuevo saldo
-        $saldoFinal += $premioGanado['puntos_premio'];
+    if ($tipo === 'puntos') {
+        $saldoFinal += $puntosValor;
         $stmtPuntos = $conexion->prepare("UPDATE Usuario SET puntos = ? WHERE id_usuario = ?");
         $stmtPuntos->bind_param("ii", $saldoFinal, $idUsuario);
         $stmtPuntos->execute();
-        $mensajePremio = "¡Has ganado " . $premioGanado['puntos_premio'] . " puntos extra!";
+        $mensajePremio = "¡Has ganado " . $puntosValor . " puntos!";
 
-    } elseif ($premioGanado['tipo_premio'] === 'avatar' || $premioGanado['tipo_premio'] === 'marco') {
-        // Lo metemos en la tabla de usuario_items (Inventario)
-        $idItem = $premioGanado['id_item'];
+    } elseif ($tipo === 'avatar' || $tipo === 'marco') {
         $stmtItem = $conexion->prepare("INSERT IGNORE INTO usuario_items (id_usuario, id_item, equipado) VALUES (?, ?, 0)");
         $stmtItem->bind_param("ii", $idUsuario, $idItem);
         $stmtItem->execute();
-        $mensajePremio = "¡Has conseguido un nuevo cosmético!";
+        $mensajePremio = "¡Nuevo cosmético desbloqueado!";
 
-    } elseif ($premioGanado['tipo_premio'] === 'juego') {
-        // Lo metemos en la tabla de biblioteca
-        $idJuego = $premioGanado['id_videojuego'];
+    } elseif ($tipo === 'juego') {
+        // Si tienes ID de juego en el sistema antiguo/nuevo
+        $idJuego = $premioGanado['id_videojuego'] ?? $idItem;
         $stmtJuego = $conexion->prepare("INSERT IGNORE INTO biblioteca (id_usuario, id_videojuego) VALUES (?, ?)");
         $stmtJuego->bind_param("ii", $idUsuario, $idJuego);
         $stmtJuego->execute();
-        $mensajePremio = "¡Te ha tocado un juego top!";
+        $mensajePremio = "¡Juego añadido a tu biblioteca!";
     }
 
-    // 7. CONFIRMAMOS LA TRANSACCIÓN
     $conexion->commit();
 
-    // Devolvemos el resultado al Front-end con todos los datos visuales listos para la ruleta
     echo json_encode([
         'status' => 'success',
-        'nuevo_saldo' => $saldoFinal, // Importante: Enviamos el saldo con el cobro hecho y el premio sumado (si aplica)
+        'nuevo_saldo' => $saldoFinal,
         'mensaje' => $mensajePremio,
-        'tipo_premio' => $premioGanado['tipo_premio'],
-        'puntos_premio' => $premioGanado['puntos_premio'],
-        'nombre_premio' => $premioGanado['nombre_premio'] ?? ($premioGanado['puntos_premio'] . ' Pts'),
-        'imagen_premio' => $premioGanado['imagen_premio'] ?? 'logoPlatino.png'
+        'tipo_premio' => $tipo,
+        'puntos_premio' => $puntosValor,
+        'nombre_premio' => $nombrePremio,
+        'imagen_premio' => $imagenPremio
     ]);
 
 } catch (Exception $e) {
-    $conexion->rollback(); // Si algo falla, deshacemos el cobro automáticamente
+    if ($conexion->in_transaction) { $conexion->rollback(); }
     echo json_encode(['status' => 'error', 'mensaje' => $e->getMessage()]);
 }
