@@ -339,8 +339,9 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         </div>
     </div>
 <?php if (count($cajasEvento) > 0): ?>
-    <div class="seccion-eventos-especiales">
-        <div class="evento-banner-wrapper">
+    <div class="main-event-wrapper">
+        
+        <div class="titulo-evento-contenedor">
             <h2 class="titulo-evento-neon">EVENTOS DE TIEMPO LIMITADO</h2>
         </div>
 
@@ -372,46 +373,58 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <?php endforeach; ?>
         </div>
     </div>
-    
     <style>
-    .seccion-eventos-especiales {
-        /* Un contenedor 100% seguro y centrado */
+    /* 1. CONTENEDOR PRINCIPAL: Centra todo el bloque en la web de forma segura */
+    .main-event-wrapper {
         width: 100%;
-        margin-top: 80px;
-        padding: 50px 20px;
-        background: radial-gradient(ellipse at center, #1b2129 0%, transparent 80%);
-        border-top: 1px solid rgba(0, 255, 204, 0.2);
-        border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+        max-width: 1200px; /* O el ancho máximo que use tu web (ej: 1400px) */
+        margin: 80px auto; /* Centrado automático horizontal */
+        padding: 0 20px; /* Margen de seguridad para móviles */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centra los hijos (título y grid) horizontalmente */
         box-sizing: border-box;
+        background: radial-gradient(circle at top, #1b2129 0%, transparent 60%); /* Brillo sutil de fondo */
     }
 
-    .grid-cajas-eventos {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 30px;
+    /* 2. TÍTULO CENTRADO CON NEÓN */
+    .titulo-evento-contenedor {
+        text-align: center;
+        margin-bottom: 50px; /* Espacio antes de las cajas */
         width: 100%;
-        justify-items: center; /* Centra las cajas si hay pocas */
     }
 
     .titulo-evento-neon {
-        display: block;
-        text-align: center;
-        font-size: 2.2rem;
+        display: inline-block;
+        font-size: 2.5rem;
         color: #fff;
         text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
         text-transform: uppercase;
         letter-spacing: 5px;
-        margin-bottom: 40px;
+        margin: 0;
         animation: parpadeoNeon 4s infinite;
     }
 
+    /* 3. CUADRÍCULA DE CAJAS CENTRADA */
+    .grid-cajas-eventos {
+        display: grid;
+        /* Rellena automático: mínimo 280px, máximo 1fr, centrado */
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+        width: 100%;
+        justify-content: center; /* Centra las cajas si no llenan la fila */
+        justify-items: center; /* Centra el ítem dentro de su celda */
+    }
+
+    /* 4. LA CAJA PREMIUM (Intacta, pero controlada) */
     .caja-evento-premium {
         background-color: #16181f;
         position: relative;
-        z-index: 1;
-        transition: all 0.3s ease;
+        /* Z-index bajo para que no pise el menú superior si hay scroll */
+        z-index: 1; 
+        transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
         width: 100%;
-        max-width: 300px; /* Evita que se estiren de más */
+        max-width: 320px; /* Evita que la caja se estire demasiado */
         box-sizing: border-box;
     }
 
@@ -423,13 +436,14 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         box-shadow: inset 0 0 40px var(--glow-color-low);
         opacity: 0.5;
         transition: opacity 0.3s;
-        pointer-events: none; /* LA CLAVE PARA PODER CLICAR */
-        z-index: 10;
+        /* ESTO ES VITAL: El ratón ignora esta capa visual */
+        pointer-events: none; 
+        z-index: 5;
     }
 
     .caja-evento-premium:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.8), 0 0 25px var(--glow-color-low);
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 30px var(--glow-color-low);
         border-color: #fff !important;
     }
 
@@ -438,6 +452,7 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         transform: scale(1.1);
     }
 
+    /* Animación Neón */
     @keyframes parpadeoNeon {
         0%, 100% { opacity: 1; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
         50% { opacity: 0.8; text-shadow: 0 0 5px #00ffcc; }
@@ -446,10 +461,11 @@ $admin = ($_SESSION['admin'] ?? false) === true;
         55% { opacity: 1; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
     }
 
-    /* Responsive */
+    /* RESPONSIVE */
     @media (max-width: 768px) {
-        .titulo-evento-neon { font-size: 1.5rem; letter-spacing: 2px; }
-        .seccion-eventos-especiales { padding: 30px 10px; margin-top: 40px; }
+        .titulo-evento-neon { font-size: 1.6rem; letter-spacing: 2px; }
+        .main-event-wrapper { margin-top: 40px; }
+        .titulo-evento-contenedor { margin-bottom: 30px; }
     }
 </style>
 <?php endif; ?>

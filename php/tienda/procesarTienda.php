@@ -16,8 +16,7 @@ $offset = ($pagina - 1) * $limite;
    =========================
    Solo traer items que no sean lootboxes
 */
-$where = "WHERE ti.activo = 1 AND ti.tipo IN ('avatar','marco','fondo')";
-
+$where = "WHERE ti.activo = 1 AND ti.precio > 0 AND ti.tipo IN ('avatar','marco','fondo')"; 
 if ($buscar !== '') {
     $buscar = mysqli_real_escape_string($conexion, $buscar);
     $where .= " AND ti.nombre LIKE '%$buscar%'";
