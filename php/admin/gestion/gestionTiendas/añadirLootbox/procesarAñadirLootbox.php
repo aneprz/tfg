@@ -10,38 +10,93 @@ if (!isset($_SESSION['admin']) || $_SESSION['admin'] !== true) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = $_POST['nombre'];
     $precio = (int)$_POST['precio'];
-    $imagen = $_POST['imagen']; // ✅ nuevo campo
-    $items = $_POST['items'] ?? [];
+    $color_neon = $_POST['color_neon'];
+    $cosmeticos = $_POST['cosmeticos'] ?? [];
 
-    if (empty($nombre) || $precio < 0 || empty($items) || empty($imagen)) {
-        die("Datos incompletos");
+    // Recogemos las variables calculadas de los puntos
+    $pts_consuelo = (int)$_POST['pts_consuelo'];
+    $prob_consuelo = (int)$_POST['prob_consuelo'];
+    
+    $pts_ganancia = (int)$_POST['pts_ganancia'];
+    $prob_ganancia = (int)$_POST['prob_ganancia'];
+    
+    $pts_jackpot = (int)$_POST['pts_jackpot'];
+    $prob_jackpot = (int)$_POST['prob_jackpot'];
+
+    if (empty($nombre) || $precio <= 0 || count($cosmeticos) < 3) {
+        die("Faltan datos o no has añadido suficientes cosméticos.");
     }
 
-    // Validar que la imagen sea una de las permitidas (seguridad)
-    $imagenesPermitidas = ['lootbox_default.png', 'lootbox_oro.png', 'lootbox_plata.png', 'lootbox_legendaria.png'];
-    if (!in_array($imagen, $imagenesPermitidas)) {
-        die("Imagen no válida");
+    // --- PROCESAR LA IMAGEN ---
+    if (!isset($_FILES['imagen_caja']) || $_FILES['imagen_caja']['error'] !== UPLOAD_ERR_OK) {
+        die("Error al subir la imagen de la caja.");
+    }
+
+    $fileTmpPath = $_FILES['imagen_caja']['tmp_name'];
+    $fileName = $_FILES['imagen_caja']['name'];
+    $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+    $extensionesPermitidas = ['jpg', 'jpeg', 'png', 'webp'];
+    if (!in_array($fileExtension, $extensionesPermitidas)) die("Formato no permitido.");
+
+    $nuevoNombreImagen = 'evento_' . time() . '.' . $fileExtension;
+    $rutaDestinoFisica = __DIR__ . '/../../../../../media/' . $nuevoNombreImagen;
+
+    if (!move_uploaded_file($fileTmpPath, $rutaDestinoFisica)) {
+        die("Error guardando la imagen en el servidor.");
     }
 
     mysqli_begin_transaction($conexion);
 
     try {
-        // 1️⃣ Insertar lootbox como item de tienda (con imagen)
-        $stmtItem = $conexion->prepare("
-            INSERT INTO Tienda_Items (nombre, tipo, precio, imagen, activo, fecha_creacion)
-            VALUES (?, 'lootbox', ?, ?, 1, NOW())
+        // 1. CREAR LA LOOTBOX EN LA TIENDA
+        $stmtLootbox = $conexion->prepare("
+            INSERT INTO Tienda_Items (nombre, tipo, precio, imagen, activo, fecha_creacion, color_neon)
+            VALUES (?, 'lootbox', ?, ?, 1, NOW(), ?)
         ");
-        $stmtItem->bind_param("sis", $nombre, $precio, $imagen);
-        $stmtItem->execute();
-        $id_tienda_item = $stmtItem->insert_id;
+        $stmtLootbox->bind_param("siss", $nombre, $precio, $nuevoNombreImagen, $color_neon);
+        $stmtLootbox->execute();
+        $id_lootbox = $stmtLootbox->insert_id;
 
-        // 2️⃣ Insertar recompensas en lootbox_recompensas
-        $stmt2 = $conexion->prepare("INSERT INTO lootbox_recompensas (id_lootbox, id_item, probabilidad) VALUES (?, ?, ?)");
-        foreach ($items as $item) {
-            $id_item = (int)$item['id_item'];
-            $prob = (int)$item['probabilidad'];
-            $stmt2->bind_param("iii", $id_tienda_item, $id_item, $prob);
-            $stmt2->execute();
+        // 2. FUNCIÓN PARA CREAR LOS PREMIOS DE PUNTOS DINÁMICOS
+        // Para que la ruleta sepa qué son puntos, guardaremos el valor en el 'precio' (como recompensa)
+        $stmtPuntos = $conexion->prepare("
+            INSERT INTO Tienda_Items (nombre, tipo, precio, imagen, activo)
+            VALUES (?, 'puntos', ?, 'logoPlatino.png', 0)
+        ");
+
+        $stmtLink = $conexion->prepare("INSERT INTO lootbox_recompensas (id_lootbox, id_item, probabilidad) VALUES (?, ?, ?)");
+
+        // 2.1 Insertar y linkear Premio Consuelo
+        $nombreConsuelo = $pts_consuelo . " Puntos";
+        $stmtPuntos->bind_param("si", $nombreConsuelo, $pts_consuelo);
+        $stmtPuntos->execute();
+        $id_consuelo = $stmtPuntos->insert_id;
+        $stmtLink->bind_param("iii", $id_lootbox, $id_consuelo, $prob_consuelo);
+        $stmtLink->execute();
+
+        // 2.2 Insertar y linkear Premio Ganancia
+        $nombreGanancia = $pts_ganancia . " Puntos";
+        $stmtPuntos->bind_param("si", $nombreGanancia, $pts_ganancia);
+        $stmtPuntos->execute();
+        $id_ganancia = $stmtPuntos->insert_id;
+        $stmtLink->bind_param("iii", $id_lootbox, $id_ganancia, $prob_ganancia);
+        $stmtLink->execute();
+
+        // 2.3 Insertar y linkear Premio Jackpot
+        $nombreJackpot = $pts_jackpot . " Puntos";
+        $stmtPuntos->bind_param("si", $nombreJackpot, $pts_jackpot);
+        $stmtPuntos->execute();
+        $id_jackpot = $stmtPuntos->insert_id;
+        $stmtLink->bind_param("iii", $id_lootbox, $id_jackpot, $prob_jackpot);
+        $stmtLink->execute();
+
+        // 3. LINKEAR LOS COSMÉTICOS
+        foreach ($cosmeticos as $cosmetico) {
+            $id_item = (int)$cosmetico['id_item'];
+            $prob = (int)$cosmetico['probabilidad'];
+            $stmtLink->bind_param("iii", $id_lootbox, $id_item, $prob);
+            $stmtLink->execute();
         }
 
         mysqli_commit($conexion);
@@ -50,6 +105,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } catch (Exception $e) {
         mysqli_rollback($conexion);
-        die("Error al crear lootbox: " . $e->getMessage());
+        if(file_exists($rutaDestinoFisica)) unlink($rutaDestinoFisica);
+        die("Error en la Base de Datos: " . $e->getMessage());
     }
 }
+?>
