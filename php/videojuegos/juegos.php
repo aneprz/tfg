@@ -318,6 +318,7 @@ function cargarBiblioteca() {
                 <table>
                     <thead>
                         <tr>
+                            <th>Portada</th>
                             <th>Título</th>
                             <th>Estado</th>
                             <th>Puntuación</th>
@@ -333,6 +334,9 @@ function cargarBiblioteca() {
                 
                 html += `
                     <tr data-href="${urlJuego}" style="cursor: pointer;">
+                        <td>
+                            <img src="../../media/${juego.portada}" class="portada" alt="${juego.titulo}">
+                        </td>
                         <td style="font-weight: bold; color: #f0c330;">
                             ${juego.titulo}
                         </td>

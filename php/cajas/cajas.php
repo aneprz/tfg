@@ -1,7 +1,9 @@
 <?php
 session_start();
 require_once '../../db/conexiones.php';
-
+// Consultar las cajas dinámicas (las de evento)
+$resEventos = mysqli_query($conexion, "SELECT * FROM Tienda_Items WHERE tipo = 'lootbox' AND activo = 1");
+$cajasEvento = mysqli_fetch_all($resEventos, MYSQLI_ASSOC);
 $idUsuarioSesion = isset($_SESSION['id_usuario']) ? (int) $_SESSION['id_usuario'] : 0;
 $admin = ($_SESSION['admin'] ?? false) === true;
 ?>
@@ -336,7 +338,137 @@ $admin = ($_SESSION['admin'] ?? false) === true;
             <span class="ver-contenido" onclick="verProbabilidades(4)">Ver contenido posible</span>
         </div>
     </div>
+<?php if (count($cajasEvento) > 0): ?>
+    <div class="main-event-wrapper">
+        
+        <div class="titulo-evento-contenedor">
+            <h2 class="titulo-evento-neon">EVENTOS DE TIEMPO LIMITADO</h2>
+        </div>
 
+        <div class="grid-cajas-eventos">
+            <?php foreach ($cajasEvento as $evento): 
+                $color = $evento['color_neon']; 
+                $shadow_low = $color . '33'; 
+                $shadow_mid = $color . '80'; 
+            ?>
+                <div class="caja-item caja-evento-premium" 
+                     style="border-color: <?php echo $color; ?>; --glow-color: <?php echo $shadow_mid; ?>; --glow-color-low: <?php echo $shadow_low; ?>;">
+                    
+                    <div class="caja-hueco">
+                        <img src="../../media/<?php echo $evento['imagen']; ?>" alt="<?php echo htmlspecialchars($evento['nombre']); ?>" class="caja-imagen">
+                    </div>
+                    <div class="caja-info">
+                        <h2 class="caja-titulo"><?php echo htmlspecialchars($evento['nombre']); ?></h2>
+                        <p class="caja-precio"><?php echo $evento['precio']; ?> Puntos</p>
+                    </div>
+                    <div class="caja-footer">
+                        <button class="boton-abrir" 
+                                style="background-color: <?php echo $color; ?>;" 
+                                onclick="abrirCaja(<?php echo $evento['id_item']; ?>)">
+                            ABRIR CAJA
+                        </button>
+                        <span class="ver-contenido" onclick="verProbabilidades(<?php echo $evento['id_item']; ?>)">Ver contenido posible</span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <style>
+    /* 1. CONTENEDOR PRINCIPAL: Centra todo el bloque en la web de forma segura */
+    .main-event-wrapper {
+        width: 100%;
+        max-width: 1200px; /* O el ancho máximo que use tu web (ej: 1400px) */
+        margin: 80px auto; /* Centrado automático horizontal */
+        padding: 0 20px; /* Margen de seguridad para móviles */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centra los hijos (título y grid) horizontalmente */
+        box-sizing: border-box;
+        background: radial-gradient(circle at top, #1b2129 0%, transparent 60%); /* Brillo sutil de fondo */
+    }
+
+    /* 2. TÍTULO CENTRADO CON NEÓN */
+    .titulo-evento-contenedor {
+        text-align: center;
+        margin-bottom: 50px; /* Espacio antes de las cajas */
+        width: 100%;
+    }
+
+    .titulo-evento-neon {
+        display: inline-block;
+        font-size: 2.5rem;
+        color: #fff;
+        text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        margin: 0;
+        animation: parpadeoNeon 4s infinite;
+    }
+
+    /* 3. CUADRÍCULA DE CAJAS CENTRADA */
+    .grid-cajas-eventos {
+        display: grid;
+        /* Rellena automático: mínimo 280px, máximo 1fr, centrado */
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+        width: 100%;
+        justify-content: center; /* Centra las cajas si no llenan la fila */
+        justify-items: center; /* Centra el ítem dentro de su celda */
+    }
+
+    /* 4. LA CAJA PREMIUM (Intacta, pero controlada) */
+    .caja-evento-premium {
+        background-color: #16181f;
+        position: relative;
+        /* Z-index bajo para que no pise el menú superior si hay scroll */
+        z-index: 1; 
+        transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+        width: 100%;
+        max-width: 320px; /* Evita que la caja se estire demasiado */
+        box-sizing: border-box;
+    }
+
+    /* El efecto cristal arreglado para que deje hacer clic */
+    .caja-evento-premium::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        box-shadow: inset 0 0 40px var(--glow-color-low);
+        opacity: 0.5;
+        transition: opacity 0.3s;
+        /* ESTO ES VITAL: El ratón ignora esta capa visual */
+        pointer-events: none; 
+        z-index: 5;
+    }
+
+    .caja-evento-premium:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 30px var(--glow-color-low);
+        border-color: #fff !important;
+    }
+
+    .caja-evento-premium:hover .caja-imagen {
+        filter: drop-shadow(0px 0px 20px var(--glow-color));
+        transform: scale(1.1);
+    }
+
+    /* Animación Neón */
+    @keyframes parpadeoNeon {
+        0%, 100% { opacity: 1; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
+        50% { opacity: 0.8; text-shadow: 0 0 5px #00ffcc; }
+        52% { opacity: 1; text-shadow: 0 0 15px #00ffcc, 0 0 25px #00ffcc; }
+        54% { opacity: 0.7; text-shadow: none; }
+        55% { opacity: 1; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+        .titulo-evento-neon { font-size: 1.6rem; letter-spacing: 2px; }
+        .main-event-wrapper { margin-top: 40px; }
+        .titulo-evento-contenedor { margin-bottom: 30px; }
+    }
+</style>
+<?php endif; ?>
 </div>
 </main>
 
@@ -379,240 +511,209 @@ $listaArchivosReales = array_values(array_diff(scandir($directorioFisicoMarcos),
 ?>
 <script>
     const LISTA_MARCOS_REALES = <?php echo json_encode($listaArchivosReales); ?>;
-    const menuToggle = document.querySelector('.menu-toggle');
-    const nav = document.querySelector('nav');
-    if (menuToggle) {
-        menuToggle.addEventListener('click', function() {
-            nav.classList.toggle('open');
-        });
-    }
-
-    // EL NUEVO MOTOR JAVASCRIPT DE LA RULETA
-// EL NUEVO MOTOR JAVASCRIPT DE LA RULETA
-    function abrirCaja(idCaja) {
-        <?php if (!isset($_SESSION['id_usuario'])): ?>
-            alert("¡Debes iniciar sesión para abrir cajas!");
-            window.location.href = "../sesiones/login/login.php";
-            return;
-        <?php endif; ?>
-
-        const modal = document.getElementById('modal-ruleta');
-        const pista = document.getElementById('ruleta-pista');
-        const titulo = document.getElementById('ruleta-titulo');
-        const mensaje = document.getElementById('ruleta-mensaje');
-        const saldo = document.getElementById('ruleta-saldo');
-        const btnCerrar = document.getElementById('btn-cerrar-modal');
-
-        modal.style.display = 'flex';
-        titulo.innerText = "Girando...";
-        mensaje.innerText = "";
-        saldo.innerText = "";
-        btnCerrar.style.display = 'none';
+    
+    // Función auxiliar para unificar colores en toda la web
+    function obtenerColorPorProbabilidad(prob, tipo, puntos, idCaja) {
+        if (tipo !== 'puntos') return 'rareza-morado'; // Cosméticos siempre morados
         
-        pista.style.transition = 'none';
-        pista.style.transform = 'translateX(0)';
-        pista.innerHTML = '';
+        // Si es una caja de evento (ID > 4), usamos probabilidad pura
+        if (idCaja > 4) {
+            if (prob <= 5) return 'rareza-dorado';
+            if (prob <= 20) return 'rareza-azul';
+            return 'rareza-gris';
+        }
 
-        const formData = new FormData();
-        formData.append('id_caja', idCaja);
-
-        fetch('abrir_caja_ajax.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                const totalItems = 70;
-                const indexGanador = 60; 
-                const anchoItem = 140; 
-
-                // 1. Lógica inteligente de colores del PREMIO GANADOR
-                let claseGanador = 'rareza-gris'; 
-                if (data.tipo_premio === 'avatar' || data.tipo_premio === 'marco') {
-                    claseGanador = 'rareza-morado';
-                } else if (data.tipo_premio === 'puntos') {
-                    if (idCaja == 3) { // LÍMITES GOTY
-                        if (data.puntos_premio <= 500) claseGanador = 'rareza-gris';
-                        else if (data.puntos_premio <= 3000) claseGanador = 'rareza-azul';
-                        else claseGanador = 'rareza-dorado';
-                    } else if (idCaja == 2) { // LÍMITES TRIPLE A
-                        if (data.puntos_premio <= 200) claseGanador = 'rareza-gris';
-                        else if (data.puntos_premio <= 1000) claseGanador = 'rareza-azul';
-                        else claseGanador = 'rareza-dorado';
-                    } else { // LÍMITES INDIE (Por defecto)
-                        if (data.puntos_premio <= 100) claseGanador = 'rareza-gris';
-                        else if (data.puntos_premio <= 500) claseGanador = 'rareza-azul';
-                        else claseGanador = 'rareza-dorado';
-                    }
-                }
-
-                // 2. Aseguramos imagen ganadora
-                let imgGanador = data.imagen_premio ? '../../media/' + data.imagen_premio : '../../media/logoPlatino.png';
-                let textoGanador = data.tipo_premio === 'puntos' ? data.puntos_premio + ' Puntos' : data.nombre_premio;
-
-                // 3. BUCLE PARA DIBUJAR LA RULETA
-                for (let i = 0; i < totalItems; i++) {
-                    let div = document.createElement('div');
-                    
-                    if (i === indexGanador) {
-                        div.className = `ruleta-item-track ${claseGanador}`;
-                        div.innerHTML = `<img src="${imgGanador}"><span>${textoGanador}</span>`;
-                    } else {
-                        // RELLENO VISUAL (El teatro de la ruleta)
-                        let random = Math.random() * 100;
-                        let claseFalsa, imgFalsa, txtFalso;
-                        
-                        if (idCaja == 4) { // SI ES LA DE MARCOS (AQUÍ ESTÁ LA MAGIA ARREGLADA)
-                            claseFalsa = 'rareza-morado'; 
-                            let archivoAleatorio = LISTA_MARCOS_REALES[Math.floor(Math.random() * LISTA_MARCOS_REALES.length)];
-                            imgFalsa = '../../media/marcos/' + archivoAleatorio; 
-                            let txtLimpio = archivoAleatorio.replace('.png', '').split('_').pop().toUpperCase();
-                            txtFalso = 'Marco ' + txtLimpio; 
-
-                        } else if (idCaja == 3) { // SI ES LA GOTY
-                            if (random < 50) { 
-                                claseFalsa = 'rareza-gris'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '400 Puntos'; 
-                            } else if (random < 80) { 
-                                claseFalsa = 'rareza-azul'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '1800 Puntos'; 
-                            } else if (random < 98) { 
-                                claseFalsa = 'rareza-morado'; 
-                                let randomImg = Math.floor(Math.random() * 5) + 1; 
-                                imgFalsa = '../../media/premiosGoty/' + randomImg + '.png'; 
-                                txtFalso = 'Avatar LEGENDARIO';
-                            } else { 
-                                claseFalsa = 'rareza-dorado'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '10000 Pts'; 
-                            }
-                        } else if (idCaja == 2) { // SI ES LA TRIPLE A
-                            if (random < 50) { 
-                                claseFalsa = 'rareza-gris'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '200 Puntos'; 
-                            } else if (random < 80) { 
-                                claseFalsa = 'rareza-azul'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '750 Puntos'; 
-                            } else if (random < 98) { 
-                                claseFalsa = 'rareza-morado'; 
-                                let randomImg = Math.floor(Math.random() * 5) + 1; 
-                                imgFalsa = '../../media/premiosTripleA/' + randomImg + '.png'; 
-                                txtFalso = 'Avatar ÉPICO';
-                            } else { 
-                                claseFalsa = 'rareza-dorado'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '3000 Puntos'; 
-                            }
-                        } else { // CAJA INDIE
-                            if (random < 50) { 
-                                claseFalsa = 'rareza-gris'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '50 Puntos'; 
-                            } else if (random < 80) { 
-                                claseFalsa = 'rareza-azul'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '250 Puntos'; 
-                            } else if (random < 98) { 
-                                claseFalsa = 'rareza-morado'; 
-                                let randomImg = Math.floor(Math.random() * 3) + 1; 
-                                imgFalsa = '../../media/premiosIndie/' + randomImg + '.png'; 
-                                txtFalso = 'Avatar Exclusivo';
-                            } else { 
-                                claseFalsa = 'rareza-dorado'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = '1200 Puntos'; 
-                            }
-                        } 
-
-                        div.className = `ruleta-item-track ${claseFalsa}`;
-                        div.innerHTML = `<img src="${imgFalsa}" style="opacity: 0.7;"><span>${txtFalso}</span>`;
-                    }
-                    pista.appendChild(div);
-                }
-
-                pista.offsetHeight; 
-
-                const anchoVentana = document.getElementById('ruleta-ventana').clientWidth;
-                let distancia = (indexGanador * anchoItem); 
-                distancia = distancia - (anchoVentana / 2);
-                distancia = distancia + (anchoItem / 2);
-                const randomOffset = Math.floor(Math.random() * 100) - 50;
-                distancia = distancia + randomOffset;
-
-                pista.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
-                pista.style.transform = `translateX(-${distancia}px)`;
-
-                setTimeout(() => {
-                    titulo.innerText = "¡Resultado!";
-                    mensaje.innerText = `¡Has conseguido: ${textoGanador}!`;
-                    saldo.innerText = "Tu nuevo saldo: " + data.nuevo_saldo + " Puntos";
-                    btnCerrar.style.display = 'block';
-                }, 6000); 
-
-            } else {
-                titulo.innerText = "Error";
-                mensaje.innerText = data.mensaje;
-                btnCerrar.style.display = 'block';
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            titulo.innerText = "Error de conexión";
-            btnCerrar.style.display = 'block';
-        });
+        // Si son las cajas fijas, mantenemos tus umbrales de puntos
+        let p = parseInt(puntos);
+        if (idCaja == 3) { // GOTY
+            if (p > 3000) return 'rareza-dorado';
+            if (p > 500) return 'rareza-azul';
+        } else if (idCaja == 2) { // TRIPLE A
+            if (p > 1000) return 'rareza-dorado';
+            if (p > 200) return 'rareza-azul';
+        } else { // INDIE
+            if (p > 500) return 'rareza-dorado';
+            if (p > 100) return 'rareza-azul';
+        }
+        return 'rareza-gris';
     }
 
+function abrirCaja(idCaja) {
+    <?php if (!isset($_SESSION['id_usuario'])): ?>
+        alert("¡Debes iniciar sesión para abrir cajas!");
+        window.location.href = "../sesiones/login/login.php";
+        return;
+    <?php endif; ?>
+
+    const modal = document.getElementById('modal-ruleta');
+    const pista = document.getElementById('ruleta-pista');
+    const titulo = document.getElementById('ruleta-titulo');
+    const mensaje = document.getElementById('ruleta-mensaje');
+    const saldo = document.getElementById('ruleta-saldo');
+    const btnCerrar = document.getElementById('btn-cerrar-modal');
+
+    modal.style.display = 'flex';
+    titulo.innerText = "Girando...";
+    mensaje.innerText = "";
+    saldo.innerText = "";
+    btnCerrar.style.display = 'none';
+    
+    pista.style.transition = 'none';
+    pista.style.transform = 'translateX(0)';
+    pista.innerHTML = '';
+
+    const formData = new FormData();
+    formData.append('id_caja', idCaja);
+
+    fetch('abrir_caja_ajax.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const totalItems = 70;
+            const indexGanador = 60; 
+            const anchoItem = 140; 
+
+            // DETERMINAR COLOR DEL GANADOR (Usando la nueva función unificada)
+            let claseGanador = obtenerColorPorProbabilidad(
+                parseFloat(data.probabilidad_ganadora), 
+                data.tipo_premio, 
+                data.puntos_premio, 
+                idCaja
+            );
+
+            let imgGanador = data.imagen_premio ? '../../media/' + data.imagen_premio : '../../media/logoPlatino.png';
+            let textoGanador = data.tipo_premio === 'puntos' ? data.puntos_premio + ' Puntos' : data.nombre_premio;
+
+            const poolPremios = data.premios_todos || []; 
+
+            for (let i = 0; i < totalItems; i++) {
+                let div = document.createElement('div');
+                
+                if (i === indexGanador) {
+                    div.className = `ruleta-item-track ${claseGanador}`;
+                    div.innerHTML = `<img src="${imgGanador}"><span>${textoGanador}</span>`;
+                } else {
+                    let claseFalsa, imgFalsa, txtFalso;
+                    if (poolPremios.length > 0) {
+                        let pA = poolPremios[Math.floor(Math.random() * poolPremios.length)];
+                        
+                        // Color del teatro unificado también
+                        claseFalsa = obtenerColorPorProbabilidad(pA.probabilidad, pA.tipo, pA.valor_puntos, idCaja);
+                        
+                        if (pA.tipo === 'puntos') {
+                            txtFalso = pA.valor_puntos + ' Puntos';
+                            imgFalsa = '../../media/logoPlatino.png';
+                        } else {
+                            txtFalso = pA.nombre;
+                            let rutaImg = pA.imagen;
+                            if (pA.tipo === 'marco' && !rutaImg.includes('marcos/')) {
+                                rutaImg = 'marcos/' + rutaImg;
+                            }
+                            imgFalsa = '../../media/' + rutaImg;
+                        }
+                    } else {
+                        claseFalsa = 'rareza-gris'; imgFalsa = '../../media/logoPlatino.png'; txtFalso = 'SalsaBox';
+                    }
+
+                    div.className = `ruleta-item-track ${claseFalsa}`;
+                    div.innerHTML = `<img src="${imgFalsa}" style="opacity: 0.6;"><span>${txtFalso}</span>`;
+                }
+                pista.appendChild(div);
+            }
+
+            pista.offsetHeight; 
+            const anchoVentana = document.getElementById('ruleta-ventana').clientWidth;
+            let distancia = (indexGanador * anchoItem) - (anchoVentana / 2) + (anchoItem / 2);
+            distancia += Math.floor(Math.random() * 80) - 40;
+
+            pista.style.transition = 'transform 6s cubic-bezier(0.1, 0.9, 0.2, 1)';
+            pista.style.transform = `translateX(-${distancia}px)`;
+
+            setTimeout(() => {
+                titulo.innerText = "¡Resultado!";
+                mensaje.innerText = `¡Has conseguido: ${textoGanador}!`;
+                saldo.innerText = "Tu nuevo saldo: " + data.nuevo_saldo + " Puntos";
+                btnCerrar.style.display = 'block';
+            }, 6000); 
+
+        } else {
+            titulo.innerText = "Error"; mensaje.innerText = data.mensaje; btnCerrar.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        titulo.innerText = "Error de conexión"; btnCerrar.style.display = 'block';
+    });
+}
+
+function verProbabilidades(idCaja) {
+    const modal = document.getElementById('modal-probabilidades');
+    const lista = document.getElementById('lista-probabilidades');
+    modal.style.display = 'flex';
+    lista.innerHTML = '<p style="text-align: center;">Cargando...</p>';
+
+    fetch('ver_probabilidades_ajax.php?id_caja=' + idCaja)
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            lista.innerHTML = ''; 
+            data.premios.forEach(premio => {
+                let nombre = premio.tipo_premio === 'puntos' ? premio.puntos_premio + ' Puntos' : premio.nombre_premio;
+                let rutaImagen = premio.imagen_premio ? '../../media/' + premio.imagen_premio : '../../media/logoPlatino.png';
+                
+                // USAMOS LA MISMA FUNCIÓN QUE LA RULETA
+                let claseCSS = obtenerColorPorProbabilidad(premio.probabilidad, premio.tipo_premio, premio.puntos_premio, idCaja);
+                
+                // Mapeo de clase CSS a código hexadecimal para el estilo inline del modal
+                let hex = '#888';
+                if (claseCSS === 'rareza-azul') hex = '#4aa3f0';
+                if (claseCSS === 'rareza-morado') hex = '#c724b1';
+                if (claseCSS === 'rareza-dorado') hex = '#f0c330';
+
+                lista.innerHTML += `
+                    <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #333;">
+                        <div style="display: flex; align-items: center;">
+                            <img src="${rutaImagen}" style="width: 40px; height: 40px; object-fit: contain; margin-right: 15px; border-radius: 5px; background: #222; padding: 5px; border-bottom: 2px solid ${hex};">
+                            <div>
+                                <span style="font-weight: bold; color: #fff; display: block;">${nombre}</span>
+                                <span style="font-size: 0.8rem; color: ${hex}; text-transform: uppercase; font-weight: bold;">${premio.tipo_premio}</span>
+                            </div>
+                        </div>
+                        <div style="color: #f0c330; font-weight: bold; font-size: 1.1rem;">${parseFloat(premio.probabilidad)}%</div>
+                    </li>`;
+            });
+        }
+    });
+}
+// --- FUNCIONES DE CIERRE ---
+    
     function cerrarRuleta() {
         document.getElementById('modal-ruleta').style.display = 'none';
+        // Recargamos para actualizar el saldo de puntos en la cabecera
         location.reload(); 
-    }
-function verProbabilidades(idCaja) {
-        const modal = document.getElementById('modal-probabilidades');
-        const lista = document.getElementById('lista-probabilidades');
-        
-        modal.style.display = 'flex';
-        lista.innerHTML = '<p style="text-align: center;">Cargando probabilidades...</p>';
-
-        fetch('ver_probabilidades_ajax.php?id_caja=' + idCaja)
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                lista.innerHTML = ''; 
-                
-                data.premios.forEach(premio => {
-                    // AQUÍ EL CAMBIO PARA EL MODAL: Muestra directamente la cantidad de puntos
-                    let nombre = premio.tipo_premio === 'puntos' ? premio.puntos_premio + ' Puntos' : premio.nombre_premio;
-
-                    let rutaImagen = premio.imagen_premio ? '../../media/' + premio.imagen_premio : '../../media/logoPlatino.png';
-                    
-                    // Colores en la lista de probabilidades
-                    let colorRareza = '#888'; // Gris
-                    if (premio.tipo_premio === 'avatar' || premio.tipo_premio === 'marco') {
-                        colorRareza = '#c724b1'; // Morado
-                    } else if (premio.tipo_premio === 'puntos') {
-                        if (idCaja == 3) { // GOTY
-                            if (premio.puntos_premio > 500 && premio.puntos_premio <= 3000) colorRareza = '#4aa3f0'; 
-                            else if (premio.puntos_premio > 3000) colorRareza = '#f0c330'; 
-                        } else if (idCaja == 2) { // TRIPLE A
-                            if (premio.puntos_premio > 200 && premio.puntos_premio <= 1000) colorRareza = '#4aa3f0'; // Azul
-                            else if (premio.puntos_premio > 1000) colorRareza = '#f0c330'; // Dorado
-                        } else { // INDIE
-                            if (premio.puntos_premio > 100 && premio.puntos_premio <= 500) colorRareza = '#4aa3f0'; // Azul
-                            else if (premio.puntos_premio > 500) colorRareza = '#f0c330'; // Dorado
-                        }
-                    }
-
-                    lista.innerHTML += `
-                        <li style="display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #333;">
-                            <div style="display: flex; align-items: center;">
-                                <img src="${rutaImagen}" style="width: 40px; height: 40px; object-fit: contain; margin-right: 15px; border-radius: 5px; background: #222; padding: 5px; border-bottom: 2px solid ${colorRareza};">
-                                <div>
-                                    <span style="font-weight: bold; color: #fff; display: block;">${nombre}</span>
-                                    <span style="font-size: 0.8rem; color: ${colorRareza}; text-transform: uppercase; font-weight: bold;">${premio.tipo_premio}</span>
-                                </div>
-                            </div>
-                            <div style="color: #f0c330; font-weight: bold; font-size: 1.1rem;">
-                                ${parseFloat(premio.probabilidad)}%
-                            </div>
-                        </li>
-                    `;
-                });
-            } else {
-                lista.innerHTML = '<p style="color: #ff4444; text-align: center;">Error al cargar el contenido.</p>';
-            }
-        })
-        .catch(error => console.error("Error:", error));
     }
 
     function cerrarProbabilidades() {
         document.getElementById('modal-probabilidades').style.display = 'none';
+    }
+
+    // Cerrar modales si se hace clic fuera de la caja blanca
+    window.onclick = function(event) {
+        const modalRuleta = document.getElementById('modal-ruleta');
+        const modalProb = document.getElementById('modal-probabilidades');
+        if (event.target == modalRuleta) {
+            // No permitimos cerrar la ruleta haciendo clic fuera mientras gira
+            const btnCerrar = document.getElementById('btn-cerrar-modal');
+            if (btnCerrar.style.display === 'block') {
+                cerrarRuleta();
+            }
+        }
+        if (event.target == modalProb) {
+            cerrarProbabilidades();
+        }
     }
 </script>
 

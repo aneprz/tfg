@@ -334,73 +334,102 @@ main {
     }
 }
 
-/* Estilos para la modal de biblioteca */
-#contenido-biblioteca table {
-    width: 100%;
-    border-collapse: collapse;
+/* =========================================================
+   ESTILOS MODAL BIBLIOTECA (Sin Tablas / 100% Responsive)
+   ========================================================= */
+
+.lista-biblioteca { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
 }
 
-#contenido-biblioteca th {
-    text-align: left;
-    padding: 12px;
-    color: #9ab;
-    border-bottom: 2px solid #f0c330;
+.biblio-item { 
+    display: flex; 
+    align-items: center; 
+    background: #222; 
+    padding: 12px 15px; 
+    border-radius: 8px; 
+    border: 1px solid #333; 
+    cursor: pointer; 
+    transition: all 0.2s; 
 }
 
-#contenido-biblioteca td {
-    padding: 12px;
-    border-bottom: 1px solid #2c3440;
+.biblio-item:hover { 
+    background: #2a2a2a; 
+    border-color: #f0c330; 
+    transform: translateX(5px); 
 }
 
-#contenido-biblioteca tr {
-    cursor: pointer;
-    transition: background 0.2s;
+.biblio-portada { 
+    width: 50px; 
+    height: 70px; 
+    object-fit: cover; 
+    border-radius: 4px; 
+    margin-right: 15px; 
 }
 
-#contenido-biblioteca tr:hover {
-    background: #2a2a2a;
+.biblio-datos { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: flex-start; 
+    gap: 8px; 
 }
 
-#contenido-biblioteca .portada {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 6px;
+.biblio-titulo { 
+    font-weight: bold; 
+    color: #f0c330; 
+    font-size: 1.1rem; 
+    line-height: 1.2; 
 }
 
-#contenido-biblioteca .status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
+.status-badge { 
+    display: inline-block; 
+    padding: 4px 10px; 
+    border-radius: 20px; 
+    font-size: 0.75rem; 
+    font-weight: bold; 
+    text-transform: uppercase;
 }
 
-#contenido-biblioteca .status-badge.Completado { background: #2ecc71; color: #000; }
-#contenido-biblioteca .status-badge.Jugando { background: #f0c330; color: #000; }
-#contenido-biblioteca .status-badge.Pendiente { background: #e74c3c; color: #fff; }
-#contenido-biblioteca .status-badge.Abandonado { background: #95a5a6; color: #000; }
+.status-badge.Completado { background: #2ecc71; color: #000; }
+.status-badge.Jugando { background: #f0c330; color: #000; }
+.status-badge.Pendiente { background: #e74c3c; color: #fff; }
+.status-badge.Abandonado { background: #95a5a6; color: #000; }
 
-#contenido-biblioteca .estrellas {
-    position: relative;
-    display: inline-block;
-    font-size: 16px;
-    color: #444;
+.biblio-puntuacion { 
+    margin-left: 15px; 
 }
 
-#contenido-biblioteca .estrellas::before {
-    content: "★★★★★";
-}
+.estrellas { position: relative; display: inline-block; font-size: 18px; color: #444; }
+.estrellas::before { content: "★★★★★"; }
+.estrellas .relleno { position: absolute; top: 0; left: 0; white-space: nowrap; overflow: hidden; color: gold; }
+.estrellas .relleno::before { content: "★★★★★"; }
 
-#contenido-biblioteca .estrellas .relleno {
-    position: absolute;
-    top: 0;
-    left: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    color: gold;
-}
-
-#contenido-biblioteca .estrellas .relleno::before {
-    content: "★★★★★";
+/* 📱 EL TRUCO PARA MÓVILES */
+@media (max-width: 600px) {
+    .biblio-item { 
+        flex-wrap: wrap; /* Permite que los elementos salten de línea */
+        padding: 10px; 
+    }
+    
+    .biblio-portada { 
+        width: 45px; 
+        height: 60px; 
+        margin-right: 10px; 
+    }
+    
+    .biblio-titulo { 
+        font-size: 1rem; 
+    }
+    
+    .biblio-puntuacion { 
+        width: 100%; 
+        margin-left: 0; 
+        margin-top: 10px; 
+        text-align: right; 
+        padding-top: 10px; 
+        border-top: 1px solid #333; /* Línea separadora para las estrellas */
+    }
 }
